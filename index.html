@@ -1,0 +1,3018 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>和風五十音｜日文平假名・片假名互動自學工具</title>
+
+  <!-- Google Fonts: Noto Sans JP, Noto Serif JP, Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            washi: '#FAF6F0',
+            washiCard: '#FFFFFF',
+            washiBorder: '#E5DDD0',
+            indigoJp: '#2B4C7E',
+            indigoSoft: '#3A619C',
+            vermilion: '#C84B31',
+            matcha: '#4A6B5D',
+            tatami: '#E8E2C8',
+            tatamiDark: '#D5CCA8',
+            ink: '#2C2A29',
+            muted: '#6F6A62'
+          },
+          fontFamily: {
+            sans: ['"Noto Sans TC"', '"Noto Sans JP"', 'sans-serif'],
+            jp: ['"Noto Sans JP"', '"Noto Sans TC"', 'sans-serif'],
+            serifJp: ['"Noto Serif JP"', '"Noto Sans TC"', 'serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #FAF6F0;
+      color: #2C2A29;
+      font-family: 'Noto Sans TC', 'Noto Sans JP', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    /* Subtle Washi Paper Texture */
+    .washi-texture {
+      background-image: radial-gradient(rgba(43, 76, 126, 0.04) 1px, transparent 0);
+      background-size: 22px 22px;
+    }
+
+    /* Tatami Woven Texture for Karuta Board */
+    .tatami-bg {
+      background-color: #E8E2C8;
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          rgba(74, 107, 93, 0.05) 0px,
+          rgba(74, 107, 93, 0.05) 2px,
+          transparent 2px,
+          transparent 5px
+        );
+    }
+
+    /* Speaking / Row-Col Highlight Animation */
+    @keyframes speakGlow {
+      0% { box-shadow: 0 0 0 0 rgba(200, 75, 49, 0.45); }
+      70% { box-shadow: 0 0 0 8px rgba(200, 75, 49, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(200, 75, 49, 0); }
+    }
+    .kana-speaking {
+      animation: speakGlow 0.75s ease-out;
+      border-color: #C84B31 !important;
+      background-color: #FDF2EE !important;
+      transform: translateY(-2px);
+    }
+    .kana-group-highlight {
+      border-color: #2B4C7E !important;
+      background-color: #EEF3FA !important;
+    }
+
+    /* Rice Grid (傳統米字格) */
+    .grid-rice {
+      background-color: #FFFFFF;
+      background-image:
+        linear-gradient(to right, transparent 49.5%, rgba(200, 75, 49, 0.24) 49.5%, rgba(200, 75, 49, 0.24) 50.5%, transparent 50.5%),
+        linear-gradient(to bottom, transparent 49.5%, rgba(200, 75, 49, 0.24) 49.5%, rgba(200, 75, 49, 0.24) 50.5%, transparent 50.5%),
+        linear-gradient(45deg, transparent 49.65%, rgba(43, 76, 126, 0.09) 49.65%, rgba(43, 76, 126, 0.09) 50.35%, transparent 50.35%),
+        linear-gradient(-45deg, transparent 49.65%, rgba(43, 76, 126, 0.09) 49.65%, rgba(43, 76, 126, 0.09) 50.35%, transparent 50.35%);
+    }
+
+    /* Four Rooms Grid (日本小一・四個房間) */
+    .grid-rooms {
+      background-color: #FFFFFF;
+    }
+    .grid-rooms-lines {
+      background-image:
+        repeating-linear-gradient(to bottom, rgba(43, 76, 126, 0.28) 0 6px, transparent 6px 12px),
+        repeating-linear-gradient(to right, rgba(43, 76, 126, 0.28) 0 6px, transparent 6px 12px);
+      background-size: 2px 100%, 100% 2px;
+      background-position: center center, center center;
+      background-repeat: no-repeat;
+    }
+
+    /* Blank Canvas */
+    .grid-blank {
+      background-color: #FFFFFF;
+    }
+
+    #writingCanvas {
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Hanamaru Stamp Animation */
+    @keyframes hanamaruStamp {
+      0% { opacity: 0; transform: scale(2.2) rotate(-22deg); }
+      55% { opacity: 1; transform: scale(0.92) rotate(-8deg); }
+      75% { transform: scale(1.04) rotate(-10deg); }
+      100% { opacity: 0.92; transform: scale(1) rotate(-10deg); }
+    }
+    .animate-hanamaru {
+      animation: hanamaruStamp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Karuta Card Shake & Take Stamp */
+    @keyframes karutaShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px) rotate(-1.5deg); }
+      40% { transform: translateX(6px) rotate(1.5deg); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .karuta-wrong {
+      animation: karutaShake 0.36s ease-in-out;
+      border-color: #C84B31 !important;
+      background-color: #FDF2EE !important;
+    }
+
+    @keyframes karutaTake {
+      0% { transform: scale(1); opacity: 1; }
+      45% { transform: scale(1.07) translateY(-6px); opacity: 1; }
+      100% { transform: scale(0.95) translateY(-10px); opacity: 0.35; }
+    }
+    .karuta-taken {
+      animation: karutaTake 0.55s ease-out forwards;
+      pointer-events: none;
+    }
+
+    /* 3D Flip Card for Matching Game */
+    .perspective-1000 { perspective: 1000px; }
+    .flip-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+      transform-style: preserve-3d;
+    }
+    .flip-card.flipped .flip-inner,
+    .flip-card.matched .flip-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 0.75rem;
+    }
+    .flip-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Modal Fade */
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.96) translateY(6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .animate-modal {
+      animation: modalIn 0.2s ease-out forwards;
+    }
+
+    /* Subtle Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #FAF6F0; }
+    ::-webkit-scrollbar-thumb { background: #D4CBBF; border-radius: 9999px; }
+  </style>
+</head>
+<body class="washi-texture min-h-screen flex flex-col">
+
+  <!-- ==================== GLOBAL HEADER & NAVIGATION ==================== -->
+  <header class="sticky top-0 z-30 bg-washi/95 backdrop-blur-md border-b border-washiBorder shadow-xs">
+    <div class="max-w-5xl mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-indigoJp text-washi flex items-center justify-center font-serifJp font-bold text-xl shadow-xs shrink-0">
+          あ
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-serifJp font-bold text-indigoJp tracking-wider leading-tight">和風五十音</h1>
+          <p class="text-[11px] text-muted hidden sm:block leading-none mt-0.5">日本小一學習法 × 平板觸控自學工具</p>
+        </div>
+      </div>
+
+      <!-- Global Controls: Quick Script Switch, Hide Romaji, Voice Test -->
+      <div class="flex items-center flex-wrap gap-1.5 sm:gap-2">
+        <!-- Quick Global Script Switch -->
+        <div class="inline-flex rounded-xl bg-white border border-washiBorder p-0.5 shadow-2xs" title="全域快速切換平／片假名">
+          <button id="globalScriptHira" onclick="setGlobalScript('hiragana')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition">平</button>
+          <button id="globalScriptKata" onclick="setGlobalScript('katakana')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition">片</button>
+        </div>
+
+        <!-- Hide Romaji Toggle -->
+        <button id="globalHideRomajiBtn" onclick="toggleHideRomaji()" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-washiBorder bg-white text-xs sm:text-sm font-bold text-indigoJp hover:border-indigoJp transition shadow-2xs" title="開啟後隱藏圖表、字卡與練習中的羅馬拼音">
+          <span id="hideRomajiIndicator" class="w-2.5 h-2.5 rounded-full bg-gray-300 transition"></span>
+          <span id="hideRomajiText">隱藏羅馬字：關</span>
+        </button>
+
+        <!-- Test Voice Quick Button -->
+        <button onclick="speakJapanese('あいうえお', 1.0)" class="p-2 rounded-xl border border-washiBorder bg-white text-indigoJp hover:border-indigoJp transition shadow-2xs" title="測試日語發音引擎">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 5 Main Tabs -->
+    <nav class="max-w-5xl mx-auto px-2 sm:px-5 border-t border-washiBorder/70">
+      <div class="grid grid-cols-5 gap-1 py-1.5">
+        <button data-tab="chart" onclick="switchTab('chart')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <span class="truncate">五十音圖表</span>
+        </button>
+        <button data-tab="write" onclick="switchTab('write')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+          <span class="truncate">手寫描字</span>
+        </button>
+        <button data-tab="quiz" onclick="switchTab('quiz')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span class="truncate">測驗與歌牌</span>
+        </button>
+        <button data-tab="read" onclick="switchTab('read')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
+          <span class="truncate">短句跟讀</span>
+        </button>
+        <button data-tab="guide" onclick="switchTab('guide')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          <span class="truncate">進度與攻略</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 bg-indigoJp text-washi text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl shadow-lg whitespace-nowrap"></div>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-5 py-4 sm:py-6">
+
+    <!-- ==================== TAB 1: 五十音圖表 ==================== -->
+    <section id="tab-chart" class="tab-panel space-y-4">
+      <!-- Row & Column Concept Banner -->
+      <div class="bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigoJp/10 text-indigoJp">行與段互動學習</span>
+            <span class="text-xs text-vermilion font-bold">點擊「行」或「段」標題即可高亮連播！</span>
+          </div>
+          <p class="text-xs sm:text-sm text-ink leading-relaxed">
+            <strong>橫排為「行」（子音相同）、直排為「段」（母音相同）</strong>。點擊任意假名可查看精準漢字字源（女手／男手）、諧音口訣，以及<strong>日本小一「一字一詞」代表單字</strong>。已獲得「花丸」印章的字會顯示小紅花標記。
+          </p>
+        </div>
+        <button id="stopSeqBtn" onclick="stopSequentialPlay()" class="hidden shrink-0 px-3.5 py-2 rounded-xl bg-vermilion text-white text-xs font-bold shadow-xs hover:opacity-90 transition">
+          ■ 停止連播
+        </button>
+      </div>
+
+      <!-- Chart Controls -->
+      <div class="bg-white rounded-2xl border border-washiBorder p-3.5 sm:p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <!-- Script Switch -->
+        <div class="inline-flex flex-wrap rounded-xl bg-washi border border-washiBorder p-1 gap-1">
+          <button onclick="setChartScript('hiragana')" id="btnChartHira" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">平假名 <span class="hidden sm:inline font-normal text-[11px] opacity-80">(女手・草書)</span></button>
+          <button onclick="setChartScript('katakana')" id="btnChartKata" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">片假名 <span class="hidden sm:inline font-normal text-[11px] opacity-80">(男手・偏旁)</span></button>
+          <button onclick="setChartScript('both')" id="btnChartBoth" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">平片對照</button>
+        </div>
+
+        <!-- Legend -->
+        <div class="flex items-center gap-3 text-[11px] text-muted">
+          <span class="inline-flex items-center gap-1"><span class="text-vermilion text-sm leading-none">💮</span> 已蓋花丸</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-vermilion inline-block"></span> 錯題待加強</span>
+        </div>
+      </div>
+
+      <!-- Interactive Chart Matrix (Left = 行, Top = 段) -->
+      <div class="bg-white rounded-2xl border border-washiBorder p-3 sm:p-5 shadow-xs overflow-x-auto">
+        <div class="min-w-[320px]">
+          <!-- Column Headers (段) -->
+          <div class="grid grid-cols-[62px_repeat(5,1fr)] sm:grid-cols-[84px_repeat(5,1fr)] gap-1.5 sm:gap-2.5 mb-2.5">
+            <div class="flex items-center justify-center text-[11px] font-bold text-muted bg-washi rounded-xl py-2 border border-washiBorder/60">
+              行＼段
+            </div>
+            <button onclick="playColumn(0)" class="py-2 px-1 rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm transition flex flex-col items-center justify-center">
+              <span>あ段</span>
+              <span class="text-[10px] font-normal opacity-75">母音 a 🔊</span>
+            </button>
+            <button onclick="playColumn(1)" class="py-2 px-1 rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm transition flex flex-col items-center justify-center">
+              <span>い段</span>
+              <span class="text-[10px] font-normal opacity-75">母音 i 🔊</span>
+            </button>
+            <button onclick="playColumn(2)" class="py-2 px-1 rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm transition flex flex-col items-center justify-center">
+              <span>う段</span>
+              <span class="text-[10px] font-normal opacity-75">母音 u 🔊</span>
+            </button>
+            <button onclick="playColumn(3)" class="py-2 px-1 rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm transition flex flex-col items-center justify-center">
+              <span>え段</span>
+              <span class="text-[10px] font-normal opacity-75">母音 e 🔊</span>
+            </button>
+            <button onclick="playColumn(4)" class="py-2 px-1 rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm transition flex flex-col items-center justify-center">
+              <span>お段</span>
+              <span class="text-[10px] font-normal opacity-75">母音 o 🔊</span>
+            </button>
+          </div>
+
+          <!-- Rows Container -->
+          <div id="kanaMatrixBody" class="space-y-2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: 手寫描字畫布 ==================== -->
+    <section id="tab-write" class="tab-panel hidden space-y-4">
+      <!-- Top Selection Bar -->
+      <div class="bg-white rounded-2xl border border-washiBorder p-3.5 sm:p-4 shadow-xs space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2.5">
+          <!-- Script Toggle -->
+          <div class="inline-flex rounded-xl bg-washi border border-washiBorder p-1 gap-1">
+            <button onclick="setWriteScript('hiragana')" id="btnWriteHira" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">平假名 (女手)</button>
+            <button onclick="setWriteScript('katakana')" id="btnWriteKata" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">片假名 (男手)</button>
+          </div>
+
+          <!-- Writing Order Toggle (小一由簡入繁 vs 五十音順序) -->
+          <div class="inline-flex rounded-xl bg-washi border border-washiBorder p-1 gap-1">
+            <button onclick="setWriteOrder('easy')" id="btnOrderEasy" class="px-3 py-1.5 rounded-lg text-xs font-bold transition">🌱 由簡入繁 (小一推薦)</button>
+            <button onclick="setWriteOrder('standard')" id="btnOrderStd" class="px-3 py-1.5 rounded-lg text-xs font-bold transition">五十音順序</button>
+          </div>
+
+          <!-- Prev / Next -->
+          <div class="flex items-center gap-1.5">
+            <button onclick="stepWriteChar(-1)" class="px-3 py-1.5 rounded-xl bg-washi border border-washiBorder hover:border-indigoJp text-xs sm:text-sm font-bold text-indigoJp transition">← 上一字</button>
+            <button onclick="stepWriteChar(1)" class="px-3 py-1.5 rounded-xl bg-washi border border-washiBorder hover:border-indigoJp text-xs sm:text-sm font-bold text-indigoJp transition">下一字 →</button>
+          </div>
+        </div>
+
+        <!-- Tier / Row Quick Filter -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+          <span id="writeGroupLabel" class="text-xs font-bold text-muted shrink-0">難易度分組：</span>
+          <div id="writeGroupSelector" class="flex items-center gap-1.5"></div>
+        </div>
+
+        <!-- Characters in Current Group -->
+        <div id="writeCharSelector" class="flex items-center gap-2 overflow-x-auto pb-0.5"></div>
+      </div>
+
+      <!-- Canvas & Info Layout (Tablet Friendly 2-column on lg) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <!-- Left: Interactive Canvas -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs flex flex-col items-center space-y-3.5">
+          <!-- Grid Mode Switcher -->
+          <div class="w-full max-w-[420px] flex flex-wrap items-center justify-between gap-2">
+            <div class="inline-flex rounded-xl bg-washi border border-washiBorder p-1 gap-1">
+              <button onclick="setWriteGrid('rooms')" id="btnGridRooms" class="px-2.5 py-1 rounded-lg text-xs font-bold transition">四個房間 (小一)</button>
+              <button onclick="setWriteGrid('rice')" id="btnGridRice" class="px-2.5 py-1 rounded-lg text-xs font-bold transition">傳統米字格</button>
+              <button onclick="setWriteGrid('blank')" id="btnGridBlank" class="px-2.5 py-1 rounded-lg text-xs font-bold transition">無格線</button>
+            </div>
+            <button id="toggleGuideBtn" onclick="toggleTracingGuide()" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-indigoJp text-white border-indigoJp">
+              描紅字帖：顯示
+            </button>
+          </div>
+
+          <!-- Canvas Container -->
+          <div id="canvasContainer" class="relative w-full max-w-[420px] aspect-square rounded-2xl border-2 border-indigoJp/35 grid-rooms overflow-hidden shadow-inner">
+            <!-- 4 Rooms Overlay (Visible only when grid === 'rooms') -->
+            <div id="fourRoomsOverlay" class="absolute inset-0 pointer-events-none select-none grid-rooms-lines grid grid-cols-2 grid-rows-2">
+              <div class="p-2.5 text-left"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigoJp/10 text-indigoJp/50 font-bold text-xs">1</span></div>
+              <div class="p-2.5 text-right"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigoJp/10 text-indigoJp/50 font-bold text-xs">2</span></div>
+              <div class="p-2.5 flex items-end justify-start"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigoJp/10 text-indigoJp/50 font-bold text-xs">3</span></div>
+              <div class="p-2.5 flex items-end justify-end"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigoJp/10 text-indigoJp/50 font-bold text-xs">4</span></div>
+            </div>
+
+            <!-- Tracing Guide Watermark -->
+            <div id="tracingWatermark" class="absolute inset-0 flex items-center justify-center font-jp text-indigoJp/15 select-none pointer-events-none leading-none">
+              く
+            </div>
+
+            <!-- Hanamaru Stamp Overlay (Animated on completion) -->
+            <div id="hanamaruOverlay" class="hidden absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+              <svg viewBox="0 0 220 220" class="w-48 h-48 sm:w-56 sm:h-56 text-vermilion drop-shadow-md">
+                <!-- Outer Flower Petals -->
+                <path fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"
+                  d="M110,22 C128,12 152,26 148,46 C168,42 186,62 174,82 C194,90 196,118 178,130 C188,150 172,174 150,170 C148,190 124,202 108,188 C90,202 66,190 66,170 C44,174 28,150 38,130 C20,118 22,90 42,82 C30,62 48,42 68,46 C64,26 88,12 110,22 Z" />
+                <!-- Inner Spiral Circle -->
+                <path fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"
+                  d="M110,56 C142,56 164,80 164,110 C164,142 138,164 108,164 C78,164 56,140 56,110 C56,82 78,64 105,64 C130,64 148,82 148,108 C148,132 130,148 108,148" />
+                <text x="110" y="116" text-anchor="middle" fill="currentColor" font-size="22" font-weight="bold" font-family="Noto Serif JP, serif">はなまる</text>
+              </svg>
+            </div>
+
+            <!-- Drawing Canvas -->
+            <canvas id="writingCanvas" class="relative z-10 w-full h-full cursor-crosshair"></canvas>
+          </div>
+
+          <!-- Four Rooms Spatial Hint -->
+          <div id="roomHintBar" class="w-full max-w-[420px] bg-indigoJp/5 border border-indigoJp/20 rounded-xl px-3.5 py-2 text-xs text-indigoJp leading-relaxed">
+            <strong>🏠 四房定位提示：</strong><span id="writeRoomHintText"></span>
+          </div>
+
+          <!-- Primary Action: Stamp Hanamaru + Undo / Clear -->
+          <div class="w-full max-w-[420px] space-y-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="stampHanamaru()" class="flex-1 py-3 px-4 rounded-xl bg-vermilion hover:opacity-95 text-white font-bold text-sm shadow-sm flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
+                <span>💮 完成練習・蓋花丸（はなまる）</span>
+              </button>
+              <button onclick="undoWritingStroke()" class="px-3 py-3 rounded-xl bg-washi border border-washiBorder hover:border-indigoJp text-xs font-bold text-indigoJp transition">
+                ↩ 復原
+              </button>
+              <button onclick="clearWritingCanvas()" class="px-3 py-3 rounded-xl bg-washi border border-washiBorder hover:border-vermilion text-xs font-bold text-vermilion transition">
+                清除
+              </button>
+            </div>
+
+            <!-- Brush Color & Size -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-washiBorder">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xs font-bold text-muted">筆刷：</span>
+                <button onclick="setBrushColor('#2C2A29')" data-bcolor="#2C2A29" class="bcolor-btn w-7 h-7 rounded-full bg-[#2C2A29] ring-2 ring-offset-2 ring-indigoJp transition" title="墨黑"></button>
+                <button onclick="setBrushColor('#C84B31')" data-bcolor="#C84B31" class="bcolor-btn w-7 h-7 rounded-full bg-[#C84B31] transition" title="朱紅"></button>
+                <button onclick="setBrushColor('#2B4C7E')" data-bcolor="#2B4C7E" class="bcolor-btn w-7 h-7 rounded-full bg-[#2B4C7E] transition" title="靛藍"></button>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-muted">粗細：</span>
+                <button onclick="setBrushSize(0.016)" data-bsize="0.016" class="bsize-btn px-2.5 py-1 rounded-lg text-xs font-bold border border-washiBorder bg-washi text-muted">細</button>
+                <button onclick="setBrushSize(0.028)" data-bsize="0.028" class="bsize-btn px-2.5 py-1 rounded-lg text-xs font-bold border border-indigoJp bg-indigoJp text-white">中</button>
+                <button onclick="setBrushSize(0.042)" data-bsize="0.042" class="bsize-btn px-2.5 py-1 rounded-lg text-xs font-bold border border-washiBorder bg-washi text-muted">粗</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Character Details, Kids Word, Etymology & Mnemonic -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-4">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3.5">
+              <div id="writeDisplayChar" class="text-5xl font-serifJp font-bold text-indigoJp">く</div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span id="writeDisplayRomaji" class="text-xl font-bold text-ink">ku</span>
+                  <span id="writeDisplayPair" class="text-xs px-2 py-0.5 rounded-lg bg-washi border border-washiBorder text-muted font-jp">對應：ク</span>
+                </div>
+                <div id="writeHanamaruBadge" class="text-xs font-bold mt-1 text-muted">尚未蓋花丸</div>
+              </div>
+            </div>
+            <button onclick="speakCurrentWriteChar()" class="px-4 py-2.5 rounded-xl bg-indigoJp hover:bg-indigoSoft text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95">
+              🔊 發音重播
+            </button>
+          </div>
+
+          <!-- Japanese Kids Word Card -->
+          <button onclick="speakCurrentWriteWord()" class="w-full text-left bg-[#F4F8F5] hover:bg-[#EAF2EC] rounded-xl p-3.5 border border-matcha/30 flex items-center justify-between gap-3 transition active:scale-[0.99]">
+            <div class="flex items-center gap-3">
+              <span id="writeKidsEmoji" class="text-3xl leading-none">🚗</span>
+              <div>
+                <div class="text-[11px] font-bold text-matcha">日本兒童一字一詞（點擊朗讀）</div>
+                <div class="flex items-baseline gap-2 mt-0.5">
+                  <span id="writeKidsWord" class="font-serifJp font-bold text-lg text-ink">くるま</span>
+                  <span id="writeKidsZh" class="text-xs text-muted">車子</span>
+                </div>
+              </div>
+            </div>
+            <span class="text-matcha font-bold text-sm shrink-0">🔊</span>
+          </button>
+
+          <!-- Etymology Box -->
+          <div class="bg-washi rounded-xl p-3.5 border border-washiBorder space-y-1.5">
+            <div class="text-[11px] font-bold text-indigoJp uppercase tracking-wider">精準漢字字源</div>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div class="bg-white rounded-lg p-2 border border-washiBorder/70">
+                <div class="text-[10px] text-muted">平假名（女手・草書）</div>
+                <div id="writeOriginHira" class="font-serifJp font-bold text-indigoJp text-base mt-0.5">く ← 久</div>
+              </div>
+              <div class="bg-white rounded-lg p-2 border border-washiBorder/70">
+                <div class="text-[10px] text-muted">片假名（男手・偏旁）</div>
+                <div id="writeOriginKata" class="font-serifJp font-bold text-vermilion text-base mt-0.5">ク ← 久</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mnemonic Box -->
+          <div class="bg-[#FDF8EE] rounded-xl p-4 border border-[#EADBC0] space-y-1">
+            <div class="text-xs font-bold text-vermilion">💡 圖像與諧音記憶口訣</div>
+            <p id="writeMnemonicText" class="text-sm text-ink leading-relaxed"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: 互動測驗與日本歌牌（かるた） ==================== -->
+    <section id="tab-quiz" class="tab-panel hidden space-y-4">
+      <!-- 3 Sub-mode Switcher -->
+      <div class="flex justify-center">
+        <div class="inline-flex flex-wrap justify-center rounded-2xl bg-white border border-washiBorder p-1.5 shadow-xs gap-1">
+          <button onclick="switchQuizSubTab('karuta')" id="subTab-karuta" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition">🎴 日式歌牌 (かるた)</button>
+          <button onclick="switchQuizSubTab('quiz')" id="subTab-quiz" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition">🎯 分組互動測驗</button>
+          <button onclick="switchQuizSubTab('match')" id="subTab-match" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition">🃏 4×4 翻牌配對</button>
+        </div>
+      </div>
+
+      <!-- ===== SUB-TAB 3A: 日式歌牌 (かるた / Karuta) ===== -->
+      <div id="quizSubPanel-karuta" class="space-y-4">
+        <!-- Karuta Control Bar -->
+        <div class="bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-matcha/15 text-matcha">日本經典聽音搶答</span>
+                <h2 class="text-base sm:text-lg font-serifJp font-bold text-indigoJp">日式歌牌（かるた）</h2>
+              </div>
+              <p class="text-xs text-muted mt-0.5">聽系統唸出「假名＋兒童代表單字」，用最快速度拍點對應的直式和風歌牌！每局 10 題。</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="startKarutaGame()" id="karutaStartBtn" class="px-5 py-2.5 rounded-xl bg-vermilion hover:opacity-95 text-white text-xs sm:text-sm font-bold shadow-xs transition active:scale-95">
+                ▶ 開始搶答
+              </button>
+            </div>
+          </div>
+
+          <!-- Options & Live Stats -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-washiBorder/70">
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="inline-flex rounded-xl bg-washi border border-washiBorder p-0.5 gap-0.5">
+                <button onclick="setKarutaScript('hiragana')" id="kscript-hiragana" class="px-2.5 py-1 rounded-lg text-xs font-bold transition">平假名</button>
+                <button onclick="setKarutaScript('katakana')" id="kscript-katakana" class="px-2.5 py-1 rounded-lg text-xs font-bold transition">片假名</button>
+                <button onclick="setKarutaScript('mixed')" id="kscript-mixed" class="px-2.5 py-1 rounded-lg text-xs font-bold transition">混合</button>
+              </div>
+              <button onclick="toggleKarutaPureAudio()" id="karutaPureBtn" class="px-3 py-1.5 rounded-xl border border-washiBorder bg-washi text-xs font-bold text-indigoJp transition">
+                純聽音挑戰：關
+              </button>
+            </div>
+
+            <div class="flex items-center gap-3 text-xs font-bold">
+              <span class="px-2.5 py-1 rounded-lg bg-washi border border-washiBorder text-indigoJp">題數：<span id="karutaRoundDisp">0 / 10</span></span>
+              <span class="px-2.5 py-1 rounded-lg bg-vermilion/10 text-vermilion">🔥 連勝：<span id="karutaComboDisp">0</span></span>
+              <span class="px-2.5 py-1 rounded-lg bg-matcha/15 text-matcha">得分：<span id="karutaScoreDisp">0</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Karuta Tatami Board -->
+        <div class="tatami-bg rounded-3xl border-4 border-matcha/50 p-4 sm:p-6 shadow-inner space-y-4">
+          <!-- Prompt Banner -->
+          <div id="karutaPromptBar" class="bg-white/95 rounded-2xl border border-washiBorder p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-center gap-3">
+              <span id="karutaPromptEmoji" class="text-3xl leading-none">🎴</span>
+              <div>
+                <div id="karutaPromptMain" class="text-sm sm:text-base font-bold text-indigoJp">點擊上方「開始搶答」展開 9 張和風歌牌！</div>
+                <div id="karutaPromptSub" class="text-xs text-muted mt-0.5">訓練聽到發音立刻反應字形的直覺</div>
+              </div>
+            </div>
+            <button id="karutaReplayBtn" onclick="replayKarutaAudio()" disabled class="px-4 py-2 rounded-xl bg-indigoJp hover:bg-indigoSoft disabled:opacity-40 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition">
+              🔊 再聽一次
+            </button>
+          </div>
+
+          <!-- 3x3 Vertical Karuta Cards Grid -->
+          <div id="karutaGrid" class="max-w-lg mx-auto grid grid-cols-3 gap-3 sm:gap-4">
+            <!-- 9 vertical cards injected by JS -->
+          </div>
+
+          <!-- Karuta Result Summary -->
+          <div id="karutaSummaryBox" class="hidden max-w-lg mx-auto bg-white rounded-2xl border-2 border-matcha p-5 text-center space-y-3 shadow-md animate-modal">
+            <div class="text-3xl">🏆</div>
+            <h3 class="text-lg font-serifJp font-bold text-indigoJp">歌牌搶答完成！</h3>
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div class="bg-washi rounded-xl p-2.5 border border-washiBorder">
+                <div class="text-[11px] text-muted">得分</div>
+                <div id="kResScore" class="text-lg font-bold text-matcha">0</div>
+              </div>
+              <div class="bg-washi rounded-xl p-2.5 border border-washiBorder">
+                <div class="text-[11px] text-muted">最高連勝</div>
+                <div id="kResCombo" class="text-lg font-bold text-vermilion">0</div>
+              </div>
+              <div class="bg-washi rounded-xl p-2.5 border border-washiBorder">
+                <div class="text-[11px] text-muted">平均反應</div>
+                <div id="kResAvgTime" class="text-lg font-bold text-indigoJp">0.0s</div>
+              </div>
+            </div>
+            <button onclick="startKarutaGame()" class="px-6 py-2.5 rounded-xl bg-vermilion text-white text-sm font-bold hover:opacity-95 transition">再挑戰一局</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SUB-TAB 3B: 分組互動測驗 ===== -->
+      <div id="quizSubPanel-quiz" class="hidden space-y-4">
+        <!-- Quiz Setup -->
+        <div id="quizSetupView" class="bg-white rounded-2xl border border-washiBorder p-4 sm:p-6 shadow-xs space-y-5">
+          <div>
+            <h2 class="text-lg font-serifJp font-bold text-indigoJp">分組互動測驗</h2>
+            <p class="text-xs sm:text-sm text-muted mt-0.5">建議每次只勾選 1～2 行分段練習，答錯會自動加入錯題本並顯示記憶口訣。</p>
+          </div>
+
+          <!-- 1. Mode -->
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-indigoJp uppercase tracking-wider">1. 測驗模式</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+              <button onclick="setQuizMode('audioToKana')" id="qmode-audioToKana" class="qmode-btn text-left p-3 rounded-xl border-2 transition">
+                <div class="font-bold text-xs sm:text-sm text-indigoJp">聽音選字</div>
+                <div class="text-[11px] text-muted mt-0.5">聽發音選假名</div>
+              </button>
+              <button onclick="setQuizMode('kanaToRomaji')" id="qmode-kanaToRomaji" class="qmode-btn text-left p-3 rounded-xl border-2 transition">
+                <div class="font-bold text-xs sm:text-sm text-indigoJp">看字選音</div>
+                <div class="text-[11px] text-muted mt-0.5">看假名選拼音</div>
+              </button>
+              <button onclick="setQuizMode('scriptSwap')" id="qmode-scriptSwap" class="qmode-btn text-left p-3 rounded-xl border-2 transition">
+                <div class="font-bold text-xs sm:text-sm text-indigoJp">平片互換</div>
+                <div class="text-[11px] text-muted mt-0.5">平片假名對應</div>
+              </button>
+              <button onclick="setQuizMode('confusing')" id="qmode-confusing" class="qmode-btn text-left p-3 rounded-xl border-2 transition">
+                <div class="font-bold text-xs sm:text-sm text-vermilion">易混淆特訓</div>
+                <div class="text-[11px] text-muted mt-0.5">シツソンぬめ等</div>
+              </button>
+              <button onclick="setQuizMode('weak')" id="qmode-weak" class="qmode-btn text-left p-3 rounded-xl border-2 transition">
+                <div class="font-bold text-xs sm:text-sm text-matcha">錯題本特訓</div>
+                <div class="text-[11px] text-muted mt-0.5">專攻歷史錯題</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Script & Count -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="quizScriptGroup" class="space-y-2">
+              <label class="text-xs font-bold text-indigoJp uppercase tracking-wider">2. 練習假名</label>
+              <div class="inline-flex rounded-xl bg-washi border border-washiBorder p-1 gap-1">
+                <button onclick="setQuizScript('hiragana')" id="qscript-hiragana" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">平假名</button>
+                <button onclick="setQuizScript('katakana')" id="qscript-katakana" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">片假名</button>
+                <button onclick="setQuizScript('mixed')" id="qscript-mixed" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">混合</button>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-indigoJp uppercase tracking-wider">題數</label>
+              <div class="inline-flex rounded-xl bg-washi border border-washiBorder p-1 gap-1">
+                <button onclick="setQuizCount(5)" id="qcount-5" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">5 題</button>
+                <button onclick="setQuizCount(10)" id="qcount-10" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">10 題</button>
+                <button onclick="setQuizCount(15)" id="qcount-15" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">15 題</button>
+                <button onclick="setQuizCount(20)" id="qcount-20" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">20 題</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Row Selection -->
+          <div id="quizRowGroup" class="space-y-2">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <label class="text-xs font-bold text-indigoJp uppercase tracking-wider">3. 選擇練習行（可只選 1～2 行）</label>
+              <div class="flex items-center gap-1.5 text-xs">
+                <button onclick="presetQuizRows('start')" class="px-2.5 py-1 rounded-lg bg-washi border border-washiBorder hover:border-indigoJp text-indigoJp font-medium">新手 (あ+か)</button>
+                <button onclick="presetQuizRows('all')" class="px-2.5 py-1 rounded-lg bg-washi border border-washiBorder hover:border-indigoJp text-indigoJp font-medium">全選</button>
+                <button onclick="presetQuizRows('none')" class="px-2.5 py-1 rounded-lg bg-washi border border-washiBorder hover:border-vermilion text-muted font-medium">清除</button>
+              </div>
+            </div>
+            <div id="quizRowGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-2"></div>
+          </div>
+
+          <div class="pt-1 flex items-center flex-wrap gap-3">
+            <button onclick="startQuiz()" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-indigoJp hover:bg-indigoSoft text-white font-bold text-sm sm:text-base shadow-xs transition active:scale-[0.98]">
+              開始測驗
+            </button>
+            <span id="quizSetupAlert" class="text-xs font-bold text-vermilion hidden"></span>
+          </div>
+        </div>
+
+        <!-- Quiz Active -->
+        <div id="quizActiveView" class="hidden max-w-2xl mx-auto space-y-4">
+          <div class="bg-white rounded-2xl border border-washiBorder p-4 shadow-xs space-y-2.5">
+            <div class="flex items-center justify-between text-xs sm:text-sm">
+              <div class="flex items-center gap-2">
+                <button onclick="exitQuiz()" class="text-muted hover:text-indigoJp font-bold">← 返回</button>
+                <span id="quizActiveBadge" class="px-2 py-0.5 rounded-md bg-indigoJp/10 text-indigoJp text-xs font-bold"></span>
+              </div>
+              <div class="flex items-center gap-3 font-bold">
+                <span id="quizComboDisplay" class="hidden text-xs px-2.5 py-0.5 rounded-full bg-vermilion/10 text-vermilion">🔥 0 連擊</span>
+                <span class="text-indigoJp"><span id="quizIdxNum">1</span> / <span id="quizTotalNum">10</span></span>
+              </div>
+            </div>
+            <div class="w-full h-2 bg-washi rounded-full overflow-hidden">
+              <div id="quizProgressFill" class="h-full bg-indigoJp transition-all duration-300" style="width: 10%"></div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-washiBorder p-6 sm:p-8 shadow-xs text-center space-y-5">
+            <p id="quizInstruction" class="text-xs sm:text-sm text-muted font-medium"></p>
+            <div id="quizQuestionStage" class="min-h-[110px] flex flex-col items-center justify-center"></div>
+            <div id="quizOptionsBox" class="grid grid-cols-2 gap-3"></div>
+            <div id="quizFeedbackArea" class="hidden rounded-xl p-4 text-left text-sm"></div>
+            <div id="quizNextBtnWrap" class="hidden">
+              <button onclick="nextQuizStep()" class="w-full py-3 rounded-xl bg-indigoJp hover:bg-indigoSoft text-white font-bold text-sm sm:text-base transition">
+                下一題
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Result -->
+        <div id="quizResultView" class="hidden max-w-2xl mx-auto bg-white rounded-2xl border border-washiBorder p-6 sm:p-8 shadow-xs text-center space-y-5">
+          <div>
+            <div id="quizResEmoji" class="text-4xl mb-2">🎉</div>
+            <h3 class="text-xl font-serifJp font-bold text-indigoJp">測驗完成！</h3>
+            <p id="quizResSubtitle" class="text-sm text-muted mt-1"></p>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-washi rounded-xl p-3 border border-washiBorder">
+              <div class="text-xs text-muted">答對</div>
+              <div id="quizResScore" class="text-xl font-bold text-matcha mt-1">0 / 10</div>
+            </div>
+            <div class="bg-washi rounded-xl p-3 border border-washiBorder">
+              <div class="text-xs text-muted">正確率</div>
+              <div id="quizResAcc" class="text-xl font-bold text-indigoJp mt-1">0%</div>
+            </div>
+            <div class="bg-washi rounded-xl p-3 border border-washiBorder">
+              <div class="text-xs text-muted">最高連擊</div>
+              <div id="quizResCombo" class="text-xl font-bold text-vermilion mt-1">0</div>
+            </div>
+          </div>
+          <div id="quizResWrongBox" class="hidden text-left space-y-2">
+            <div class="text-xs font-bold text-vermilion">本次答錯假名（已收錄至錯題本）：</div>
+            <div id="quizResWrongList" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+          </div>
+          <div class="flex flex-wrap justify-center gap-3 pt-2">
+            <button onclick="startQuiz()" class="px-6 py-2.5 rounded-xl bg-indigoJp text-white font-bold text-sm hover:bg-indigoSoft transition">再測一次</button>
+            <button onclick="exitQuiz()" class="px-6 py-2.5 rounded-xl bg-washi border border-washiBorder text-indigoJp font-bold text-sm hover:border-indigoJp transition">調整範圍</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SUB-TAB 3C: 翻牌配對 (4x4) ===== -->
+      <div id="quizSubPanel-match" class="hidden space-y-4">
+        <div class="bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-serifJp font-bold text-indigoJp">4×4 翻牌配對遊戲</h2>
+              <p class="text-xs text-muted">共 8 組 16 張牌，配對成功自動朗讀發音加深記憶！</p>
+            </div>
+            <button onclick="initMatchGame()" class="px-4 py-2 rounded-xl bg-indigoJp hover:bg-indigoSoft text-white text-xs sm:text-sm font-bold transition">
+              重新洗牌
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <select id="matchModeSelect" onchange="initMatchGame()" class="px-3.5 py-2 rounded-xl bg-washi border border-washiBorder text-sm font-bold text-indigoJp focus:outline-none focus:border-indigoJp">
+              <option value="h-k">平假名 ↔ 片假名</option>
+              <option value="h-r">平假名 ↔ 羅馬音</option>
+              <option value="k-r">片假名 ↔ 羅馬音</option>
+            </select>
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div class="bg-washi rounded-xl py-1.5 px-2 border border-washiBorder/60">
+                <div class="text-[10px] text-muted">進度</div>
+                <div id="matchPairStat" class="text-sm font-bold text-matcha">0 / 8</div>
+              </div>
+              <div class="bg-washi rounded-xl py-1.5 px-2 border border-washiBorder/60">
+                <div class="text-[10px] text-muted">翻牌次數</div>
+                <div id="matchFlipStat" class="text-sm font-bold text-indigoJp">0</div>
+              </div>
+              <div class="bg-washi rounded-xl py-1.5 px-2 border border-washiBorder/60">
+                <div class="text-[10px] text-muted">時間</div>
+                <div id="matchTimeStat" class="text-sm font-bold text-indigoJp">00:00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="matchBoard" class="max-w-xl mx-auto grid grid-cols-4 gap-2.5 sm:gap-3.5"></div>
+
+        <div id="matchWinBox" class="hidden max-w-xl mx-auto bg-matcha/10 border border-matcha/30 rounded-2xl p-5 text-center space-y-2.5 animate-modal">
+          <div class="text-3xl">🎊</div>
+          <div class="text-lg font-bold text-matcha">全部配對完成！</div>
+          <p id="matchWinSummary" class="text-sm text-ink"></p>
+          <button onclick="initMatchGame()" class="px-6 py-2 rounded-xl bg-matcha text-white text-sm font-bold hover:opacity-90 transition">再玩一局</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: 短句與歌詞跟讀 ==================== -->
+    <section id="tab-read" class="tab-panel hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs space-y-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-vermilion/10 text-vermilion">實戰跟讀法</span>
+          <h2 class="text-base sm:text-lg font-serifJp font-bold text-indigoJp">短句與歌詞慢速跟讀</h2>
+        </div>
+        <p class="text-xs sm:text-sm text-ink leading-relaxed">
+          預設不顯示羅馬拼音，先試著直接唸，<strong>遇到不會的假名點一下就會標出淡朱紅羅馬音</strong>並統計標記數，搭配 0.6x 慢速朗讀多練幾次，標記越變越少就能整句流暢唸出！
+        </p>
+      </div>
+
+      <!-- Category Tabs + Global Speed Control -->
+      <div class="bg-white rounded-2xl border border-washiBorder p-3.5 sm:p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="inline-flex flex-wrap rounded-xl bg-washi border border-washiBorder p-1 gap-1">
+          <button onclick="setReadCategory('greeting')" id="readCat-greeting" class="read-cat-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">必備打招呼</button>
+          <button onclick="setReadCategory('travel')" id="readCat-travel" class="read-cat-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">日本旅遊實戰</button>
+          <button onclick="setReadCategory('lyrics')" id="readCat-lyrics" class="read-cat-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">日文歌慢速跟讀</button>
+          <button onclick="setReadCategory('custom')" id="readCat-custom" class="read-cat-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">✍️ 自訂歌詞貼上</button>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-xs font-bold text-muted">語速：</span>
+          <div class="inline-flex rounded-xl bg-washi border border-washiBorder p-1 gap-0.5">
+            <button onclick="setReadSpeed(0.6)" data-rspeed="0.6" class="rspeed-btn px-2.5 py-1 rounded-lg text-xs font-bold transition">0.6x</button>
+            <button onclick="setReadSpeed(0.8)" data-rspeed="0.8" class="rspeed-btn px-2.5 py-1 rounded-lg text-xs font-bold transition">0.8x</button>
+            <button onclick="setReadSpeed(1.0)" data-rspeed="1.0" class="rspeed-btn px-2.5 py-1 rounded-lg text-xs font-bold transition">1.0x</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Input Box -->
+      <div id="customReadBox" class="hidden bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs space-y-3">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <label for="customJapaneseInput" class="text-sm font-bold text-indigoJp">貼上任何日文平假名／片假名歌詞或短句：</label>
+          <button onclick="fillCustomExample()" class="text-xs text-vermilion hover:underline font-medium">填入範例歌詞</button>
+        </div>
+        <textarea id="customJapaneseInput" rows="3" placeholder="例如：ありがとうって つたえたくて あなたを みつめる（支援濁音、半濁音、促音っ、拗音きゃ/しゃ、長音ー）" class="w-full rounded-xl bg-washi border border-washiBorder p-3 text-sm font-jp text-ink focus:outline-none focus:border-indigoJp"></textarea>
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <span class="text-xs text-muted">內建完整假名轉羅馬音引擎，產生後即可點擊標音與慢速跟讀。</span>
+          <button onclick="generateCustomPhrase()" class="px-5 py-2.5 rounded-xl bg-indigoJp hover:bg-indigoSoft text-white text-xs sm:text-sm font-bold shadow-xs transition">
+            產生互動跟讀句
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Interactive Reading Stage -->
+      <div class="bg-white rounded-2xl border border-washiBorder p-5 sm:p-6 shadow-xs space-y-5">
+        <div id="phraseSelectorList" class="flex items-center gap-2 overflow-x-auto pb-1.5 border-b border-washiBorder/70"></div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div id="readPhraseZh" class="text-base sm:text-lg font-bold text-indigoJp">你好（午安）</div>
+            <div id="readPhraseNote" class="text-xs text-muted mt-0.5">點擊下方任意不熟的假名，即可標出淡朱紅色羅馬音提示</div>
+          </div>
+          <span id="readMarkedCounter" class="px-3 py-1.5 rounded-xl bg-matcha/15 text-matcha text-xs font-bold shrink-0">
+            本句標記提示：0 字
+          </span>
+        </div>
+
+        <div id="readTilesContainer" class="min-h-[110px] bg-washi/80 rounded-2xl border border-washiBorder p-4 sm:p-6 flex flex-wrap items-end gap-x-1.5 gap-y-4 leading-none"></div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <button onclick="speakCurrentReadPhrase()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigoJp hover:bg-indigoSoft text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition active:scale-[0.98]">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
+            <span id="readPlayBtnLabel">整句朗讀 (0.8x)</span>
+          </button>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button onclick="setAllReadMarks(true)" class="flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl bg-washi border border-washiBorder hover:border-indigoJp text-xs font-bold text-indigoJp transition">
+              全部顯示標音
+            </button>
+            <button onclick="setAllReadMarks(false)" class="flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl bg-washi border border-washiBorder hover:border-vermilion text-xs font-bold text-vermilion transition">
+              全部隱藏標音
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: 學習進度與新手攻略儀表板 ==================== -->
+    <section id="tab-guide" class="tab-panel hidden space-y-5">
+      <!-- 1. Local Storage Dashboard -->
+      <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-lg font-serifJp font-bold text-indigoJp">單機學習進度儀表板</h2>
+            <p class="text-xs text-muted mt-0.5">所有花丸印章、歌牌紀錄與錯題本皆自動儲存於本裝置瀏覽器中。</p>
+          </div>
+          <button onclick="openResetModal()" class="text-xs px-3 py-1.5 rounded-xl border border-vermilion/40 text-vermilion hover:bg-red-50 font-bold transition">
+            重置學習進度
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="bg-washi rounded-xl p-3.5 border border-washiBorder">
+            <div class="text-xs text-muted">💮 平假名花丸</div>
+            <div id="dashHiraHanamaru" class="text-xl sm:text-2xl font-bold text-indigoJp mt-1">0 / 46</div>
+          </div>
+          <div class="bg-washi rounded-xl p-3.5 border border-washiBorder">
+            <div class="text-xs text-muted">💮 片假名花丸</div>
+            <div id="dashKataHanamaru" class="text-xl sm:text-2xl font-bold text-vermilion mt-1">0 / 46</div>
+          </div>
+          <div class="bg-washi rounded-xl p-3.5 border border-washiBorder">
+            <div class="text-xs text-muted">🎯 測驗總正確率</div>
+            <div id="dashQuizAcc" class="text-xl sm:text-2xl font-bold text-matcha mt-1">--%</div>
+            <div id="dashQuizTotalSub" class="text-[10px] text-muted mt-0.5">共 0 題</div>
+          </div>
+          <div class="bg-washi rounded-xl p-3.5 border border-washiBorder">
+            <div class="text-xs text-muted">🎴 歌牌最佳紀錄</div>
+            <div id="dashKarutaBest" class="text-lg sm:text-xl font-bold text-indigoJp mt-1">0 連勝</div>
+            <div id="dashKarutaFast" class="text-[10px] text-muted mt-0.5">最快 --s</div>
+          </div>
+        </div>
+
+        <!-- Mistake Book -->
+        <div class="pt-3 border-t border-washiBorder space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-vermilion">📌 弱點錯題本</h3>
+              <p class="text-[11px] text-muted">已記熟的字可點擊右側「✓ 已克服」移除。</p>
+            </div>
+            <button id="dashWeakQuizBtn" onclick="launchWeakQuizFromDash()" class="px-4 py-2 rounded-xl bg-vermilion hover:opacity-90 text-white text-xs sm:text-sm font-bold shadow-xs transition disabled:opacity-40 disabled:cursor-not-allowed">
+              立即針對錯題測驗
+            </button>
+          </div>
+          <div id="dashMistakeList" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+        </div>
+      </div>
+
+      <!-- 2. Beginner Self-Study Mindsets & Japanese Elementary Methods -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-2">
+          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigoJp/10 text-indigoJp">心法 01・打破卡關</span>
+          <h3 class="text-base font-serifJp font-bold text-indigoJp">別在五十音停太久！</h3>
+          <p class="text-xs sm:text-sm text-muted leading-relaxed">
+            不需要背到 100% 完美才往下走。只要每次練熟 1～2 行，就大膽切到「短句跟讀」與「歌牌搶答」，透過真實單字與聽音反應，反而能最快把五十音刻進長期記憶。
+          </p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-2">
+          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-matcha/15 text-matcha">心法 02・日本小一法</span>
+          <h3 class="text-base font-serifJp font-bold text-indigoJp">一字一詞＋由簡入繁＋四房定位</h3>
+          <p class="text-xs sm:text-sm text-muted leading-relaxed">
+            日本小朋友學假名不死背單一符號，而是<strong>綁定具體單字</strong>（あ＝あめ糖果），寫字則先從無交叉的 <strong>く・し・つ・へ</strong> 開始，並用 <strong>1～4 號房</strong>抓準筆畫位置，練完蓋花丸累積成就感！
+          </p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-2">
+          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-vermilion/10 text-vermilion">心法 03・女手與男手</span>
+          <h3 class="text-base font-serifJp font-bold text-indigoJp">善用中文母語的漢字字源優勢</h3>
+          <p class="text-xs sm:text-sm text-muted leading-relaxed">
+            <strong>平假名（女手）</strong>源自漢字草書，線條圓潤；<strong>片假名（男手）</strong>取自楷書偏旁，筆畫方正。遇到容易忘記的字，打開字卡看一眼字源漢字與口訣，記憶力馬上倍增。
+          </p>
+        </div>
+      </div>
+
+      <!-- 3. Long Vowel / Sokuon / Yoon Rules -->
+      <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-4">
+        <div>
+          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigoJp/10 text-indigoJp mb-1">必學發音規則</span>
+          <h3 class="text-lg font-serifJp font-bold text-indigoJp">長音・促音（っ）・拗音（きゃ）單字示範</h3>
+          <p class="text-xs text-muted mt-0.5">點擊單字按鈕即可直接聽日語標準發音。</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <div class="bg-washi rounded-xl p-4 border border-washiBorder space-y-2.5">
+            <div class="font-bold text-indigoJp text-sm flex items-center justify-between">
+              <span>1. 長音（拉長一拍）</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-white border border-washiBorder">ー / 母音</span>
+            </div>
+            <p class="text-xs text-muted leading-relaxed">平假名多以母音拉長，片假名用「ー」將前一個音拉長一拍。</p>
+            <div class="space-y-1.5">
+              <button onclick="speakJapanese('おかあさん', 0.85)" class="w-full text-left px-3 py-2 rounded-lg bg-white border border-washiBorder hover:border-indigoJp flex items-center justify-between text-xs transition">
+                <span><strong class="font-jp text-sm text-indigoJp">おかあさん</strong> (媽媽)</span><span>🔊</span>
+              </button>
+              <button onclick="speakJapanese('コーヒー', 0.85)" class="w-full text-left px-3 py-2 rounded-lg bg-white border border-washiBorder hover:border-indigoJp flex items-center justify-between text-xs transition">
+                <span><strong class="font-jp text-sm text-indigoJp">コーヒー</strong> (咖啡)</span><span>🔊</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-washi rounded-xl p-4 border border-washiBorder space-y-2.5">
+            <div class="font-bold text-indigoJp text-sm flex items-center justify-between">
+              <span>2. 促音（停頓一拍）</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-white border border-washiBorder font-jp">っ / ッ</span>
+            </div>
+            <p class="text-xs text-muted leading-relaxed">小寫「っ / ッ」不發音，停頓憋氣一拍後再急促唸出下一個音。</p>
+            <div class="space-y-1.5">
+              <button onclick="speakJapanese('きって', 0.85)" class="w-full text-left px-3 py-2 rounded-lg bg-white border border-washiBorder hover:border-indigoJp flex items-center justify-between text-xs transition">
+                <span><strong class="font-jp text-sm text-indigoJp">きって</strong> (郵票)</span><span>🔊</span>
+              </button>
+              <button onclick="speakJapanese('チケット', 0.85)" class="w-full text-left px-3 py-2 rounded-lg bg-white border border-washiBorder hover:border-indigoJp flex items-center justify-between text-xs transition">
+                <span><strong class="font-jp text-sm text-indigoJp">チケット</strong> (票券)</span><span>🔊</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-washi rounded-xl p-4 border border-washiBorder space-y-2.5">
+            <div class="font-bold text-indigoJp text-sm flex items-center justify-between">
+              <span>3. 拗音（合唸一拍）</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-white border border-washiBorder font-jp">きゃ しゅ ちょ</span>
+            </div>
+            <p class="text-xs text-muted leading-relaxed">い段假名＋小寫「ゃ・ゅ・ょ」，兩個音滑順合為一拍唸出。</p>
+            <div class="space-y-1.5">
+              <button onclick="speakJapanese('しゃしん', 0.85)" class="w-full text-left px-3 py-2 rounded-lg bg-white border border-washiBorder hover:border-indigoJp flex items-center justify-between text-xs transition">
+                <span><strong class="font-jp text-sm text-indigoJp">しゃしん</strong> (照片)</span><span>🔊</span>
+              </button>
+              <button onclick="speakJapanese('とうきょう', 0.85)" class="w-full text-left px-3 py-2 rounded-lg bg-white border border-washiBorder hover:border-indigoJp flex items-center justify-between text-xs transition">
+                <span><strong class="font-jp text-sm text-indigoJp">とうきょう</strong> (東京)</span><span>🔊</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Confusing Characters Showdown Table -->
+      <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-4">
+        <div>
+          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-vermilion/10 text-vermilion mb-1">魔王剋星</span>
+          <h3 class="text-lg font-serifJp font-bold text-indigoJp">易混淆字魔王對決表</h3>
+          <p class="text-xs text-muted mt-0.5">點擊假名按鈕即可聽發音，搭配口訣一次分清楚！</p>
+        </div>
+        <div id="confusingShowdownGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+      </div>
+
+      <!-- 5. 12 Practical Japanese Travel & Daily Words -->
+      <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-4">
+        <div>
+          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-matcha/15 text-matcha mb-1">實戰速查</span>
+          <h3 class="text-lg font-serifJp font-bold text-indigoJp">12 個日本旅遊與生活實用單字</h3>
+          <p class="text-xs text-muted mt-0.5">點擊卡片直接聽標準發音，去日本馬上用得到！</p>
+        </div>
+        <div id="travelWordsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== DETAIL MODAL (Chart Click) ==================== -->
+  <div id="kanaDetailModal" class="hidden fixed inset-0 z-50 bg-black/45 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target===this) closeKanaModal()">
+    <div class="bg-washiCard rounded-3xl border border-washiBorder max-w-md w-full p-5 sm:p-6 shadow-2xl animate-modal space-y-4 max-h-[92vh] overflow-y-auto">
+      <!-- Top Row -->
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex items-center gap-3.5">
+          <div class="flex items-baseline gap-2.5 bg-washi px-4 py-2.5 rounded-2xl border border-washiBorder">
+            <span id="modalHira" class="text-5xl font-serifJp font-bold text-indigoJp">あ</span>
+            <span class="text-muted text-lg">/</span>
+            <span id="modalKata" class="text-4xl font-serifJp font-bold text-vermilion">ア</span>
+          </div>
+          <div>
+            <div id="modalRomaji" class="text-2xl font-bold text-ink">a</div>
+            <div id="modalRowCol" class="text-xs text-muted mt-0.5">あ行・あ段</div>
+          </div>
+        </div>
+        <button onclick="closeKanaModal()" class="w-9 h-9 rounded-xl bg-washi hover:bg-washiBorder text-muted font-bold flex items-center justify-center transition">✕</button>
+      </div>
+
+      <!-- Japanese Kids One-Word Card (頭音あつめ) -->
+      <button id="modalKidsWordBtn" class="w-full text-left bg-[#F4F8F5] hover:bg-[#EAF2EC] rounded-2xl p-3.5 border border-matcha/30 flex items-center justify-between gap-3 transition active:scale-[0.99]">
+        <div class="flex items-center gap-3">
+          <span id="modalKidsEmoji" class="text-3xl leading-none">🍬</span>
+          <div>
+            <div class="text-[11px] font-bold text-matcha">日本兒童一字一詞（點擊朗讀單字）</div>
+            <div class="flex items-baseline gap-2 mt-0.5">
+              <span id="modalKidsWord" class="text-lg font-serifJp font-bold text-ink">あめ</span>
+              <span id="modalKidsZh" class="text-xs text-muted">糖果</span>
+            </div>
+          </div>
+        </div>
+        <span class="px-2.5 py-1 rounded-lg bg-white border border-matcha/30 text-matcha text-xs font-bold shrink-0">🔊 唸單字</span>
+      </button>
+
+      <!-- Etymology Pair -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="bg-washi rounded-xl p-3 border border-washiBorder">
+          <div class="text-[11px] text-muted">平假名（女手・草書）</div>
+          <div id="modalOrigH" class="text-base font-serifJp font-bold text-indigoJp mt-0.5">あ ← 安</div>
+        </div>
+        <div class="bg-washi rounded-xl p-3 border border-washiBorder">
+          <div class="text-[11px] text-muted">片假名（男手・偏旁）</div>
+          <div id="modalOrigK" class="text-base font-serifJp font-bold text-vermilion mt-0.5">ア ← 阿</div>
+        </div>
+      </div>
+
+      <!-- Mnemonic -->
+      <div class="bg-[#FDF8EE] rounded-xl p-4 border border-[#EADBC0] space-y-1">
+        <div class="text-xs font-bold text-vermilion">💡 圖像與諧音記憶口訣</div>
+        <p id="modalMnemonic" class="text-sm text-ink leading-relaxed"></p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="grid grid-cols-2 gap-2.5 pt-1">
+        <button id="modalSpeakBtn" class="py-3 rounded-xl bg-indigoJp hover:bg-indigoSoft text-white text-sm font-bold flex items-center justify-center gap-1.5 transition">
+          🔊 播放假名音
+        </button>
+        <button id="modalJumpWriteBtn" class="py-3 rounded-xl bg-matcha hover:opacity-90 text-white text-sm font-bold flex items-center justify-center gap-1.5 transition">
+          ✍️ 前往手寫練習
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== RESET CONFIRM MODAL (No window.confirm) ==================== -->
+  <div id="resetConfirmModal" class="hidden fixed inset-0 z-50 bg-black/45 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target===this) closeResetModal()">
+    <div class="bg-white rounded-2xl border border-washiBorder max-w-sm w-full p-5 shadow-xl animate-modal space-y-4">
+      <h3 class="text-base font-bold text-vermilion">確定要重置所有學習進度嗎？</h3>
+      <p class="text-xs sm:text-sm text-muted leading-relaxed">這將會清除本機的花丸印章、歌牌最高分、測驗正確率與錯題本，且無法復原。</p>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeResetModal()" class="px-4 py-2 rounded-xl bg-washi border border-washiBorder text-xs sm:text-sm font-bold text-ink">取消</button>
+        <button onclick="confirmResetProgress()" class="px-4 py-2 rounded-xl bg-vermilion text-white text-xs sm:text-sm font-bold">確定清除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT APPLICATION ==================== -->
+  <script>
+    /*************************************************************************
+     * 1. COMPLETE 46 SEION DATA: Exact Etymology, Kids Word, 4-Room Hint
+     *************************************************************************/
+    const SEION_DATA = [
+      // あ行
+      { h: 'あ', k: 'ア', r: 'a', row: 'あ行', col: 0, oh: '安', ok: '阿', w: 'あめ', wZh: '糖果', emoji: '🍬', roomHint: '第一橫穿過1、2號房上方，豎彎居中，最後一筆在3、4號房畫大圓弧。', tip: '平假名「あ」像張嘴「啊(a)」的女子側面（來自草書安）；片假名「ア」像「阿」的左耳旁，斧頭劈下大叫「啊」。' },
+      { h: 'い', k: 'イ', r: 'i', row: 'あ行', col: 1, oh: '以', ok: '伊', w: 'いぬ', wZh: '狗狗', emoji: '🐕', roomHint: '左筆住1→3號房並微微勾起，右筆住2號房偏短，左右像互相對望。', tip: '「い」像兩條並排的魚，也像「以」的簡化；「イ」是「伊」的單人旁，一個人立正唸「一(i)」。' },
+      { h: 'う', k: 'ウ', r: 'u', row: 'あ行', col: 2, oh: '宇', ok: '宇', w: 'うさぎ', wZh: '兔子', emoji: '🐇', roomHint: '上方一點在1、2號房交界，下方圓弧從1號房穿過2號房再彎進3、4號房。', tip: '平假名「う」像彎腰捂肚子喊「嗚(u)」；片假名「ウ」則是「宇」的寶蓋頭，像屋頂遮雨。' },
+      { h: 'え', k: 'エ', r: 'e', row: 'あ行', col: 3, oh: '衣', ok: '江', w: 'えんぴつ', wZh: '鉛筆', emoji: '✏️', roomHint: '頂點在1、2號房中線，橫折斜穿中心進3號房，再往4號房彎出收尾。', tip: '「え」像「衣」的草書，像翹腳說「欸(e)？」；「エ」來自「江」的右半邊「工」。' },
+      { h: 'お', k: 'オ', r: 'o', row: 'あ行', col: 4, oh: '於', ok: '於', w: 'おにぎり', wZh: '飯糰', emoji: '🍙', roomHint: '左橫在1號房，豎筆直下3號房繞大圈進4號房，別忘了2號房的小點！', tip: '「お」像揮高爾夫球桿進洞喊「喔(o)！」（右上有一顆球）；「オ」像「才」字。' },
+
+      // か行
+      { h: 'か', k: 'カ', r: 'ka', row: 'か行', col: 0, oh: '加', ok: '加', w: 'かめ', wZh: '烏龜', emoji: '🐢', roomHint: '左半「力」跨1、3號房，斜撇居中穿過，右上方小點落在2號房。', tip: '「か」像「力」加一點，用力打蚊子「啪(ka)！」；「カ」直接就是「力」字。' },
+      { h: 'き', k: 'キ', r: 'ki', row: 'か行', col: 1, oh: '機', ok: '機', w: 'きりん', wZh: '長頸鹿', emoji: '🦒', roomHint: '兩橫平行微右上斜跨1、2號房，斜豎穿過中心，下方圓弧落在3、4號房。', tip: '「き」與「キ」長得超像一把「鑰匙(key)」，有兩條橫齒！' },
+      { h: 'く', k: 'ク', r: 'ku', row: 'か行', col: 2, oh: '久', ok: '久', w: 'くるま', wZh: '車子', emoji: '🚗', roomHint: '從2號房往左斜進1與3號房交界折轉，再往4號房穩穩收筆。', tip: '「く」像小鳥張嘴，也像嘴角下垂在「哭(ku)」；「ク」像「久」的左半邊。' },
+      { h: 'け', k: 'ケ', r: 'ke', row: 'か行', col: 3, oh: '計', ok: '介', w: 'けーき', wZh: '蛋糕', emoji: '🍰', roomHint: '左豎弧住1→3號房，右邊一橫一豎撇住在2→4號房。', tip: '「け」來自「計」，像打開的木桶(keg)；「ケ」取自「介」，像大寫 K 的變形。' },
+      { h: 'こ', k: 'コ', r: 'ko', row: 'か行', col: 4, oh: '己', ok: '己', w: 'こあら', wZh: '無尾熊', emoji: '🐨', roomHint: '上橫弧安穩住1、2號房，下橫弧住3、4號房，上下微抱合。', tip: '「こ」像兩條游動的錦鯉(koi)；「コ」像一個「口(ko)」少掉左邊一豎。' },
+
+      // さ行
+      { h: 'さ', k: 'サ', r: 'sa', row: 'さ行', col: 0, oh: '左', ok: '散', w: 'さくら', wZh: '櫻花', emoji: '🌸', roomHint: '一橫跨1、2號房，斜豎向下，底部圓弧輕輕落在3、4號房。', tip: '「さ」字源是「左」，像微笑臉；「サ」像「草字頭(艹)」，來自「散」上方。' },
+      { h: 'し', k: 'シ', r: 'shi', row: 'さ行', col: 1, oh: '之', ok: '之', w: 'しか', wZh: '小鹿', emoji: '🦌', roomHint: '從1號房偏左直直往下進3號房，再圓潤轉彎往4號房上方收筆。', tip: '「し」像一根彎彎的「吸(shi)管」；「シ」三點水由左往右上挑，像笑臉仰望天空。' },
+      { h: 'す', k: 'ス', r: 'su', row: 'さ行', col: 2, oh: '寸', ok: '須', w: 'すいか', wZh: '西瓜', emoji: '🍉', roomHint: '上橫跨1、2號房，中豎穿過中心在3、4交界打小圈再直下收尾。', tip: '「す」中間打結像盪鞦韆或吸拉麵「蘇(su)」；「ス」像跑步衝刺的人。' },
+      { h: 'せ', k: 'セ', r: 'se', row: 'さ行', col: 3, oh: '世', ok: '世', w: 'せみ', wZh: '蟬', emoji: '🪲', roomHint: '橫筆穿過中央，右豎在2號房往下微勾，左豎從1號房進3號房再橫向4號房。', tip: '「せ」和「セ」都源自「世(se)界」的「世」，保留「世」字骨架。' },
+      { h: 'そ', k: 'ソ', r: 'so', row: 'さ行', col: 4, oh: '曾', ok: '曾', w: 'そら', wZh: '天空', emoji: '☁️', roomHint: '上半 Z 字折在1、2號房，下半大圓弧穩穩坐在3、4號房。', tip: '「そ」像縫紉機走線(sew)；「ソ」取自「曾」的上面兩點，由上往下寫。' },
+
+      // た行
+      { h: 'た', k: 'タ', r: 'ta', row: 'た行', col: 0, oh: '太', ok: '多', w: 'たいこ', wZh: '太鼓', emoji: '🥁', roomHint: '左邊十字住1→3號房，右邊兩條小橫弧像「こ」住在2、4號房。', tip: '「た」左像 t、右像 a，合起來直接寫著英文「ta」！「タ」是「多」的一半。' },
+      { h: 'ち', k: 'チ', r: 'chi', row: 'た行', col: 1, oh: '知', ok: '千', w: 'ちず', wZh: '地圖', emoji: '🗺️', roomHint: '上橫與豎筆從1號房穿下，在3、4號房繞出一個飽滿的半圓肚子。', tip: '「ち」像數字「5」，五塊錢買起司(chi)；「チ」幾乎就是國字「千」。' },
+      { h: 'つ', k: 'ツ', r: 'tsu', row: 'た行', col: 2, oh: '川', ok: '川', w: 'つき', wZh: '月亮', emoji: '🌙', roomHint: '從1號房出發往2號房拱起，再大氣地滑進4號房轉往3號房收筆。', tip: '「つ」像海嘯(tsunami)巨浪；「ツ」是「川」字三筆由上往下點。' },
+      { h: 'て', k: 'テ', r: 'te', row: 'た行', col: 3, oh: '天', ok: '天', w: 'てがみ', wZh: '信件', emoji: '✉️', roomHint: '橫筆跨過1→2號房，接著轉進中央往3、4號房畫出如「C」的圓弧。', tip: '「て」像「天」的草書，也像伸出的「手(te)」；「テ」像郵局標誌「〒」。' },
+      { h: 'と', k: 'ト', r: 'to', row: 'た行', col: 4, oh: '止', ok: '止', w: 'とけい', wZh: '時鐘', emoji: '⏰', roomHint: '第一斜豎住1號房，第二彎弧從2號房進3、4號房像張開的嘴。', tip: '「と」像腳趾頭(toe)扎到刺；「ト」像「卜」字，取自「止」。' },
+
+      // な行
+      { h: 'な', k: 'ナ', r: 'na', row: 'な行', col: 0, oh: '奈', ok: '奈', w: 'なす', wZh: '茄子', emoji: '🍆', roomHint: '左上十字住1號房，右上點住2號房，下方打結筆畫落於3、4號房。', tip: '「な」來自「奈(na)良」；「ナ」是「奈」左上的「大」字簡化，像十字架。' },
+      { h: 'に', k: 'ニ', r: 'ni', row: 'な行', col: 1, oh: '仁', ok: '仁', w: 'にじ', wZh: '彩虹', emoji: '🌈', roomHint: '左豎弧住1→3號房，右邊兩橫弧整齊住在2、4號房。', tip: '「に」來自「仁」，左豎右「二」；「ニ」就是國字「二」，日文 2 正是 ni！' },
+      { h: 'ぬ', k: 'ヌ', r: 'nu', row: 'な行', col: 2, oh: '奴', ok: '奴', w: 'ぬいぐるみ', wZh: '布偶', emoji: '🧸', roomHint: '先斜下1→3號房，再從2號房繞大圈穿過全部四房，最後在4號房打小結！', tip: '「ぬ」像捲起打結的「麵條(noodles)」，尾巴多一個圈；「ヌ」取自「奴」的右邊「又」。' },
+      { h: 'ね', k: 'ネ', r: 'ne', row: 'な行', col: 3, oh: '祢', ok: '祢', w: 'ねこ', wZh: '貓咪', emoji: '🐱', roomHint: '左豎在1、3號房，Z 字繞過中心進入2號房再往下到4號房捲個小圈。', tip: '「ね」尾巴捲捲的像「貓咪(neko)」；「ネ」是「祢」的示字旁。' },
+      { h: 'の', k: 'ノ', r: 'no', row: 'な行', col: 4, oh: '乃', ok: '乃', w: 'のり', wZh: '海苔', emoji: '🍙', roomHint: '從中心偏上往3號房畫斜弧，再繞過1、2號房大圈進4號房收尾。', tip: '「の」像禁止標誌「NO」，也是日文最常見的「的」；「ノ」是「乃」的第一撇。' },
+
+      // は行
+      { h: 'は', k: 'ハ', r: 'ha', row: 'は行', col: 0, oh: '波', ok: '八', w: 'はな', wZh: '花朵', emoji: '🌺', roomHint: '左豎住1→3號房，右邊一橫住2號房，豎筆直下4號房打一個扁圓結。', tip: '「は」像開心「哈(ha)哈大笑」；「ハ」直接就是中文字「八」。' },
+      { h: 'ひ', k: 'ヒ', r: 'hi', row: 'は行', col: 1, oh: '比', ok: '比', w: 'ひこうき', wZh: '飛機', emoji: '✈️', roomHint: '從1號房出發，往下跨過3、4號房畫出大 U 形微笑，收在2號房。', tip: '「ひ」像大嘴「嘻(hi)嘻笑」的U形；「ヒ」取自「比」的右半邊，像高跟鞋(heel)。' },
+      { h: 'ふ', k: 'フ', r: 'fu', row: 'は行', col: 2, oh: '不', ok: '不', w: 'ふうせん', wZh: '氣球', emoji: '🎈', roomHint: '頂點與彎鉤居中線，左下小點住3號房，右下小點住4號房，如富士山對稱。', tip: '「ふ」超像「富士山(Fuji)」輪廓；「フ」像屋簷一角，風吹「呼(fu)」一聲。' },
+      { h: 'へ', k: 'ヘ', r: 'he', row: 'は行', col: 3, oh: '部', ok: '部', w: 'へび', wZh: '小蛇', emoji: '🐍', roomHint: '從1號房偏下往右上小爬坡到中線，再長長地往4號房滑下去。', tip: '平假名「へ」與片假名「ヘ」幾乎一模一樣！像小山丘或微笑的眼睛「嘿(he)」。' },
+      { h: 'ほ', k: 'ホ', r: 'ho', row: 'は行', col: 4, oh: '保', ok: '保', w: 'ほし', wZh: '星星', emoji: '⭐', roomHint: '像「は」但2號房多了一條帽子橫線，注意豎筆頂端不要凸出帽子！', tip: '「ほ」比「は」多戴一頂帽子「吼(ho)」；「ホ」取自「保」的右下「木」。' },
+
+      // ま行
+      { h: 'ま', k: 'マ', r: 'ma', row: 'ま行', col: 0, oh: '末', ok: '末', w: 'まくら', wZh: '枕頭', emoji: '🛏️', roomHint: '兩橫跨1、2號房，中豎直下在3、4號房打一個優雅的扁結。', tip: '「ま」像「媽(ma)媽」雙手抱寶寶；「マ」像媽媽抱胸側影，字源「末」。' },
+      { h: 'み', k: 'ミ', r: 'mi', row: 'ま行', col: 1, oh: '美', ok: '三', w: 'みかん', wZh: '橘子', emoji: '🍊', roomHint: '左邊先從1號房繞進3號房打小結再往4號房走，最後2→4號房補一撇。', tip: '「み」像連筆數字「21」，21 歲最「美(mi)」；「ミ」是「三」條斜線像貓鬍鬚。' },
+      { h: 'む', k: 'ム', r: 'mu', row: 'ま行', col: 2, oh: '武', ok: '牟', w: 'むし', wZh: '昆蟲', emoji: '🐞', roomHint: '一橫在1號房，豎筆進3號房打圈再跨到4號房上勾，2號房補一點。', tip: '「む」像牛頭和角「哞(mu)～」；「ム」取自「牟」的上半部。' },
+      { h: 'め', k: 'メ', r: 'me', row: 'ま行', col: 3, oh: '女', ok: '女', w: 'めがね', wZh: '眼鏡', emoji: '👓', roomHint: '結構同「ぬ」，但最後繞過2號房進入4號房時直接圓滑收筆，不打結！', tip: '「め」像「女」的草書，也像「眼睛(me)」且尾巴無結；「メ」像刀疤打叉。' },
+      { h: 'も', k: 'モ', r: 'mo', row: 'ま行', col: 4, oh: '毛', ok: '毛', w: 'もも', wZh: '桃子', emoji: '🍑', roomHint: '先從1號房穿過3號房畫大魚鉤進4號房，再於1、2號房補上兩條橫線。', tip: '「も」和「モ」都來自「毛(mo)」，「モ」像「毛」去掉最上面一撇。' },
+
+      // や行
+      { h: 'や', k: 'ヤ', r: 'ya', row: 'や行', col: 0, oh: '也', ok: '也', w: 'やま', wZh: '高山', emoji: '⛰️', roomHint: '圓弧從1號房繞進2號房，頂端小點在2號房，最後斜豎從1號房落進3號房。', tip: '「や」和「ヤ」都源自「也」，「や」像犛牛角開心喊「呀(ya)！」。' },
+      { h: 'ゆ', k: 'ユ', r: 'yu', row: 'や行', col: 2, oh: '由', ok: '由', w: 'ゆきだるま', wZh: '雪人', emoji: '⛄', roomHint: '左豎進3號房後繞大圓穿過2、4號房，最後一豎從中上方直落切過。', tip: '「ゆ」像水中「游(yu)」泳的熱帶魚；「ユ」像橫躺的英文 U (you)。' },
+      { h: 'よ', k: 'ヨ', r: 'yo', row: 'や行', col: 4, oh: '与', ok: '与', w: 'よる', wZh: '夜晚', emoji: '🌃', roomHint: '小橫住2號房，中豎從1、2中線直下並在3、4號房畫扁結。', tip: '「よ」像溜溜球(yo-yo)；「ヨ」像倒過來的 E，打招呼說「喲(yo)！」。' },
+
+      // ら行
+      { h: 'ら', k: 'ラ', r: 'ra', row: 'ら行', col: 0, oh: '良', ok: '良', w: 'らいおん', wZh: '獅子', emoji: '🦁', roomHint: '上方小點在1、2交界，下方從1號房滑下3號房再往4號房畫飽滿弧線。', tip: '「ら」像數字「5」啦啦隊(ra)；「ラ」像一碗冒熱氣的拉麵(ramen)。' },
+      { h: 'り', k: 'リ', r: 'ri', row: 'ら行', col: 1, oh: '利', ok: '利', w: 'りす', wZh: '松鼠', emoji: '🐿️', roomHint: '左豎住1→3號房並微微上勾，右長撇住2→4號房自然往左收尾。', tip: '「り」和「リ」都取自「利(ri)」的立刀旁，像兩條河流(river)。' },
+      { h: 'る', k: 'ル', r: 'ru', row: 'ら行', col: 2, oh: '留', ok: '流', w: 'るびー', wZh: '紅寶石', emoji: '💎', roomHint: '橫折在1、2號房，大肚圓弧進4號房，最後在3、4號房交界捲一個小圈。', tip: '「る」像數字「3」尾巴捲著一顆紅寶石(ruby)；「ル」取自「流」右下角。' },
+      { h: 'れ', k: 'レ', r: 're', row: 'ら行', col: 3, oh: '礼', ok: '礼', w: 'れもん', wZh: '檸檬', emoji: '🍋', roomHint: '左豎在1、3號房，Z 字繞過中心進入2號房，最後在4號房往外瀟灑挑起。', tip: '「れ」尾巴往外甩開，像累了(re)踢腳；「レ」是「礼」的右邊一豎勾。' },
+      { h: 'ろ', k: 'ロ', r: 'ro', row: 'ら行', col: 4, oh: '呂', ok: '呂', w: 'ろけっと', wZh: '火箭', emoji: '🚀', roomHint: '結構和「る」幾乎相同，但進4號房繞到3號房後直接收尾不打圈！', tip: '「ろ」是沒捲尾巴的數字「3」，像「裸(ro)體」；「ロ」是「呂」的方正「口」。' },
+
+      // わ行 + ん
+      { h: 'わ', k: 'ワ', r: 'wa', row: 'わ行', col: 0, oh: '和', ok: '和', w: 'わに', wZh: '鱷魚', emoji: '🐊', roomHint: '左豎在1、3號房，Z 字繞過中心進入2號房，最後在4號房大圓弧往內收。', tip: '「わ」像大肚子圓弧「哇(wa)」；「ワ」像紅酒杯(wine)，字源「和」。' },
+      { h: 'を', k: 'ヲ', r: 'wo', row: 'わ行', col: 4, oh: '遠', ok: '乎', w: 'ほんをよむ', wZh: '讀書（助詞）', emoji: '📖', roomHint: '上橫與折筆跨1、2號房，下方像「C」的圓弧安穩坐在3、4號房。', tip: '「を」像跳高跨欄喊「喔(wo)！」（現代多當助詞）；「ヲ」像「乎」的上半部。' },
+      { h: 'ん', k: 'ン', r: 'n', row: 'ん(撥音)', col: 0, oh: '无', ok: '尔', w: 'りんご', wZh: '蘋果（字中撥音）', emoji: '🍎', roomHint: '從1、2號房交界斜撇進3號房，順勢往上拱進中央再滑往4號房微翹。', tip: '「ん」直接就是草寫英文「n」，發鼻音「嗯(n)」！片假名「ン」由左下往右上挑。' }
+    ];
+
+    const SEION_ROWS = ['あ行', 'か行', 'さ行', 'た行', 'な行', 'は行', 'ま行', 'や行', 'ら行', 'わ行', 'ん(撥音)'];
+
+    // Japanese Elementary School Easy-to-Hard Order (46 unique characters divided into 4 tiers)
+    const EASY_TIERS = [
+      { id: 't1', name: '第1階・無交叉簡單字', chars: ['く', 'し', 'つ', 'へ', 'の', 'て', 'そ', 'ひ', 'ん', 'ろ', 'る', 'う'] },
+      { id: 't2', name: '第2階・2畫基礎字', chars: ['こ', 'い', 'り', 'と', 'ち', 'ら', 'え', 'ゆ', 'や', 'よ'] },
+      { id: 't3', name: '第3階・3畫平衡字', chars: ['に', 'さ', 'け', 'せ', 'か', 'す', 'も', 'ま', 'は', 'わ', 'れ', 'ほ'] },
+      { id: 't4', name: '第4階・繞圈進階字', chars: ['き', 'た', 'な', 'ふ', 'み', 'む', 'お', 'め', 'ぬ', 'ね', 'あ', 'を'] }
+    ];
+    const EASY_FLAT_ORDER = EASY_TIERS.flatMap(t => t.chars);
+
+    // Confusing Character Groups
+    const CONFUSING_GROUPS = [
+      {
+        title: 'シ (shi) vs ツ (tsu)',
+        chars: [{ ch: 'シ', r: 'shi', script: 'katakana' }, { ch: 'ツ', r: 'tsu', script: 'katakana' }],
+        tip: '「シ」像三點水由左往右上挑（仰望笑臉）；「ツ」是「川」字，兩點直直向下（低頭看）。'
+      },
+      {
+        title: 'ソ (so) vs ン (n)',
+        chars: [{ ch: 'ソ', r: 'so', script: 'katakana' }, { ch: 'ン', r: 'n', script: 'katakana' }],
+        tip: '「ソ」從上往下撇（像曾的頭頂）；「ン」點比較平，最後一筆由左下往右上挑。'
+      },
+      {
+        title: 'ぬ (nu) vs め (me)',
+        chars: [{ ch: 'ぬ', r: 'nu', script: 'hiragana' }, { ch: 'め', r: 'me', script: 'hiragana' }],
+        tip: '「ぬ」尾巴多打一個小結，像捲起來的麵條(noodles)；「め」尾巴乾淨沒有結，像眼睛(me)。'
+      },
+      {
+        title: 'れ (re) vs ね (ne) vs わ (wa)',
+        chars: [{ ch: 'れ', r: 're', script: 'hiragana' }, { ch: 'ね', r: 'ne', script: 'hiragana' }, { ch: 'わ', r: 'wa', script: 'hiragana' }],
+        tip: '看右下尾巴：「れ」往外甩（累了踢腳）；「ね」捲個圈（貓尾巴 neko）；「わ」往內大圓弧收（大肚子哇）。'
+      },
+      {
+        title: 'さ (sa) vs き (ki)',
+        chars: [{ ch: 'さ', r: 'sa', script: 'hiragana' }, { ch: 'き', r: 'ki', script: 'hiragana' }],
+        tip: '「さ」只有一條橫線；「き」有兩條橫線，像鑰匙(key)的兩排齒！'
+      },
+      {
+        title: 'る (ru) vs ろ (ro)',
+        chars: [{ ch: 'る', r: 'ru', script: 'hiragana' }, { ch: 'ろ', r: 'ro', script: 'hiragana' }],
+        tip: '「る」像 3 捲著一顆紅寶石(ruby)；「ろ」尾巴空空的什麼都沒穿（裸 ro）。'
+      }
+    ];
+
+    // 12 Practical Japanese Travel & Daily Words
+    const TRAVEL_WORDS = [
+      { jp: 'ありがとう', r: 'arigatou', zh: '謝謝', emoji: '🙏' },
+      { jp: 'すみません', r: 'sumimasen', zh: '不好意思／請問', emoji: '🙋' },
+      { jp: 'おいしい', r: 'oishii', zh: '好好吃', emoji: '😋' },
+      { jp: 'いくらですか', r: 'ikura desu ka', zh: '請問多少錢？', emoji: '💴' },
+      { jp: 'えき', r: 'eki', zh: '車站', emoji: '🚉' },
+      { jp: 'といれ', r: 'toire', zh: '洗手間', emoji: '🚻' },
+      { jp: 'みず', r: 'mizu', zh: '水', emoji: '💧' },
+      { jp: 'おかいけい', r: 'okaikei', zh: '結帳', emoji: '🧾' },
+      { jp: 'メニュー', r: 'menyū', zh: '菜單', emoji: '📖' },
+      { jp: 'ラーメン', r: 'rāmen', zh: '拉麵', emoji: '🍜' },
+      { jp: 'コンビニ', r: 'konbini', zh: '便利商店', emoji: '🏪' },
+      { jp: 'ホテル', r: 'hoteru', zh: '飯店', emoji: '🏨' }
+    ];
+
+    // Built-in Reading & Shadowing Phrases
+    const READING_PHRASES = {
+      greeting: [
+        { jp: 'こんにちは', zh: '你好（午安）', note: '最基本的日間問候，注意最後的「は」當助詞時唸 wa！' },
+        { jp: 'ありがとう', zh: '謝謝', note: '對親友說謝謝，更禮貌則加上 ございます。' },
+        { jp: 'すみません', zh: '不好意思／請問／對不起', note: '在日本萬用度第一名，問路、點餐、道歉都能用。' },
+        { jp: 'おはようございます', zh: '早安（禮貌說法）', note: '早上見面必說，熟悉「ご」的濁音發音。' },
+        { jp: 'いただきます', zh: '我要開動了', note: '吃飯前雙手合十說，感謝食物與料理的人。' },
+        { jp: 'おつかれさまです', zh: '辛苦了', note: '職場與日常最常聽到的溫馨問候語。' }
+      ],
+      travel: [
+        { jp: 'えきはどこですか', zh: '請問車站在哪裡？', note: 'えき(車站)＋どこ(哪裡)，自由行問路神句。' },
+        { jp: 'これをください', zh: '請給我這個', note: '指著菜單或商品就能直接點餐結帳！' },
+        { jp: 'おすすめはなんですか', zh: '請問推薦哪一道呢？', note: 'おすすめ(推薦)，去居酒屋或拉麵店必問。' },
+        { jp: 'おかいけいおねがいします', zh: '麻煩結帳', note: 'おかいけい(結帳)＋おねがいします(拜託您)。' },
+        { jp: 'コーヒーをひとつください', zh: '請給我一杯咖啡', note: '同時練習片假名長音「コーヒー」與助詞「を」。' }
+      ],
+      lyrics: [
+        { jp: 'さくら さくら やよいの そらは', zh: '櫻花呀櫻花，三月陽春的天空裡', note: '經典日本民謠《櫻花》，節奏緩慢最適合新手跟讀。' },
+        { jp: 'ありがとうって つたえたくて あなたを みつめる', zh: '好想傳達那句謝謝，靜靜凝視著你', note: '練習促音「って」停頓一拍的柔美節奏感。' },
+        { jp: 'ほしが ながれる よるに きみを おもう', zh: '在流星劃過的夜晚裡思念著你', note: '抒情歌常見句型：ほし(星星)、よる(夜晚)、きみ(你)。' },
+        { jp: 'あしたは きっと はれるから わらって あるこう', zh: '明天一定會放晴的，笑著向前走吧', note: '練習促音「きっと(一定)」與長音「あるこう」。' },
+        { jp: 'かぜに ゆれる はなびら そっと てをのばした', zh: '隨風搖曳的花瓣，我輕輕伸出了手', note: '感受清音、濁音(ぜ/び)與促音(そっと)交錯的韻律。' }
+      ]
+    };
+
+    /*************************************************************************
+     * 2. LOCALSTORAGE STATE (Single-device persistent accumulation)
+     *************************************************************************/
+    const STORAGE_KEY = 'wafu_kana_pro_v3';
+
+    let store = {
+      hideRomaji: false,
+      hanamaru: [], // e.g., ['h_あ', 'k_ア']
+      quizStats: { total: 0, correct: 0, bestCombo: 0 },
+      mistakes: {}, // e.g., { 'h_ぬ': 2 }
+      karuta: { bestScore: 0, bestCombo: 0, fastestMs: null }
+    };
+
+    function loadStore() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const p = JSON.parse(raw);
+          store = {
+            hideRomaji: !!p.hideRomaji,
+            hanamaru: Array.isArray(p.hanamaru) ? p.hanamaru : [],
+            quizStats: p.quizStats || { total: 0, correct: 0, bestCombo: 0 },
+            mistakes: p.mistakes || {},
+            karuta: p.karuta || { bestScore: 0, bestCombo: 0, fastestMs: null }
+          };
+        }
+      } catch (e) {
+        console.warn('LocalStorage unavailable:', e);
+      }
+    }
+
+    function saveStore() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+      } catch (e) {
+        console.warn('LocalStorage save failed:', e);
+      }
+    }
+
+    // Runtime UI State
+    let activeTab = 'chart';
+    let globalScript = 'hiragana'; // 'hiragana' | 'katakana'
+    let chartScript = 'hiragana';  // 'hiragana' | 'katakana' | 'both'
+    let seqPlayToken = 0;
+
+    // Writing State
+    let writeScript = 'hiragana';
+    let writeOrderMode = 'easy'; // 'easy' | 'standard'
+    let writeGridMode = 'rooms'; // 'rooms' | 'rice' | 'blank'
+    let writeCharH = 'く';       // Track active char by hiragana key
+    let writeShowGuide = true;
+    let brushColor = '#2C2A29';
+    let brushSizeRatio = 0.028;
+    let strokes = [];
+    let currentStroke = null;
+    let isDrawing = false;
+
+    // Karuta State
+    let karutaScript = 'hiragana'; // 'hiragana' | 'katakana' | 'mixed'
+    let karutaPureAudio = false;
+    let karutaGame = null;
+
+    // Quiz State
+    let quizSubTab = 'karuta';
+    let quizMode = 'audioToKana';
+    let quizScript = 'hiragana';
+    let quizCount = 10;
+    let quizSelectedRows = new Set(['あ行', 'か行']);
+    let quizSession = null;
+
+    // Match Game State
+    let matchState = {
+      cards: [],
+      flipped: [],
+      matchedCount: 0,
+      flips: 0,
+      locked: false,
+      timerId: null,
+      seconds: 0
+    };
+
+    // Reading State
+    let readCategory = 'greeting';
+    let readPhraseIdx = 0;
+    let readSpeed = 0.8;
+    let customPhraseObj = {
+      jp: 'ありがとうって つたえたくて あなたを みつめる',
+      zh: '自訂練習句',
+      note: '點擊任意不熟的假名即可標出羅馬音提示'
+    };
+    let readTokens = [];
+
+    /*************************************************************************
+     * 3. WEB SPEECH API & WEB AUDIO API SOUND EFFECTS
+     *************************************************************************/
+    let bestJaVoice = null;
+    let audioCtx = null;
+
+    function initVoices() {
+      if (!('speechSynthesis' in window)) return;
+      const voices = window.speechSynthesis.getVoices();
+      const jaVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('ja'));
+      if (jaVoices.length > 0) {
+        bestJaVoice =
+          jaVoices.find(v => /google/i.test(v.name)) ||
+          jaVoices.find(v => /kyoko|nanami|haruka|otoya|o-ren/i.test(v.name)) ||
+          jaVoices[0];
+      }
+    }
+
+    if ('speechSynthesis' in window) {
+      initVoices();
+      window.speechSynthesis.onvoiceschanged = initVoices;
+    }
+
+    function speakJapanese(text, rate = 1.0, onEnd = null) {
+      if (!('speechSynthesis' in window)) {
+        showToast('您的瀏覽器不支援語音朗讀功能');
+        if (onEnd) onEnd();
+        return;
+      }
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ja-JP';
+        utter.rate = rate;
+        if (bestJaVoice) utter.voice = bestJaVoice;
+        utter.onend = () => { if (onEnd) onEnd(); };
+        utter.onerror = () => { if (onEnd) onEnd(); };
+        window.speechSynthesis.speak(utter);
+      } catch (e) {
+        if (onEnd) onEnd();
+      }
+    }
+
+    // Crisp Web Audio API chime (no external audio URLs)
+    function playChime(type = 'hanamaru') {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!audioCtx) audioCtx = new AudioContextClass();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const now = audioCtx.currentTime;
+        const playTone = (freq, start, dur, vol = 0.14, wave = 'sine') => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = wave;
+          osc.frequency.setValueAtTime(freq, now + start);
+          gain.gain.setValueAtTime(0.001, now + start);
+          gain.gain.exponentialRampToValueAtTime(vol, now + start + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + start + dur);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + start);
+          osc.stop(now + start + dur + 0.02);
+        };
+
+        if (type === 'hanamaru') {
+          playTone(523.25, 0, 0.18, 0.14);     // C5
+          playTone(659.25, 0.09, 0.18, 0.14);  // E5
+          playTone(783.99, 0.18, 0.25, 0.15);  // G5
+          playTone(1046.5, 0.27, 0.42, 0.16);  // C6
+        } else if (type === 'karutaHit') {
+          playTone(698.46, 0, 0.12, 0.15, 'triangle');
+          playTone(1046.5, 0.07, 0.22, 0.15, 'sine');
+        } else if (type === 'wrong') {
+          playTone(220, 0, 0.16, 0.12, 'sawtooth');
+          playTone(185, 0.1, 0.2, 0.1, 'sawtooth');
+        }
+      } catch (e) {
+        // Silently ignore audio context restrictions
+      }
+    }
+
+    /*************************************************************************
+     * 4. GLOBAL UI CONTROLS (Tabs, Global Script, Hide Romaji, Toast)
+     *************************************************************************/
+    let toastTimer = null;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.remove('opacity-0');
+      el.classList.add('opacity-100');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        el.classList.remove('opacity-100');
+        el.classList.add('opacity-0');
+      }, 2200);
+    }
+
+    function setGlobalScript(script) {
+      globalScript = script;
+      chartScript = script;
+      writeScript = script;
+      karutaScript = script;
+      quizScript = script;
+
+      renderGlobalScriptUI();
+      renderChartControls();
+      renderChart();
+      renderWriteUI();
+      renderKarutaControls();
+      renderQuizSetupUI();
+      showToast(script === 'hiragana' ? '已切換為：平假名（女手）' : '已切換為：片假名（男手）');
+    }
+
+    function renderGlobalScriptUI() {
+      const hBtn = document.getElementById('globalScriptHira');
+      const kBtn = document.getElementById('globalScriptKata');
+      hBtn.className = `px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+        globalScript === 'hiragana' ? 'bg-indigoJp text-washi' : 'text-muted hover:text-indigoJp'
+      }`;
+      kBtn.className = `px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+        globalScript === 'katakana' ? 'bg-vermilion text-washi' : 'text-muted hover:text-vermilion'
+      }`;
+    }
+
+    function updateHideRomajiUI() {
+      const dot = document.getElementById('hideRomajiIndicator');
+      const txt = document.getElementById('hideRomajiText');
+      const btn = document.getElementById('globalHideRomajiBtn');
+      if (store.hideRomaji) {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-vermilion transition';
+        txt.textContent = '隱藏羅馬字：開';
+        btn.classList.add('border-vermilion', 'bg-red-50/60');
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-gray-300 transition';
+        txt.textContent = '隱藏羅馬字：關';
+        btn.classList.remove('border-vermilion', 'bg-red-50/60');
+      }
+    }
+
+    function toggleHideRomaji() {
+      store.hideRomaji = !store.hideRomaji;
+      saveStore();
+      updateHideRomajiUI();
+      renderChart();
+      renderWritePanelInfo();
+      renderTravelWords();
+      showToast(store.hideRomaji ? '已隱藏羅馬拼音，訓練直覺認字！' : '已恢復顯示羅馬拼音');
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      stopSequentialPlay();
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        const isCurrent = btn.dataset.tab === tab;
+        btn.className = `nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition ${
+          isCurrent
+            ? 'bg-indigoJp text-washi shadow-xs'
+            : 'text-muted hover:text-indigoJp hover:bg-washiBorder/40'
+        }`;
+      });
+
+      if (tab === 'write') {
+        requestAnimationFrame(() => {
+          resizeWritingCanvas();
+          renderWriteUI();
+        });
+      } else if (tab === 'read') {
+        renderReadSection();
+      } else if (tab === 'quiz') {
+        if (quizSubTab === 'match' && matchState.cards.length === 0) initMatchGame();
+      } else if (tab === 'guide') {
+        renderDashboard();
+      }
+    }
+
+    /*************************************************************************
+     * 5. TAB 1: KANA CHART (Row/Col Playback + Etymology + Kids Word Modal)
+     *************************************************************************/
+    function setChartScript(script) {
+      chartScript = script;
+      if (script === 'hiragana' || script === 'katakana') {
+        globalScript = script;
+        renderGlobalScriptUI();
+      }
+      renderChartControls();
+      renderChart();
+    }
+
+    function renderChartControls() {
+      const act = 'bg-indigoJp text-washi shadow-xs';
+      const idle = 'text-muted hover:text-indigoJp';
+      document.getElementById('btnChartHira').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${chartScript === 'hiragana' ? act : idle}`;
+      document.getElementById('btnChartKata').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${chartScript === 'katakana' ? act : idle}`;
+      document.getElementById('btnChartBoth').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${chartScript === 'both' ? act : idle}`;
+    }
+
+    function renderChart() {
+      const container = document.getElementById('kanaMatrixBody');
+      let html = '';
+
+      SEION_ROWS.forEach((rowName) => {
+        const rowItems = SEION_DATA.filter(d => d.row === rowName);
+        html += `<div class="grid grid-cols-[62px_repeat(5,1fr)] sm:grid-cols-[84px_repeat(5,1fr)] gap-1.5 sm:gap-2.5 items-stretch">`;
+
+        // Row Header Button
+        html += `
+          <button onclick="playRow('${rowName}')" class="rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm px-1 py-2 flex flex-col items-center justify-center transition">
+            <span>${rowName.replace('(撥音)', '')}</span>
+            <span class="text-[10px] font-normal opacity-75">🔊</span>
+          </button>
+        `;
+
+        for (let c = 0; c < 5; c++) {
+          const item = rowItems.find(x => x.col === c);
+          if (!item) {
+            html += `<div class="rounded-xl bg-washi/40 border border-dashed border-washiBorder/50"></div>`;
+          } else {
+            const hasHanaH = store.hanamaru.includes(`h_${item.h}`);
+            const hasHanaK = store.hanamaru.includes(`k_${item.k}`);
+            const showHana = chartScript === 'hiragana' ? hasHanaH : chartScript === 'katakana' ? hasHanaK : (hasHanaH || hasHanaK);
+            const hasMistake = (store.mistakes[`h_${item.h}`] || 0) > 0 || (store.mistakes[`k_${item.k}`] || 0) > 0;
+
+            let mainDisplay = '';
+            if (chartScript === 'hiragana') {
+              mainDisplay = `<div class="text-2xl sm:text-3xl font-serifJp font-bold text-indigoJp leading-none">${item.h}</div>`;
+            } else if (chartScript === 'katakana') {
+              mainDisplay = `<div class="text-2xl sm:text-3xl font-serifJp font-bold text-vermilion leading-none">${item.k}</div>`;
+            } else {
+              mainDisplay = `
+                <div class="flex items-baseline justify-center gap-1 leading-none">
+                  <span class="text-xl sm:text-2xl font-serifJp font-bold text-indigoJp">${item.h}</span>
+                  <span class="text-base sm:text-lg font-serifJp font-bold text-vermilion">${item.k}</span>
+                </div>
+              `;
+            }
+
+            const romajiHtml = store.hideRomaji
+              ? `<div class="text-[11px] text-muted/40 mt-1 select-none">••</div>`
+              : `<div class="text-xs sm:text-sm font-medium text-muted mt-1">${item.r}</div>`;
+
+            const hanaBadge = showHana
+              ? `<span class="absolute top-1 left-1 text-[11px] leading-none" title="已獲得花丸">💮</span>`
+              : '';
+            const mistakeDot = hasMistake
+              ? `<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-vermilion" title="錯題本待加強"></span>`
+              : '';
+
+            html += `
+              <button id="cell-${item.h}" onclick="onKanaCellClick('${item.h}')"
+                class="kana-cell relative rounded-xl bg-white hover:border-indigoJp hover:bg-washi/60 border border-washiBorder py-2.5 sm:py-3 px-1 flex flex-col items-center justify-center transition shadow-2xs active:scale-95">
+                ${hanaBadge}
+                ${mistakeDot}
+                ${mainDisplay}
+                ${romajiHtml}
+              </button>
+            `;
+          }
+        }
+        html += `</div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function onKanaCellClick(hChar) {
+      stopSequentialPlay();
+      const item = SEION_DATA.find(d => d.h === hChar);
+      if (!item) return;
+      speakJapanese(item.h, 0.95);
+      openKanaModal(item);
+    }
+
+    function clearChartHighlights() {
+      document.querySelectorAll('.kana-cell').forEach(el => {
+        el.classList.remove('kana-speaking', 'kana-group-highlight');
+      });
+    }
+
+    function stopSequentialPlay() {
+      seqPlayToken++;
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      clearChartHighlights();
+      const stopBtn = document.getElementById('stopSeqBtn');
+      if (stopBtn) stopBtn.classList.add('hidden');
+    }
+
+    function playRow(rowName) {
+      const items = SEION_DATA.filter(d => d.row === rowName);
+      playSequence(items, `正在連播：${rowName}`);
+    }
+
+    function playColumn(colIdx) {
+      const items = SEION_DATA.filter(d => d.col === colIdx && d.row !== 'ん(撥音)');
+      const colNames = ['あ段', 'い段', 'う段', 'え段', 'お段'];
+      playSequence(items, `正在連播：${colNames[colIdx]}`);
+    }
+
+    function playSequence(items, toastMsg) {
+      stopSequentialPlay();
+      if (!items.length) return;
+      const myToken = ++seqPlayToken;
+      document.getElementById('stopSeqBtn').classList.remove('hidden');
+      showToast(toastMsg);
+
+      items.forEach(it => {
+        const el = document.getElementById(`cell-${it.h}`);
+        if (el) el.classList.add('kana-group-highlight');
+      });
+
+      let idx = 0;
+      function step() {
+        if (myToken !== seqPlayToken) return;
+        if (idx >= items.length) {
+          stopSequentialPlay();
+          return;
+        }
+        const cur = items[idx];
+        document.querySelectorAll('.kana-speaking').forEach(e => e.classList.remove('kana-speaking'));
+        const cell = document.getElementById(`cell-${cur.h}`);
+        if (cell) {
+          cell.classList.add('kana-speaking');
+          cell.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        speakJapanese(cur.h, 0.9, () => {
+          if (myToken !== seqPlayToken) return;
+          idx++;
+          setTimeout(step, 240);
+        });
+      }
+      step();
+    }
+
+    function openKanaModal(item) {
+      const colNames = ['あ段', 'い段', 'う段', 'え段', 'お段'];
+      document.getElementById('modalHira').textContent = item.h;
+      document.getElementById('modalKata').textContent = item.k;
+      document.getElementById('modalRomaji').textContent = store.hideRomaji ? '（已隱藏）' : item.r;
+      document.getElementById('modalRowCol').textContent = item.row === 'ん(撥音)' ? '撥音' : `${item.row}・${colNames[item.col]}`;
+      document.getElementById('modalKidsEmoji').textContent = item.emoji;
+      document.getElementById('modalKidsWord').textContent = item.w;
+      document.getElementById('modalKidsZh').textContent = item.wZh;
+      document.getElementById('modalKidsWordBtn').onclick = () => speakJapanese(item.w, 0.9);
+      document.getElementById('modalOrigH').textContent = `${item.h} ← ${item.oh}`;
+      document.getElementById('modalOrigK').textContent = `${item.k} ← ${item.ok}`;
+      document.getElementById('modalMnemonic').textContent = item.tip;
+      document.getElementById('modalSpeakBtn').onclick = () => speakJapanese(item.h, 0.9);
+      document.getElementById('modalJumpWriteBtn').onclick = () => {
+        closeKanaModal();
+        writeCharH = item.h;
+        if (chartScript === 'katakana') writeScript = 'katakana';
+        else if (chartScript === 'hiragana') writeScript = 'hiragana';
+        clearWritingCanvas();
+        switchTab('write');
+      };
+
+      document.getElementById('kanaDetailModal').classList.remove('hidden');
+    }
+
+    function closeKanaModal() {
+      document.getElementById('kanaDetailModal').classList.add('hidden');
+    }
+
+    /*************************************************************************
+     * 6. TAB 2: HANDWRITING CANVAS (4 Rooms + Easy Order + Hanamaru Stamp)
+     *************************************************************************/
+    const canvas = document.getElementById('writingCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function getWriteOrderList() {
+      if (writeOrderMode === 'easy') {
+        return EASY_FLAT_ORDER.map(ch => SEION_DATA.find(s => s.h === ch));
+      }
+      return SEION_DATA;
+    }
+
+    function initCanvasEvents() {
+      // Unified Pointer Events (supports stylus, finger touch, and mouse on Android Chrome)
+      canvas.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        hideHanamaruOverlay();
+        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+        isDrawing = true;
+        const pt = getNormalizedPoint(e.clientX, e.clientY);
+        currentStroke = { color: brushColor, sizeRatio: brushSizeRatio, points: [pt] };
+        strokes.push(currentStroke);
+        redrawCanvas();
+      });
+
+      canvas.addEventListener('pointermove', (e) => {
+        if (!isDrawing || !currentStroke) return;
+        e.preventDefault();
+        const pt = getNormalizedPoint(e.clientX, e.clientY);
+        currentStroke.points.push(pt);
+        redrawCanvas();
+      });
+
+      const endDraw = () => {
+        if (!isDrawing) return;
+        isDrawing = false;
+        currentStroke = null;
+      };
+      canvas.addEventListener('pointerup', endDraw);
+      canvas.addEventListener('pointercancel', endDraw);
+
+      // Extra touchmove prevention for older Android WebViews
+      canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+      canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+
+      window.addEventListener('resize', () => {
+        if (activeTab === 'write') resizeWritingCanvas();
+      });
+    }
+
+    function getNormalizedPoint(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)),
+        y: Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
+      };
+    }
+
+    function resizeWritingCanvas() {
+      const wrap = document.getElementById('canvasContainer');
+      if (!wrap) return;
+      const size = wrap.clientWidth;
+      if (size <= 0) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(size * dpr);
+      canvas.height = Math.floor(size * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const wm = document.getElementById('tracingWatermark');
+      wm.style.fontSize = `${Math.floor(size * 0.68)}px`;
+      redrawCanvas();
+    }
+
+    function redrawCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      strokes.forEach(s => {
+        if (!s.points.length) return;
+        ctx.beginPath();
+        ctx.strokeStyle = s.color;
+        ctx.fillStyle = s.color;
+        ctx.lineWidth = Math.max(2, s.sizeRatio * w);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        if (s.points.length === 1) {
+          ctx.arc(s.points[0].x * w, s.points[0].y * h, ctx.lineWidth / 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.moveTo(s.points[0].x * w, s.points[0].y * h);
+          for (let i = 1; i < s.points.length; i++) {
+            ctx.lineTo(s.points[i].x * w, s.points[i].y * h);
+          }
+          ctx.stroke();
+        }
+      });
+    }
+
+    function clearWritingCanvas() {
+      strokes = [];
+      hideHanamaruOverlay();
+      redrawCanvas();
+    }
+
+    function undoWritingStroke() {
+      strokes.pop();
+      redrawCanvas();
+    }
+
+    function hideHanamaruOverlay() {
+      const el = document.getElementById('hanamaruOverlay');
+      el.classList.add('hidden');
+      el.classList.remove('animate-hanamaru');
+    }
+
+    function stampHanamaru() {
+      const item = SEION_DATA.find(s => s.h === writeCharH) || SEION_DATA[0];
+      const key = writeScript === 'hiragana' ? `h_${item.h}` : `k_${item.k}`;
+
+      if (!store.hanamaru.includes(key)) {
+        store.hanamaru.push(key);
+        saveStore();
+      }
+
+      // Show animated Hanamaru SVG stamp + play chime + speak kana
+      const overlay = document.getElementById('hanamaruOverlay');
+      overlay.classList.remove('hidden', 'animate-hanamaru');
+      void overlay.offsetWidth; // trigger reflow for replay
+      overlay.classList.add('animate-hanamaru');
+
+      playChime('hanamaru');
+      showToast(`💮 太棒了！獲得「${writeScript === 'hiragana' ? item.h : item.k}」花丸印章！`);
+      renderWriteUI();
+      renderChart();
+    }
+
+    function setWriteScript(script) {
+      writeScript = script;
+      globalScript = script;
+      renderGlobalScriptUI();
+      clearWritingCanvas();
+      renderWriteUI();
+      speakCurrentWriteChar();
+    }
+
+    function setWriteOrder(mode) {
+      writeOrderMode = mode;
+      renderWriteUI();
+    }
+
+    function setWriteGrid(mode) {
+      writeGridMode = mode;
+      const box = document.getElementById('canvasContainer');
+      const roomsOverlay = document.getElementById('fourRoomsOverlay');
+      const hintBar = document.getElementById('roomHintBar');
+
+      box.classList.remove('grid-rooms', 'grid-rice', 'grid-blank');
+      if (mode === 'rooms') {
+        box.classList.add('grid-rooms');
+        roomsOverlay.classList.remove('hidden');
+        hintBar.classList.remove('hidden');
+      } else if (mode === 'rice') {
+        box.classList.add('grid-rice');
+        roomsOverlay.classList.add('hidden');
+        hintBar.classList.add('hidden');
+      } else {
+        box.classList.add('grid-blank');
+        roomsOverlay.classList.add('hidden');
+        hintBar.classList.add('hidden');
+      }
+
+      const act = 'bg-indigoJp text-washi shadow-xs';
+      const idle = 'text-muted hover:text-indigoJp';
+      document.getElementById('btnGridRooms').className = `px-2.5 py-1 rounded-lg text-xs font-bold transition ${mode === 'rooms' ? act : idle}`;
+      document.getElementById('btnGridRice').className = `px-2.5 py-1 rounded-lg text-xs font-bold transition ${mode === 'rice' ? act : idle}`;
+      document.getElementById('btnGridBlank').className = `px-2.5 py-1 rounded-lg text-xs font-bold transition ${mode === 'blank' ? act : idle}`;
+    }
+
+    function setBrushColor(color) {
+      brushColor = color;
+      document.querySelectorAll('.bcolor-btn').forEach(b => {
+        if (b.dataset.bcolor === color) b.classList.add('ring-2', 'ring-offset-2', 'ring-indigoJp');
+        else b.classList.remove('ring-2', 'ring-offset-2', 'ring-indigoJp');
+      });
+    }
+
+    function setBrushSize(ratio) {
+      brushSizeRatio = ratio;
+      document.querySelectorAll('.bsize-btn').forEach(b => {
+        const active = parseFloat(b.dataset.bsize) === ratio;
+        b.className = `bsize-btn px-2.5 py-1 rounded-lg text-xs font-bold border ${
+          active ? 'border-indigoJp bg-indigoJp text-white' : 'border-washiBorder bg-washi text-muted'
+        }`;
+      });
+    }
+
+    function toggleTracingGuide() {
+      writeShowGuide = !writeShowGuide;
+      const wm = document.getElementById('tracingWatermark');
+      const btn = document.getElementById('toggleGuideBtn');
+      wm.classList.toggle('opacity-0', !writeShowGuide);
+      if (writeShowGuide) {
+        btn.textContent = '描紅字帖：顯示';
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-indigoJp text-white border-indigoJp';
+      } else {
+        btn.textContent = '描紅字帖：隱藏';
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-washi text-muted border-washiBorder';
+      }
+    }
+
+    function stepWriteChar(delta) {
+      const list = getWriteOrderList();
+      const idx = list.findIndex(d => d.h === writeCharH);
+      const nextIdx = (idx + delta + list.length) % list.length;
+      writeCharH = list[nextIdx].h;
+      clearWritingCanvas();
+      renderWriteUI();
+      speakCurrentWriteChar();
+    }
+
+    function selectWriteCharByH(hChar) {
+      writeCharH = hChar;
+      clearWritingCanvas();
+      renderWriteUI();
+      speakCurrentWriteChar();
+    }
+
+    function speakCurrentWriteChar() {
+      const item = SEION_DATA.find(s => s.h === writeCharH) || SEION_DATA[0];
+      speakJapanese(item.h, 0.9);
+    }
+
+    function speakCurrentWriteWord() {
+      const item = SEION_DATA.find(s => s.h === writeCharH) || SEION_DATA[0];
+      speakJapanese(item.w, 0.9);
+    }
+
+    function renderWriteUI() {
+      const act = 'bg-indigoJp text-washi shadow-xs';
+      const idle = 'text-muted hover:text-indigoJp';
+      document.getElementById('btnWriteHira').className = `px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${writeScript === 'hiragana' ? act : idle}`;
+      document.getElementById('btnWriteKata').className = `px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${writeScript === 'katakana' ? act : idle}`;
+      document.getElementById('btnOrderEasy').className = `px-3 py-1.5 rounded-lg text-xs font-bold transition ${writeOrderMode === 'easy' ? act : idle}`;
+      document.getElementById('btnOrderStd').className = `px-3 py-1.5 rounded-lg text-xs font-bold transition ${writeOrderMode === 'standard' ? act : idle}`;
+
+      const curItem = SEION_DATA.find(s => s.h === writeCharH) || SEION_DATA[0];
+      const groupBox = document.getElementById('writeGroupSelector');
+      const charBox = document.getElementById('writeCharSelector');
+      const groupLabel = document.getElementById('writeGroupLabel');
+
+      let currentGroupItems = [];
+      if (writeOrderMode === 'easy') {
+        groupLabel.textContent = '小一難易度：';
+        const curTier = EASY_TIERS.find(t => t.chars.includes(curItem.h)) || EASY_TIERS[0];
+        groupBox.innerHTML = EASY_TIERS.map(t => `
+          <button onclick="selectWriteCharByH('${t.chars[0]}')" class="shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
+            t.id === curTier.id ? 'bg-matcha text-white border-matcha' : 'bg-washi text-muted border-washiBorder hover:border-matcha'
+          }">${t.name}</button>
+        `).join('');
+        currentGroupItems = curTier.chars.map(ch => SEION_DATA.find(s => s.h === ch));
+      } else {
+        groupLabel.textContent = '五十音行別：';
+        groupBox.innerHTML = SEION_ROWS.map(r => {
+          const first = SEION_DATA.find(d => d.row === r);
+          return `<button onclick="selectWriteCharByH('${first.h}')" class="shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
+            curItem.row === r ? 'bg-indigoJp text-white border-indigoJp' : 'bg-washi text-muted border-washiBorder hover:border-indigoJp'
+          }">${r.replace('(撥音)', '')}</button>`;
+        }).join('');
+        currentGroupItems = SEION_DATA.filter(d => d.row === curItem.row);
+      }
+
+      charBox.innerHTML = currentGroupItems.map(d => {
+        const ch = writeScript === 'hiragana' ? d.h : d.k;
+        const key = writeScript === 'hiragana' ? `h_${d.h}` : `k_${d.k}`;
+        const hasHana = store.hanamaru.includes(key);
+        const isAct = d.h === curItem.h;
+        return `
+          <button onclick="selectWriteCharByH('${d.h}')" class="relative shrink-0 min-w-[52px] px-3 py-1.5 rounded-xl border text-center transition ${
+            isAct ? 'bg-indigoJp text-white border-indigoJp shadow-xs' : 'bg-washi text-indigoJp border-washiBorder hover:border-indigoJp'
+          }">
+            ${hasHana ? '<span class="absolute top-0.5 right-0.5 text-[10px] leading-none">💮</span>' : ''}
+            <div class="font-serifJp font-bold text-lg leading-none">${ch}</div>
+            <div class="text-[10px] mt-0.5 opacity-80">${store.hideRomaji ? '•' : d.r}</div>
+          </button>
+        `;
+      }).join('');
+
+      renderWritePanelInfo();
+    }
+
+    function renderWritePanelInfo() {
+      const item = SEION_DATA.find(s => s.h === writeCharH) || SEION_DATA[0];
+      const ch = writeScript === 'hiragana' ? item.h : item.k;
+      const pairCh = writeScript === 'hiragana' ? item.k : item.h;
+      const key = writeScript === 'hiragana' ? `h_${item.h}` : `k_${item.k}`;
+      const hasHana = store.hanamaru.includes(key);
+
+      document.getElementById('tracingWatermark').textContent = ch;
+      document.getElementById('writeDisplayChar').textContent = ch;
+      document.getElementById('writeDisplayRomaji').textContent = store.hideRomaji ? '（隱藏）' : item.r;
+      document.getElementById('writeDisplayPair').textContent = `對應：${pairCh}`;
+      document.getElementById('writeKidsEmoji').textContent = item.emoji;
+      document.getElementById('writeKidsWord').textContent = item.w;
+      document.getElementById('writeKidsZh').textContent = item.wZh;
+      document.getElementById('writeOriginHira').textContent = `${item.h} ← ${item.oh}`;
+      document.getElementById('writeOriginKata').textContent = `${item.k} ← ${item.ok}`;
+      document.getElementById('writeMnemonicText').textContent = item.tip;
+      document.getElementById('writeRoomHintText').textContent = item.roomHint;
+
+      const badge = document.getElementById('writeHanamaruBadge');
+      if (hasHana) {
+        badge.textContent = '💮 已獲得花丸印章！';
+        badge.className = 'text-xs font-bold mt-1 text-vermilion';
+      } else {
+        badge.textContent = '描寫完成後點擊「蓋花丸」紀錄進度';
+        badge.className = 'text-xs font-medium mt-1 text-muted';
+      }
+    }
+
+    /*************************************************************************
+     * 7. TAB 3A: 日式歌牌（かるた / KARUTA）聽音搶答
+     *************************************************************************/
+    function setKarutaScript(sc) {
+      karutaScript = sc;
+      renderKarutaControls();
+    }
+
+    function toggleKarutaPureAudio() {
+      karutaPureAudio = !karutaPureAudio;
+      renderKarutaControls();
+    }
+
+    function renderKarutaControls() {
+      ['hiragana', 'katakana', 'mixed'].forEach(sc => {
+        const el = document.getElementById(`kscript-${sc}`);
+        if (!el) return;
+        el.className = `px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+          karutaScript === sc ? 'bg-indigoJp text-washi' : 'text-muted hover:text-indigoJp'
+        }`;
+      });
+      const pureBtn = document.getElementById('karutaPureBtn');
+      if (karutaPureAudio) {
+        pureBtn.textContent = '純聽音挑戰：開';
+        pureBtn.className = 'px-3 py-1.5 rounded-xl border border-vermilion bg-vermilion/10 text-xs font-bold text-vermilion transition';
+      } else {
+        pureBtn.textContent = '純聽音挑戰：關';
+        pureBtn.className = 'px-3 py-1.5 rounded-xl border border-washiBorder bg-washi text-xs font-bold text-indigoJp transition';
+      }
+    }
+
+    function renderEmptyKarutaGrid() {
+      const sample = SEION_DATA.slice(0, 9);
+      const grid = document.getElementById('karutaGrid');
+      grid.innerHTML = sample.map(it => `
+        <div class="aspect-[3/4] rounded-xl bg-[#FDFBF7] border-4 border-matcha/70 shadow-sm flex flex-col items-center justify-center p-2 opacity-65 select-none">
+          <span class="font-serifJp font-bold text-4xl sm:text-5xl text-indigoJp">${karutaScript === 'katakana' ? it.k : it.h}</span>
+        </div>
+      `).join('');
+    }
+
+    function startKarutaGame() {
+      const totalRounds = 10;
+      const targets = shuffleArr(SEION_DATA).slice(0, totalRounds);
+      karutaGame = {
+        targets,
+        round: 0,
+        score: 0,
+        combo: 0,
+        maxCombo: 0,
+        reactionTimes: [],
+        roundStartTime: 0,
+        cards: [],
+        locked: false
+      };
+      document.getElementById('karutaSummaryBox').classList.add('hidden');
+      document.getElementById('karutaGrid').classList.remove('hidden');
+      document.getElementById('karutaReplayBtn').disabled = false;
+      nextKarutaRound();
+    }
+
+    function nextKarutaRound() {
+      if (!karutaGame) return;
+      if (karutaGame.round >= karutaGame.targets.length) {
+        finishKarutaGame();
+        return;
+      }
+
+      karutaGame.locked = false;
+      const target = karutaGame.targets[karutaGame.round];
+      const distractors = shuffleArr(SEION_DATA.filter(s => s.h !== target.h)).slice(0, 8);
+      const boardItems = shuffleArr([target, ...distractors]).map((it, idx) => {
+        const sc = karutaScript === 'mixed'
+          ? (Math.random() < 0.5 ? 'hiragana' : 'katakana')
+          : karutaScript;
+        return {
+          id: idx,
+          item: it,
+          script: sc,
+          char: sc === 'hiragana' ? it.h : it.k,
+          isTarget: it.h === target.h
+        };
+      });
+
+      karutaGame.cards = boardItems;
+      karutaGame.roundStartTime = performance.now();
+
+      // Update Stats & Prompt
+      document.getElementById('karutaRoundDisp').textContent = `${karutaGame.round + 1} / ${karutaGame.targets.length}`;
+      document.getElementById('karutaComboDisp').textContent = karutaGame.combo;
+      document.getElementById('karutaScoreDisp').textContent = karutaGame.score;
+
+      if (karutaPureAudio) {
+        document.getElementById('karutaPromptEmoji').textContent = '🎧';
+        document.getElementById('karutaPromptMain').textContent = '純聽音挑戰中！請仔細聆聽發音並拍牌';
+        document.getElementById('karutaPromptSub').textContent = '點擊右側「再聽一次」可重播語音';
+      } else {
+        document.getElementById('karutaPromptEmoji').textContent = target.emoji;
+        document.getElementById('karutaPromptMain').textContent = `尋找代表「${target.wZh}」的開頭假名！`;
+        document.getElementById('karutaPromptSub').textContent = '請快速拍下對應的和風歌牌';
+      }
+
+      // Render 9 vertical Karuta cards
+      const grid = document.getElementById('karutaGrid');
+      grid.innerHTML = boardItems.map((c, i) => `
+        <button id="kcard-${i}" onclick="tapKarutaCard(${i})"
+          class="relative aspect-[3/4] rounded-xl bg-[#FDFBF7] hover:bg-white border-4 ${i % 2 === 0 ? 'border-matcha' : 'border-vermilion/80'} shadow-md flex flex-col items-center justify-center p-2 transition active:scale-95 select-none overflow-hidden">
+          <div class="absolute inset-1 border border-washiBorder/80 rounded-lg pointer-events-none"></div>
+          <span class="font-serifJp font-bold text-4xl sm:text-5xl ${c.script === 'hiragana' ? 'text-indigoJp' : 'text-vermilion'} leading-none">${c.char}</span>
+          <span id="ktake-${i}" class="hidden absolute top-1.5 right-1.5 w-8 h-8 rounded-full bg-vermilion text-white font-serifJp font-bold text-sm flex items-center justify-center shadow-sm -rotate-12">取！</span>
+        </button>
+      `).join('');
+
+      replayKarutaAudio();
+    }
+
+    function replayKarutaAudio() {
+      if (!karutaGame || karutaGame.round >= karutaGame.targets.length) return;
+      const t = karutaGame.targets[karutaGame.round];
+      speakJapanese(`${t.h}、${t.w}`, 0.92);
+    }
+
+    function tapKarutaCard(idx) {
+      if (!karutaGame || karutaGame.locked) return;
+      const card = karutaGame.cards[idx];
+      const cardEl = document.getElementById(`kcard-${idx}`);
+
+      if (card.isTarget) {
+        karutaGame.locked = true;
+        const elapsed = Math.max(150, Math.round(performance.now() - karutaGame.roundStartTime));
+        karutaGame.reactionTimes.push(elapsed);
+        karutaGame.combo += 1;
+        karutaGame.maxCombo = Math.max(karutaGame.maxCombo, karutaGame.combo);
+
+        // Speed bonus + combo bonus
+        const speedBonus = Math.max(10, Math.round(100 - elapsed / 50));
+        karutaGame.score += 100 + speedBonus + karutaGame.combo * 10;
+
+        // Update persistent bests
+        if (store.karuta.fastestMs === null || elapsed < store.karuta.fastestMs) {
+          store.karuta.fastestMs = elapsed;
+        }
+        store.karuta.bestCombo = Math.max(store.karuta.bestCombo, karutaGame.maxCombo);
+        store.karuta.bestScore = Math.max(store.karuta.bestScore, karutaGame.score);
+        saveStore();
+
+        playChime('karutaHit');
+        document.getElementById(`ktake-${idx}`).classList.remove('hidden');
+        cardEl.classList.add('karuta-taken');
+        document.getElementById('karutaComboDisp').textContent = karutaGame.combo;
+        document.getElementById('karutaScoreDisp').textContent = karutaGame.score;
+
+        const t = card.item;
+        showToast(`取！${card.char}（${t.w}・${(elapsed / 1000).toFixed(2)}秒）`);
+
+        setTimeout(() => {
+          karutaGame.round += 1;
+          nextKarutaRound();
+        }, 620);
+      } else {
+        // Wrong tap: shake + log target to mistake book
+        karutaGame.combo = 0;
+        document.getElementById('karutaComboDisp').textContent = 0;
+        const targetCard = karutaGame.cards.find(c => c.isTarget);
+        const mKey = `${targetCard.script === 'hiragana' ? 'h' : 'k'}_${targetCard.char}`;
+        store.mistakes[mKey] = (store.mistakes[mKey] || 0) + 1;
+        saveStore();
+
+        playChime('wrong');
+        cardEl.classList.remove('karuta-wrong');
+        void cardEl.offsetWidth;
+        cardEl.classList.add('karuta-wrong');
+        renderChart();
+      }
+    }
+
+    function finishKarutaGame() {
+      document.getElementById('karutaReplayBtn').disabled = true;
+      document.getElementById('karutaGrid').classList.add('hidden');
+      document.getElementById('karutaSummaryBox').classList.remove('hidden');
+
+      const avgMs = karutaGame.reactionTimes.length
+        ? karutaGame.reactionTimes.reduce((a, b) => a + b, 0) / karutaGame.reactionTimes.length
+        : 0;
+
+      document.getElementById('kResScore').textContent = karutaGame.score;
+      document.getElementById('kResCombo').textContent = `${karutaGame.maxCombo} 連勝`;
+      document.getElementById('kResAvgTime').textContent = `${(avgMs / 1000).toFixed(2)}s`;
+      playChime('hanamaru');
+    }
+
+    /*************************************************************************
+     * 8. TAB 3B & 3C: INTERACTIVE QUIZ & 4x4 MATCHING GAME
+     *************************************************************************/
+    function switchQuizSubTab(sub) {
+      quizSubTab = sub;
+      ['karuta', 'quiz', 'match'].forEach(k => {
+        document.getElementById(`quizSubPanel-${k}`).classList.toggle('hidden', sub !== k);
+        const btn = document.getElementById(`subTab-${k}`);
+        btn.className = `px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
+          sub === k ? 'bg-indigoJp text-washi shadow-xs' : 'text-muted hover:text-indigoJp'
+        }`;
+      });
+      if (sub === 'match' && matchState.cards.length === 0) initMatchGame();
+    }
+
+    function renderQuizSetupUI() {
+      ['audioToKana', 'kanaToRomaji', 'scriptSwap', 'confusing', 'weak'].forEach(m => {
+        const el = document.getElementById(`qmode-${m}`);
+        if (!el) return;
+        const active = quizMode === m;
+        el.className = `qmode-btn text-left p-3 rounded-xl border-2 transition ${
+          active ? 'border-indigoJp bg-indigoJp/5 shadow-2xs' : 'border-washiBorder bg-white hover:border-indigoJp/40'
+        }`;
+      });
+
+      ['hiragana', 'katakana', 'mixed'].forEach(s => {
+        const el = document.getElementById(`qscript-${s}`);
+        el.className = `px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${
+          quizScript === s ? 'bg-indigoJp text-washi' : 'text-muted hover:text-indigoJp'
+        }`;
+      });
+      [5, 10, 15, 20].forEach(c => {
+        const el = document.getElementById(`qcount-${c}`);
+        el.className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${
+          quizCount === c ? 'bg-indigoJp text-washi' : 'text-muted hover:text-indigoJp'
+        }`;
+      });
+
+      const hideRows = quizMode === 'confusing' || quizMode === 'weak';
+      document.getElementById('quizRowGroup').classList.toggle('hidden', hideRows);
+      document.getElementById('quizScriptGroup').classList.toggle('hidden', quizMode === 'scriptSwap' || hideRows);
+
+      const rowGrid = document.getElementById('quizRowGrid');
+      rowGrid.innerHTML = SEION_ROWS.map(r => {
+        const checked = quizSelectedRows.has(r);
+        return `
+          <button onclick="toggleQuizRow('${r}')" class="px-3 py-2 rounded-xl border text-xs font-bold flex items-center justify-between transition ${
+            checked ? 'bg-indigoJp text-white border-indigoJp' : 'bg-washi text-indigoJp border-washiBorder hover:border-indigoJp'
+          }">
+            <span>${r.replace('(撥音)', '')}</span>
+            <span>${checked ? '✓' : '+'}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function setQuizMode(m) { quizMode = m; renderQuizSetupUI(); }
+    function setQuizScript(s) { quizScript = s; renderQuizSetupUI(); }
+    function setQuizCount(c) { quizCount = c; renderQuizSetupUI(); }
+    function toggleQuizRow(r) {
+      if (quizSelectedRows.has(r)) quizSelectedRows.delete(r);
+      else quizSelectedRows.add(r);
+      renderQuizSetupUI();
+    }
+    function presetQuizRows(type) {
+      if (type === 'start') quizSelectedRows = new Set(['あ行', 'か行']);
+      else if (type === 'all') quizSelectedRows = new Set(SEION_ROWS);
+      else quizSelectedRows = new Set();
+      renderQuizSetupUI();
+    }
+
+    function shuffleArr(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function startQuiz() {
+      const alertEl = document.getElementById('quizSetupAlert');
+      alertEl.classList.add('hidden');
+
+      let pool = [];
+      if (quizMode === 'confusing') {
+        CONFUSING_GROUPS.forEach(g => {
+          g.chars.forEach(c => {
+            const base = SEION_DATA.find(s => s.h === c.ch || s.k === c.ch);
+            if (base) pool.push({ item: base, script: c.script, groupChars: g.chars.map(x => x.ch) });
+          });
+        });
+      } else if (quizMode === 'weak') {
+        const keys = Object.keys(store.mistakes).filter(k => store.mistakes[k] > 0);
+        if (keys.length === 0) {
+          alertEl.textContent = '目前錯題本是空的！先做幾次一般測驗或歌牌吧。';
+          alertEl.classList.remove('hidden');
+          return;
+        }
+        keys.forEach(k => {
+          const [sc, ch] = k.split('_');
+          const base = SEION_DATA.find(s => s.h === ch || s.k === ch);
+          if (base) pool.push({ item: base, script: sc === 'h' ? 'hiragana' : 'katakana' });
+        });
+      } else {
+        if (quizSelectedRows.size === 0) {
+          alertEl.textContent = '請至少勾選 1 行範圍！';
+          alertEl.classList.remove('hidden');
+          return;
+        }
+        const filtered = SEION_DATA.filter(d => quizSelectedRows.has(d.row));
+        filtered.forEach(item => {
+          if (quizScript === 'mixed' || quizMode === 'scriptSwap') {
+            pool.push({ item, script: 'hiragana' });
+            pool.push({ item, script: 'katakana' });
+          } else {
+            pool.push({ item, script: quizScript });
+          }
+        });
+      }
+
+      const questions = [];
+      for (let i = 0; i < quizCount; i++) {
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        questions.push(buildQuizQuestion(pick));
+      }
+
+      quizSession = {
+        questions,
+        index: 0,
+        correctCount: 0,
+        combo: 0,
+        maxCombo: 0,
+        answered: false,
+        missed: []
+      };
+
+      document.getElementById('quizSetupView').classList.add('hidden');
+      document.getElementById('quizResultView').classList.add('hidden');
+      document.getElementById('quizActiveView').classList.remove('hidden');
+      renderQuizQuestion();
+    }
+
+    function buildQuizQuestion(entry) {
+      const { item, script, groupChars } = entry;
+      const effMode = (quizMode === 'confusing' || quizMode === 'weak')
+        ? (Math.random() < 0.5 ? 'audioToKana' : 'kanaToRomaji')
+        : quizMode;
+
+      const charText = script === 'hiragana' ? item.h : item.k;
+      const otherChar = script === 'hiragana' ? item.k : item.h;
+
+      let distractors = [];
+      if (groupChars && effMode === 'audioToKana') {
+        const mates = SEION_DATA.filter(s => s.h !== item.h && (groupChars.includes(s.h) || groupChars.includes(s.k)));
+        distractors = shuffleArr(mates);
+      }
+      const fallback = shuffleArr(SEION_DATA.filter(s => s.r !== item.r && !distractors.includes(s)));
+      const picks = [...distractors, ...fallback].slice(0, 3);
+
+      let options = [];
+      if (effMode === 'kanaToRomaji') {
+        options = shuffleArr([
+          { label: item.r, isCorrect: true },
+          ...picks.map(p => ({ label: p.r, isCorrect: false }))
+        ]);
+      } else if (effMode === 'audioToKana') {
+        options = shuffleArr([
+          { label: charText, isCorrect: true },
+          ...picks.map(p => ({ label: script === 'hiragana' ? p.h : p.k, isCorrect: false }))
+        ]);
+      } else {
+        options = shuffleArr([
+          { label: otherChar, isCorrect: true },
+          ...picks.map(p => ({ label: script === 'hiragana' ? p.k : p.h, isCorrect: false }))
+        ]);
+      }
+      return { item, script, effMode, charText, options };
+    }
+
+    function renderQuizQuestion() {
+      const q = quizSession.questions[quizSession.index];
+      quizSession.answered = false;
+
+      const modeNames = { audioToKana: '聽音選字', kanaToRomaji: '看字選音', scriptSwap: '平片互換' };
+      document.getElementById('quizActiveBadge').textContent = modeNames[q.effMode] || '測驗';
+      document.getElementById('quizIdxNum').textContent = quizSession.index + 1;
+      document.getElementById('quizTotalNum').textContent = quizSession.questions.length;
+      document.getElementById('quizProgressFill').style.width = `${((quizSession.index + 1) / quizSession.questions.length) * 100}%`;
+
+      const comboEl = document.getElementById('quizComboDisplay');
+      if (quizSession.combo >= 2) {
+        comboEl.textContent = `🔥 ${quizSession.combo} 連擊`;
+        comboEl.classList.remove('hidden');
+      } else {
+        comboEl.classList.add('hidden');
+      }
+
+      const stage = document.getElementById('quizQuestionStage');
+      const inst = document.getElementById('quizInstruction');
+
+      if (q.effMode === 'audioToKana') {
+        inst.textContent = '請聆聽發音，選出正確的假名：';
+        stage.innerHTML = `
+          <button onclick="speakJapanese('${q.item.h}', 0.9)" class="w-24 h-24 rounded-full bg-indigoJp hover:bg-indigoSoft text-white flex flex-col items-center justify-center shadow-md transition active:scale-95">
+            <span class="text-3xl">🔊</span>
+            <span class="text-[11px] font-bold mt-1">再聽一次</span>
+          </button>
+        `;
+        speakJapanese(q.item.h, 0.9);
+      } else if (q.effMode === 'kanaToRomaji') {
+        inst.textContent = '請選出這個假名的正確羅馬拼音：';
+        stage.innerHTML = `<div class="text-7xl font-serifJp font-bold ${q.script === 'hiragana' ? 'text-indigoJp' : 'text-vermilion'}">${q.charText}</div>`;
+      } else {
+        const targetLabel = q.script === 'hiragana' ? '片假名' : '平假名';
+        inst.textContent = `請選出對應的「${targetLabel}」：`;
+        stage.innerHTML = `<div class="text-7xl font-serifJp font-bold ${q.script === 'hiragana' ? 'text-indigoJp' : 'text-vermilion'}">${q.charText}</div>`;
+      }
+
+      document.getElementById('quizOptionsBox').innerHTML = q.options.map((opt, idx) => `
+        <button onclick="submitQuizAnswer(${idx})" id="qopt-${idx}" class="py-4 px-3 rounded-2xl border-2 border-washiBorder bg-washi hover:border-indigoJp text-2xl font-serifJp font-bold text-indigoJp transition active:scale-[0.98]">
+          ${opt.label}
+        </button>
+      `).join('');
+
+      document.getElementById('quizFeedbackArea').classList.add('hidden');
+      document.getElementById('quizNextBtnWrap').classList.add('hidden');
+    }
+
+    function submitQuizAnswer(optIdx) {
+      if (quizSession.answered) return;
+      quizSession.answered = true;
+
+      const q = quizSession.questions[quizSession.index];
+      const chosen = q.options[optIdx];
+      const mKey = `${q.script === 'hiragana' ? 'h' : 'k'}_${q.charText}`;
+
+      store.quizStats.total += 1;
+      if (chosen.isCorrect) {
+        quizSession.correctCount += 1;
+        quizSession.combo += 1;
+        quizSession.maxCombo = Math.max(quizSession.maxCombo, quizSession.combo);
+        store.quizStats.correct += 1;
+        store.quizStats.bestCombo = Math.max(store.quizStats.bestCombo, quizSession.combo);
+        if (store.mistakes[mKey] && store.mistakes[mKey] > 0) {
+          store.mistakes[mKey] -= 1;
+          if (store.mistakes[mKey] <= 0) delete store.mistakes[mKey];
+        }
+      } else {
+        quizSession.combo = 0;
+        store.mistakes[mKey] = (store.mistakes[mKey] || 0) + 1;
+        quizSession.missed.push({ char: q.charText, item: q.item });
+      }
+      saveStore();
+
+      q.options.forEach((opt, i) => {
+        const btn = document.getElementById(`qopt-${i}`);
+        btn.disabled = true;
+        if (opt.isCorrect) {
+          btn.className = 'py-4 px-3 rounded-2xl border-2 border-matcha bg-matcha/15 text-2xl font-serifJp font-bold text-matcha';
+        } else if (i === optIdx) {
+          btn.className = 'py-4 px-3 rounded-2xl border-2 border-vermilion bg-vermilion/10 text-2xl font-serifJp font-bold text-vermilion';
+        } else {
+          btn.className = 'py-4 px-3 rounded-2xl border-2 border-washiBorder bg-washi/50 text-2xl font-serifJp font-bold text-muted opacity-50';
+        }
+      });
+
+      speakJapanese(q.item.h, 0.9);
+      const fb = document.getElementById('quizFeedbackArea');
+      fb.classList.remove('hidden');
+      if (chosen.isCorrect) {
+        fb.className = 'rounded-xl p-4 text-left text-sm bg-matcha/10 border border-matcha/30 text-ink';
+        fb.innerHTML = `<div class="font-bold text-matcha">✓ 答對了！${q.item.h} / ${q.item.k}（${q.item.r}）</div><p class="text-xs text-muted mt-1">${q.item.emoji} 代表單字：${q.item.w}（${q.item.wZh}）</p>`;
+      } else {
+        fb.className = 'rounded-xl p-4 text-left text-sm bg-vermilion/10 border border-vermilion/30 text-ink space-y-1';
+        fb.innerHTML = `<div class="font-bold text-vermilion">✕ 正確答案：${q.item.h} / ${q.item.k}（${q.item.r}）</div><p class="text-xs leading-relaxed"><strong>口訣：</strong>${q.item.tip}</p>`;
+      }
+      document.getElementById('quizNextBtnWrap').classList.remove('hidden');
+    }
+
+    function nextQuizStep() {
+      quizSession.index += 1;
+      if (quizSession.index >= quizSession.questions.length) showQuizResults();
+      else renderQuizQuestion();
+    }
+
+    function showQuizResults() {
+      document.getElementById('quizActiveView').classList.add('hidden');
+      document.getElementById('quizResultView').classList.remove('hidden');
+
+      const total = quizSession.questions.length;
+      const acc = Math.round((quizSession.correctCount / total) * 100);
+      document.getElementById('quizResScore').textContent = `${quizSession.correctCount} / ${total}`;
+      document.getElementById('quizResAcc').textContent = `${acc}%`;
+      document.getElementById('quizResCombo').textContent = quizSession.maxCombo;
+      document.getElementById('quizResEmoji').textContent = acc >= 90 ? '🏆' : acc >= 70 ? '🎉' : '💪';
+      document.getElementById('quizResSubtitle').textContent = acc >= 90 ? '表現超棒！可以試著挑戰日式歌牌或下一行囉！' : '穩紮穩打，答錯的字已自動收進錯題本。';
+
+      const wrongBox = document.getElementById('quizResWrongBox');
+      if (quizSession.missed.length > 0) {
+        wrongBox.classList.remove('hidden');
+        const unique = [];
+        const seen = new Set();
+        quizSession.missed.forEach(m => {
+          if (!seen.has(m.char)) { seen.add(m.char); unique.push(m); }
+        });
+        document.getElementById('quizResWrongList').innerHTML = unique.map(m => `
+          <button onclick="speakJapanese('${m.item.h}', 0.9)" class="flex items-center justify-between p-2.5 rounded-xl bg-washi border border-washiBorder hover:border-indigoJp text-left">
+            <span class="font-serifJp font-bold text-indigoJp text-lg">${m.char} <span class="text-xs font-sans text-muted">(${m.item.r})</span></span>
+            <span class="text-xs text-muted">🔊</span>
+          </button>
+        `).join('');
+      } else {
+        wrongBox.classList.add('hidden');
+      }
+      renderChart();
+    }
+
+    function exitQuiz() {
+      document.getElementById('quizActiveView').classList.add('hidden');
+      document.getElementById('quizResultView').classList.add('hidden');
+      document.getElementById('quizSetupView').classList.remove('hidden');
+      renderQuizSetupUI();
+    }
+
+    // ===== 4x4 MATCHING GAME =====
+    function initMatchGame() {
+      clearInterval(matchState.timerId);
+      const mode = document.getElementById('matchModeSelect').value;
+      const picked = shuffleArr(SEION_DATA).slice(0, 8);
+
+      const deck = [];
+      picked.forEach((item, idx) => {
+        if (mode === 'h-r') {
+          deck.push({ pairId: idx, text: item.h, speak: item.h, isKana: true });
+          deck.push({ pairId: idx, text: item.r, speak: item.h, isKana: false });
+        } else if (mode === 'k-r') {
+          deck.push({ pairId: idx, text: item.k, speak: item.h, isKana: true });
+          deck.push({ pairId: idx, text: item.r, speak: item.h, isKana: false });
+        } else {
+          deck.push({ pairId: idx, text: item.h, speak: item.h, isKana: true });
+          deck.push({ pairId: idx, text: item.k, speak: item.h, isKana: true });
+        }
+      });
+
+      matchState = {
+        cards: shuffleArr(deck).map((c, i) => ({ ...c, id: i, matched: false })),
+        flipped: [],
+        matchedCount: 0,
+        flips: 0,
+        locked: false,
+        seconds: 0,
+        timerId: null
+      };
+
+      document.getElementById('matchWinBox').classList.add('hidden');
+      updateMatchStats();
+      renderMatchBoard();
+
+      matchState.timerId = setInterval(() => {
+        matchState.seconds++;
+        updateMatchStats();
+      }, 1000);
+    }
+
+    function updateMatchStats() {
+      document.getElementById('matchPairStat').textContent = `${matchState.matchedCount} / 8`;
+      document.getElementById('matchFlipStat').textContent = matchState.flips;
+      const m = String(Math.floor(matchState.seconds / 60)).padStart(2, '0');
+      const s = String(matchState.seconds % 60).padStart(2, '0');
+      document.getElementById('matchTimeStat').textContent = `${m}:${s}`;
+    }
+
+    function renderMatchBoard() {
+      const board = document.getElementById('matchBoard');
+      board.innerHTML = matchState.cards.map(c => `
+        <div id="mcard-${c.id}" onclick="flipMatchCard(${c.id})" class="flip-card perspective-1000 aspect-square cursor-pointer select-none">
+          <div class="flip-inner">
+            <div class="flip-face bg-indigoJp text-washi/40 border-2 border-indigoJp flex items-center justify-center font-serifJp text-2xl shadow-xs hover:bg-indigoSoft transition">
+              和
+            </div>
+            <div class="flip-face flip-back bg-white border-2 border-indigoJp/40 flex items-center justify-center font-serifJp font-bold ${c.isKana ? 'text-3xl sm:text-4xl text-indigoJp' : 'text-xl sm:text-2xl text-vermilion'} shadow-xs">
+              ${c.text}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function flipMatchCard(id) {
+      if (matchState.locked) return;
+      const card = matchState.cards[id];
+      if (!card || card.matched || matchState.flipped.includes(id)) return;
+
+      document.getElementById(`mcard-${id}`).classList.add('flipped');
+      matchState.flipped.push(id);
+
+      if (matchState.flipped.length === 2) {
+        matchState.flips++;
+        matchState.locked = true;
+        updateMatchStats();
+
+        const [id1, id2] = matchState.flipped;
+        const c1 = matchState.cards[id1];
+        const c2 = matchState.cards[id2];
+
+        if (c1.pairId === c2.pairId) {
+          c1.matched = true;
+          c2.matched = true;
+          matchState.matchedCount++;
+          speakJapanese(c1.speak, 0.95);
+
+          setTimeout(() => {
+            [id1, id2].forEach(i => {
+              const cardEl = document.getElementById(`mcard-${i}`);
+              cardEl.classList.add('matched');
+              const back = cardEl.querySelector('.flip-back');
+              back.classList.remove('border-indigoJp/40');
+              back.classList.add('border-matcha', 'bg-matcha/10');
+            });
+            matchState.flipped = [];
+            matchState.locked = false;
+            updateMatchStats();
+
+            if (matchState.matchedCount === 8) {
+              clearInterval(matchState.timerId);
+              playChime('hanamaru');
+              document.getElementById('matchWinSummary').textContent = `共翻牌 ${matchState.flips} 次，耗時 ${document.getElementById('matchTimeStat').textContent}！`;
+              document.getElementById('matchWinBox').classList.remove('hidden');
+            }
+          }, 320);
+        } else {
+          setTimeout(() => {
+            document.getElementById(`mcard-${id1}`).classList.remove('flipped');
+            document.getElementById(`mcard-${id2}`).classList.remove('flipped');
+            matchState.flipped = [];
+            matchState.locked = false;
+          }, 700);
+        }
+      }
+    }
+
+    /*************************************************************************
+     * 9. TAB 4: PHRASES & LYRICS SHADOWING + KANA-TO-ROMAJI ENGINE
+     *************************************************************************/
+    const KANA_ROMAJI_MAP = {
+      'きゃ':'kya','きゅ':'kyu','きょ':'kyo','しゃ':'sha','しゅ':'shu','しょ':'sho',
+      'ちゃ':'cha','ちゅ':'chu','ちょ':'cho','にゃ':'nya','にゅ':'nyu','にょ':'nyo',
+      'ひゃ':'hya','ひゅ':'hyu','ひょ':'hyo','みゃ':'mya','みゅ':'myu','みょ':'myo',
+      'りゃ':'rya','りゅ':'ryu','りょ':'ryo','ぎゃ':'gya','ぎゅ':'gyu','ぎょ':'gyo',
+      'じゃ':'ja','じゅ':'ju','じょ':'jo','びゃ':'bya','びゅ':'byu','びょ':'byo',
+      'ぴゃ':'pya','ぴゅ':'pyu','ぴょ':'pyo',
+      'キャ':'kya','キュ':'kyu','キョ':'kyo','シャ':'sha','シュ':'shu','ショ':'sho',
+      'チャ':'cha','チュ':'chu','チョ':'cho','ニャ':'nya','ニュ':'nyu','ニョ':'nyo',
+      'ヒャ':'hya','ヒュ':'hyu','ヒョ':'hyo','ミャ':'mya','ミュ':'myu','ミョ':'myo',
+      'リャ':'rya','リュ':'ryu','リョ':'ryo','ギャ':'gya','ギュ':'gyu','ギョ':'gyo',
+      'ジャ':'ja','ジュ':'ju','ジョ':'jo','ビャ':'bya','ビュ':'byu','ビョ':'byo',
+      'ピャ':'pya','ピュ':'pyu','ピョ':'pyo',
+      'ティ':'ti','ディ':'di','ファ':'fa','フィ':'fi','フェ':'fe','フォ':'fo',
+      'ウィ':'wi','ウェ':'we','ウォ':'wo','チェ':'che','シェ':'she','ジェ':'je',
+      'ヴァ':'va','ヴィ':'vi','ヴ':'vu','ヴェ':'ve','ヴォ':'vo','ツァ':'tsa',
+      'あ':'a','い':'i','う':'u','え':'e','お':'o','か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko',
+      'さ':'sa','し':'shi','す':'su','せ':'se','そ':'so','た':'ta','ち':'chi','つ':'tsu','て':'te','と':'to',
+      'な':'na','に':'ni','ぬ':'nu','ね':'ne','の':'no','は':'ha','ひ':'hi','ふ':'fu','へ':'he','ほ':'ho',
+      'ま':'ma','み':'mi','む':'mu','め':'me','も':'mo','や':'ya','ゆ':'yu','よ':'yo',
+      'ら':'ra','り':'ri','る':'ru','れ':'re','ろ':'ro','わ':'wa','を':'wo','ん':'n',
+      'が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go','ざ':'za','じ':'ji','ず':'zu','ぜ':'ze','ぞ':'zo',
+      'だ':'da','ぢ':'ji','づ':'zu','で':'de','ど':'do','ば':'ba','び':'bi','ぶ':'bu','べ':'be','ぼ':'bo',
+      'ぱ':'pa','ぴ':'pi','ぷ':'pu','ぺ':'pe','ぽ':'po',
+      'ぁ':'a','ぃ':'i','ぅ':'u','ぇ':'e','ぉ':'o','ゃ':'ya','ゅ':'yu','ょ':'yo',
+      'ア':'a','イ':'i','ウ':'u','エ':'e','オ':'o','カ':'ka','キ':'ki','ク':'ku','ケ':'ke','コ':'ko',
+      'サ':'sa','シ':'shi','ス':'su','セ':'se','ソ':'so','タ':'ta','チ':'chi','ツ':'tsu','テ':'te','ト':'to',
+      'ナ':'na','ニ':'ni','ヌ':'nu','ネ':'ne','ノ':'no','ハ':'ha','ヒ':'hi','フ':'fu','ヘ':'he','ホ':'ho',
+      'マ':'ma','ミ':'mi','ム':'mu','メ':'me','モ':'mo','ヤ':'ya','ユ':'yu','ヨ':'yo',
+      'ラ':'ra','リ':'ri','ル':'ru','レ':'re','ロ':'ro','ワ':'wa','ヲ':'wo','ン':'n',
+      'ガ':'ga','ギ':'gi','グ':'gu','ゲ':'ge','ゴ':'go','ザ':'za','ジ':'ji','ズ':'zu','ゼ':'ze','ゾ':'zo',
+      'ダ':'da','ヂ':'ji','ヅ':'zu','デ':'de','ド':'do','バ':'ba','ビ':'bi','ブ':'bu','ベ':'be','ボ':'bo',
+      'パ':'pa','ピ':'pi','プ':'pu','ペ':'pe','ポ':'po',
+      'ァ':'a','ィ':'i','ゥ':'u','ェ':'e','ォ':'o','ャ':'ya','ュ':'yu','ョ':'yo'
+    };
+
+    function tokenizeJapaneseForShadowing(text) {
+      const tokens = [];
+      let i = 0;
+      while (i < text.length) {
+        const two = text.slice(i, i + 2);
+        const one = text[i];
+        if (KANA_ROMAJI_MAP[two]) {
+          tokens.push({ text: two, romaji: KANA_ROMAJI_MAP[two], clickable: true, marked: false });
+          i += 2;
+        } else if (one === 'っ' || one === 'ッ') {
+          tokens.push({ text: one, romaji: '促音', clickable: true, marked: false });
+          i += 1;
+        } else if (one === 'ー') {
+          tokens.push({ text: one, romaji: '長音', clickable: true, marked: false });
+          i += 1;
+        } else if (KANA_ROMAJI_MAP[one]) {
+          tokens.push({ text: one, romaji: KANA_ROMAJI_MAP[one], clickable: true, marked: false });
+          i += 1;
+        } else {
+          tokens.push({ text: one, romaji: '', clickable: false, marked: false });
+          i += 1;
+        }
+      }
+      return tokens;
+    }
+
+    function setReadCategory(cat) {
+      readCategory = cat;
+      readPhraseIdx = 0;
+      document.getElementById('customReadBox').classList.toggle('hidden', cat !== 'custom');
+      renderReadSection();
+    }
+
+    function setReadSpeed(speed) {
+      readSpeed = speed;
+      renderReadSpeedButtons();
+      document.getElementById('readPlayBtnLabel').textContent = `整句朗讀 (${speed}x)`;
+    }
+
+    function renderReadSpeedButtons() {
+      document.querySelectorAll('.rspeed-btn').forEach(btn => {
+        const active = parseFloat(btn.dataset.rspeed) === readSpeed;
+        btn.className = `rspeed-btn px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+          active ? 'bg-indigoJp text-washi shadow-xs' : 'text-muted hover:text-indigoJp'
+        }`;
+      });
+    }
+
+    function getActivePhraseObj() {
+      if (readCategory === 'custom') return customPhraseObj;
+      return READING_PHRASES[readCategory][readPhraseIdx] || READING_PHRASES[readCategory][0];
+    }
+
+    function renderReadSection() {
+      document.querySelectorAll('.read-cat-btn').forEach(btn => {
+        const isAct = btn.id === `readCat-${readCategory}`;
+        btn.className = `read-cat-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${
+          isAct ? 'bg-indigoJp text-washi shadow-xs' : 'text-muted hover:text-indigoJp'
+        }`;
+      });
+      renderReadSpeedButtons();
+      document.getElementById('readPlayBtnLabel').textContent = `整句朗讀 (${readSpeed}x)`;
+
+      const pillList = document.getElementById('phraseSelectorList');
+      if (readCategory === 'custom') {
+        pillList.classList.add('hidden');
+      } else {
+        pillList.classList.remove('hidden');
+        const list = READING_PHRASES[readCategory];
+        pillList.innerHTML = list.map((p, idx) => `
+          <button onclick="selectReadPhrase(${idx})" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold border transition ${
+            idx === readPhraseIdx ? 'bg-indigoJp text-white border-indigoJp' : 'bg-washi text-indigoJp border-washiBorder hover:border-indigoJp'
+          }">${p.zh}</button>
+        `).join('');
+      }
+
+      const phrase = getActivePhraseObj();
+      document.getElementById('readPhraseZh').textContent = phrase.zh;
+      document.getElementById('readPhraseNote').textContent = phrase.note;
+
+      readTokens = tokenizeJapaneseForShadowing(phrase.jp);
+      renderReadTiles();
+    }
+
+    function selectReadPhrase(idx) {
+      readPhraseIdx = idx;
+      renderReadSection();
+    }
+
+    function renderReadTiles() {
+      const box = document.getElementById('readTilesContainer');
+      let markedCount = 0;
+
+      box.innerHTML = readTokens.map((tk, idx) => {
+        if (!tk.clickable) {
+          if (tk.text === '\n') return `<div class="w-full h-1"></div>`;
+          if (tk.text === ' ' || tk.text === '　') return `<span class="inline-block w-4 sm:w-5"></span>`;
+          return `<span class="text-2xl sm:text-3xl font-serifJp text-muted px-0.5 pb-1">${tk.text}</span>`;
+        }
+        if (tk.marked) markedCount++;
+        return `
+          <button onclick="toggleReadTileMark(${idx})" class="flex flex-col items-center justify-end px-1.5 sm:px-2 py-1.5 rounded-xl border transition active:scale-95 ${
+            tk.marked ? 'bg-[#FDF2EE] border-vermilion/45 shadow-2xs' : 'bg-white border-washiBorder/80 hover:border-indigoJp'
+          }">
+            <span class="h-4 text-[11px] sm:text-xs font-bold tracking-wide transition ${
+              tk.marked ? 'text-vermilion opacity-100' : 'text-transparent select-none'
+            }">${tk.romaji}</span>
+            <span class="text-2xl sm:text-3xl font-serifJp font-bold text-indigoJp mt-0.5">${tk.text}</span>
+          </button>
+        `;
+      }).join('');
+
+      const counterEl = document.getElementById('readMarkedCounter');
+      counterEl.textContent = `本句標記提示：${markedCount} 字`;
+      counterEl.className = markedCount === 0
+        ? 'px-3 py-1.5 rounded-xl bg-matcha/15 text-matcha text-xs font-bold shrink-0'
+        : 'px-3 py-1.5 rounded-xl bg-vermilion/10 text-vermilion text-xs font-bold shrink-0';
+    }
+
+    function toggleReadTileMark(idx) {
+      const tk = readTokens[idx];
+      if (!tk || !tk.clickable) return;
+      tk.marked = !tk.marked;
+      renderReadTiles();
+      if (tk.marked && tk.text !== 'っ' && tk.text !== 'ッ' && tk.text !== 'ー') {
+        speakJapanese(tk.text, 0.9);
+      }
+    }
+
+    function setAllReadMarks(flag) {
+      readTokens.forEach(tk => { if (tk.clickable) tk.marked = flag; });
+      renderReadTiles();
+    }
+
+    function speakCurrentReadPhrase() {
+      speakJapanese(getActivePhraseObj().jp, readSpeed);
+    }
+
+    function fillCustomExample() {
+      document.getElementById('customJapaneseInput').value = 'ゆめを おいかけて きょうも まえへ すすもう';
+    }
+
+    function generateCustomPhrase() {
+      const val = document.getElementById('customJapaneseInput').value.trim();
+      if (!val) {
+        showToast('請先輸入或貼上日文假名句子');
+        return;
+      }
+      customPhraseObj = {
+        jp: val,
+        zh: '自訂歌詞／短句練習',
+        note: '點擊不會唸的假名即可標上羅馬音，試著用 0.6x 慢速跟讀！'
+      };
+      renderReadSection();
+      showToast('已產生互動跟讀句！');
+    }
+
+    /*************************************************************************
+     * 10. TAB 5: DASHBOARD, MISTAKE BOOK & TRAVEL WORDS
+     *************************************************************************/
+    function renderDashboard() {
+      const hiraCount = store.hanamaru.filter(k => k.startsWith('h_')).length;
+      const kataCount = store.hanamaru.filter(k => k.startsWith('k_')).length;
+      document.getElementById('dashHiraHanamaru').textContent = `${hiraCount} / 46`;
+      document.getElementById('dashKataHanamaru').textContent = `${kataCount} / 46`;
+
+      const acc = store.quizStats.total > 0
+        ? `${Math.round((store.quizStats.correct / store.quizStats.total) * 100)}%`
+        : '--%';
+      document.getElementById('dashQuizAcc').textContent = acc;
+      document.getElementById('dashQuizTotalSub').textContent = `共作答 ${store.quizStats.total} 題`;
+
+      document.getElementById('dashKarutaBest').textContent = `${store.karuta.bestCombo || 0} 連勝`;
+      document.getElementById('dashKarutaFast').textContent = store.karuta.fastestMs
+        ? `最快 ${(store.karuta.fastestMs / 1000).toFixed(2)}s・最高 ${store.karuta.bestScore} 分`
+        : '尚未遊玩歌牌';
+
+      const entries = Object.entries(store.mistakes)
+        .filter(([, cnt]) => cnt > 0)
+        .sort((a, b) => b[1] - a[1]);
+
+      document.getElementById('dashWeakQuizBtn').disabled = entries.length === 0;
+
+      const listEl = document.getElementById('dashMistakeList');
+      if (entries.length === 0) {
+        listEl.innerHTML = `<div class="col-span-full text-center py-5 text-xs sm:text-sm text-muted bg-washi/60 rounded-xl border border-dashed border-washiBorder">太棒了！目前沒有待加強的錯題 🎉</div>`;
+      } else {
+        listEl.innerHTML = entries.map(([key, cnt]) => {
+          const [sc, ch] = key.split('_');
+          const item = SEION_DATA.find(s => s.h === ch || s.k === ch);
+          const romaji = item ? item.r : '';
+          const tag = sc === 'h' ? '平假名' : '片假名';
+          return `
+            <div class="flex items-center justify-between p-3 rounded-xl bg-washi border border-washiBorder gap-2">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl font-serifJp font-bold ${sc === 'h' ? 'text-indigoJp' : 'text-vermilion'}">${ch}</span>
+                <div>
+                  <div class="text-xs font-bold text-ink">${tag}・${store.hideRomaji ? '••' : romaji}</div>
+                  <div class="text-[11px] text-vermilion font-medium">累計答錯 ${cnt} 次</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="speakJapanese('${item ? item.h : ch}', 0.9)" class="px-2.5 py-1.5 rounded-lg bg-white border border-washiBorder hover:border-indigoJp text-xs font-bold text-indigoJp">🔊</button>
+                <button onclick="clearSingleMistake('${key}')" class="px-2.5 py-1.5 rounded-lg bg-matcha/15 hover:bg-matcha hover:text-white text-xs font-bold text-matcha transition" title="標記為已克服並移除">✓ 已克服</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function clearSingleMistake(key) {
+      delete store.mistakes[key];
+      saveStore();
+      renderDashboard();
+      renderChart();
+      showToast('已從錯題本移除！');
+    }
+
+    function launchWeakQuizFromDash() {
+      quizMode = 'weak';
+      switchTab('quiz');
+      switchQuizSubTab('quiz');
+      renderQuizSetupUI();
+      startQuiz();
+    }
+
+    function renderConfusingShowdown() {
+      document.getElementById('confusingShowdownGrid').innerHTML = CONFUSING_GROUPS.map(g => `
+        <div class="bg-washi rounded-xl p-4 border border-washiBorder space-y-2.5">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <span class="font-bold text-sm text-indigoJp">${g.title}</span>
+            <div class="flex items-center gap-1.5">
+              ${g.chars.map(c => `
+                <button onclick="speakJapanese('${c.ch}', 0.85)" class="px-2.5 py-1 rounded-lg bg-white border border-washiBorder hover:border-vermilion font-serifJp font-bold text-base text-indigoJp shadow-2xs active:scale-95 transition">
+                  ${c.ch} <span class="text-[10px] font-sans text-muted">${c.r}</span> 🔊
+                </button>
+              `).join('')}
+            </div>
+          </div>
+          <p class="text-xs text-muted leading-relaxed">${g.tip}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderTravelWords() {
+      document.getElementById('travelWordsGrid').innerHTML = TRAVEL_WORDS.map(w => `
+        <button onclick="speakJapanese('${w.jp}', 0.9)" class="text-left p-3 rounded-xl bg-washi hover:bg-white border border-washiBorder hover:border-indigoJp transition shadow-2xs active:scale-95 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xl leading-none">${w.emoji}</span>
+            <span class="text-xs text-muted">🔊</span>
+          </div>
+          <div class="font-serifJp font-bold text-base text-indigoJp leading-tight">${w.jp}</div>
+          <div class="text-[11px] text-muted">${store.hideRomaji ? w.zh : `${w.zh} (${w.r})`}</div>
+        </button>
+      `).join('');
+    }
+
+    function openResetModal() { document.getElementById('resetConfirmModal').classList.remove('hidden'); }
+    function closeResetModal() { document.getElementById('resetConfirmModal').classList.add('hidden'); }
+    function confirmResetProgress() {
+      store.hanamaru = [];
+      store.quizStats = { total: 0, correct: 0, bestCombo: 0 };
+      store.mistakes = {};
+      store.karuta = { bestScore: 0, bestCombo: 0, fastestMs: null };
+      saveStore();
+      closeResetModal();
+      renderDashboard();
+      renderChart();
+      renderWriteUI();
+      showToast('已清除本機所有學習進度');
+    }
+
+    /*************************************************************************
+     * 11. INITIALIZATION
+     *************************************************************************/
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStore();
+      renderGlobalScriptUI();
+      updateHideRomajiUI();
+      renderChartControls();
+      renderChart();
+      initCanvasEvents();
+      setWriteGrid('rooms');
+      renderKarutaControls();
+      renderEmptyKarutaGrid();
+      renderQuizSetupUI();
+      switchQuizSubTab('karuta');
+      renderConfusingShowdown();
+      renderTravelWords();
+      switchTab('chart');
+    });
+  </script>
+</body>
+</html>
