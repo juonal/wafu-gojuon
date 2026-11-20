@@ -1,0 +1,23 @@
+/* Tailwind CSS v4 原始設定。修改 index.html 的 class 後，請重新產生 tailwind.css：
+   npx @tailwindcss/cli@4 -i src/input.css -o tailwind.css --minify */
+@import "tailwindcss";
+@source "../index.html";
+
+@theme {
+  --color-washi: #FAF6F0;
+  --color-washiCard: #FFFFFF;
+  --color-washiBorder: #E5DDD0;
+  --color-indigoJp: #2B4C7E;
+  --color-indigoSoft: #3A619C;
+  --color-vermilion: #C84B31;
+  --color-matcha: #4A6B5D;
+  --color-tatami: #E8E2C8;
+  --color-tatamiDark: #D5CCA8;
+  --color-ink: #2C2A29;
+  --color-muted: #6F6A62;
+
+  --font-sans: "Noto Sans TC", "Noto Sans JP", sans-serif;
+  --font-jp: "Noto Sans JP", "Noto Sans TC", sans-serif;
+  --font-serifJp: "Klee One", "Noto Serif JP", "Noto Sans TC", serif;
+  --font-title: "Noto Serif JP", "Noto Sans TC", serif;
+}

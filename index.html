@@ -2,42 +2,21 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>和風五十音｜日文平假名・片假名互動自學工具</title>
+  <meta name="description" content="平板觸控自學日文五十音：筆順動畫、手寫描字、歌牌搶答、旅遊單字，可離線使用。" />
+  <meta name="theme-color" content="#2B4C7E" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
-  <!-- Google Fonts: Noto Sans JP, Noto Serif JP, Noto Sans TC -->
+  <!-- Google Fonts: Klee One (教科書體), Noto Sans JP, Noto Serif JP, Noto Sans TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&display=swap" rel="stylesheet" />
 
-  <!-- Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            washi: '#FAF6F0',
-            washiCard: '#FFFFFF',
-            washiBorder: '#E5DDD0',
-            indigoJp: '#2B4C7E',
-            indigoSoft: '#3A619C',
-            vermilion: '#C84B31',
-            matcha: '#4A6B5D',
-            tatami: '#E8E2C8',
-            tatamiDark: '#D5CCA8',
-            ink: '#2C2A29',
-            muted: '#6F6A62'
-          },
-          fontFamily: {
-            sans: ['"Noto Sans TC"', '"Noto Sans JP"', 'sans-serif'],
-            jp: ['"Noto Sans JP"', '"Noto Sans TC"', 'sans-serif'],
-            serifJp: ['"Noto Serif JP"', '"Noto Sans TC"', 'serif']
-          }
-        }
-      }
-    };
-  </script>
+  <!-- 預先編譯的 Tailwind CSS（原始設定見 src/input.css，重新產生方式見 README） -->
+  <link rel="stylesheet" href="tailwind.css" />
 
   <style>
     body {
@@ -46,6 +25,43 @@
       font-family: 'Noto Sans TC', 'Noto Sans JP', sans-serif;
       -webkit-tap-highlight-color: transparent;
       overflow-x: hidden;
+      touch-action: manipulation; /* 防止雙擊放大造成延遲，但仍允許雙指縮放 */
+    }
+
+    /* ===== 平板觸控尺寸：觸控裝置上按鈕至少 44px ===== */
+    @media (pointer: coarse) {
+      button, select { min-height: 44px; }
+      .chip-sm { min-height: 40px; }
+    }
+
+    /* ===== 手寫畫布寬度：依螢幕寬高自動放大（小米 Pad 8 Pro 橫向約 600px） ===== */
+    .write-w { width: min(100%, 600px, max(320px, calc(100dvh - 270px))); }
+    #writeCanvasCard { scroll-margin-top: 112px; }
+
+    /* ===== 筆順描紅 SVG ===== */
+    #strokeGuide .guide-stroke {
+      fill: none;
+      stroke: rgba(43, 76, 126, 0.16);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    #strokeGuide .anim-stroke {
+      fill: none;
+      stroke: #C84B31;
+      stroke-width: 4.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.85;
+    }
+    #strokeGuide .num-dot { fill: #C84B31; }
+    #strokeGuide .num-text {
+      fill: #fff;
+      font-size: 6.2px;
+      font-weight: 700;
+      font-family: 'Noto Sans TC', sans-serif;
+      text-anchor: middle;
+      dominant-baseline: central;
     }
 
     /* Subtle Washi Paper Texture */
@@ -196,15 +212,15 @@
 
   <!-- ==================== GLOBAL HEADER & NAVIGATION ==================== -->
   <header class="sticky top-0 z-30 bg-washi/95 backdrop-blur-md border-b border-washiBorder shadow-xs">
-    <div class="max-w-5xl mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
+    <div class="max-w-6xl mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
       <!-- Brand -->
       <div class="flex items-center gap-2.5">
         <div class="w-9 h-9 rounded-xl bg-indigoJp text-washi flex items-center justify-center font-serifJp font-bold text-xl shadow-xs shrink-0">
           あ
         </div>
         <div>
-          <h1 class="text-base sm:text-lg font-serifJp font-bold text-indigoJp tracking-wider leading-tight">和風五十音</h1>
-          <p class="text-[11px] text-muted hidden sm:block leading-none mt-0.5">日本小一學習法 × 平板觸控自學工具</p>
+          <h1 class="text-base sm:text-lg font-title font-bold text-indigoJp tracking-wider leading-tight">和風五十音</h1>
+          <p class="text-xs text-muted hidden sm:block leading-none mt-0.5">日本小一學習法 × 平板觸控自學工具</p>
         </div>
       </div>
 
@@ -230,25 +246,29 @@
     </div>
 
     <!-- 5 Main Tabs -->
-    <nav class="max-w-5xl mx-auto px-2 sm:px-5 border-t border-washiBorder/70">
-      <div class="grid grid-cols-5 gap-1 py-1.5">
-        <button data-tab="chart" onclick="switchTab('chart')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition">
+    <nav class="max-w-6xl mx-auto px-2 sm:px-5 border-t border-washiBorder/70">
+      <div class="grid grid-cols-6 gap-1 py-1.5">
+        <button data-tab="chart" onclick="switchTab('chart')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition">
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
           <span class="truncate">五十音圖表</span>
         </button>
-        <button data-tab="write" onclick="switchTab('write')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition">
+        <button data-tab="write" onclick="switchTab('write')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition">
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
           <span class="truncate">手寫描字</span>
         </button>
-        <button data-tab="quiz" onclick="switchTab('quiz')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition">
+        <button data-tab="quiz" onclick="switchTab('quiz')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition">
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <span class="truncate">測驗與歌牌</span>
         </button>
-        <button data-tab="read" onclick="switchTab('read')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition">
+        <button data-tab="read" onclick="switchTab('read')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition">
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
           <span class="truncate">短句跟讀</span>
         </button>
-        <button data-tab="guide" onclick="switchTab('guide')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition">
+        <button data-tab="vocab" onclick="switchTab('vocab')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span class="truncate">旅遊單字</span>
+        </button>
+        <button data-tab="guide" onclick="switchTab('guide')" class="nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition">
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
           <span class="truncate">進度與攻略</span>
         </button>
@@ -260,7 +280,7 @@
   <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 bg-indigoJp text-washi text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl shadow-lg whitespace-nowrap"></div>
 
   <!-- ==================== MAIN CONTENT ==================== -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-5 py-4 sm:py-6">
+  <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-5 py-4 sm:py-6">
 
     <!-- ==================== TAB 1: 五十音圖表 ==================== -->
     <section id="tab-chart" class="tab-panel space-y-4">
@@ -268,7 +288,7 @@
       <div class="bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div class="space-y-1">
           <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigoJp/10 text-indigoJp">行與段互動學習</span>
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigoJp/10 text-indigoJp">行與段互動學習</span>
             <span class="text-xs text-vermilion font-bold">點擊「行」或「段」標題即可高亮連播！</span>
           </div>
           <p class="text-xs sm:text-sm text-ink leading-relaxed">
@@ -280,17 +300,27 @@
         </button>
       </div>
 
+      <!-- Chart Set Switch: 清音 / 濁音・半濁音 / 拗音 -->
+      <div class="bg-white rounded-2xl border border-washiBorder p-3.5 sm:p-4 shadow-xs space-y-2">
+        <div class="inline-flex flex-wrap rounded-xl bg-washi border border-washiBorder p-1 gap-1">
+          <button onclick="setChartSet('seion')" id="btnSetSeion" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">清音 46 字</button>
+          <button onclick="setChartSet('dakuon')" id="btnSetDakuon" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">濁音・半濁音</button>
+          <button onclick="setChartSet('yoon')" id="btnSetYoon" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">拗音</button>
+        </div>
+        <p id="chartSetNote" class="text-xs sm:text-sm text-muted leading-relaxed"></p>
+      </div>
+
       <!-- Chart Controls -->
       <div class="bg-white rounded-2xl border border-washiBorder p-3.5 sm:p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
         <!-- Script Switch -->
         <div class="inline-flex flex-wrap rounded-xl bg-washi border border-washiBorder p-1 gap-1">
-          <button onclick="setChartScript('hiragana')" id="btnChartHira" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">平假名 <span class="hidden sm:inline font-normal text-[11px] opacity-80">(女手・草書)</span></button>
-          <button onclick="setChartScript('katakana')" id="btnChartKata" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">片假名 <span class="hidden sm:inline font-normal text-[11px] opacity-80">(男手・偏旁)</span></button>
+          <button onclick="setChartScript('hiragana')" id="btnChartHira" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">平假名 <span class="hidden sm:inline font-normal text-xs opacity-80">(女手・草書)</span></button>
+          <button onclick="setChartScript('katakana')" id="btnChartKata" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">片假名 <span class="hidden sm:inline font-normal text-xs opacity-80">(男手・偏旁)</span></button>
           <button onclick="setChartScript('both')" id="btnChartBoth" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">平片對照</button>
         </div>
 
         <!-- Legend -->
-        <div class="flex items-center gap-3 text-[11px] text-muted">
+        <div class="flex items-center gap-3 text-xs text-muted">
           <span class="inline-flex items-center gap-1"><span class="text-vermilion text-sm leading-none">💮</span> 已蓋花丸</span>
           <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-vermilion inline-block"></span> 錯題待加強</span>
         </div>
@@ -300,31 +330,7 @@
       <div class="bg-white rounded-2xl border border-washiBorder p-3 sm:p-5 shadow-xs overflow-x-auto">
         <div class="min-w-[320px]">
           <!-- Column Headers (段) -->
-          <div class="grid grid-cols-[62px_repeat(5,1fr)] sm:grid-cols-[84px_repeat(5,1fr)] gap-1.5 sm:gap-2.5 mb-2.5">
-            <div class="flex items-center justify-center text-[11px] font-bold text-muted bg-washi rounded-xl py-2 border border-washiBorder/60">
-              行＼段
-            </div>
-            <button onclick="playColumn(0)" class="py-2 px-1 rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm transition flex flex-col items-center justify-center">
-              <span>あ段</span>
-              <span class="text-[10px] font-normal opacity-75">母音 a 🔊</span>
-            </button>
-            <button onclick="playColumn(1)" class="py-2 px-1 rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm transition flex flex-col items-center justify-center">
-              <span>い段</span>
-              <span class="text-[10px] font-normal opacity-75">母音 i 🔊</span>
-            </button>
-            <button onclick="playColumn(2)" class="py-2 px-1 rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm transition flex flex-col items-center justify-center">
-              <span>う段</span>
-              <span class="text-[10px] font-normal opacity-75">母音 u 🔊</span>
-            </button>
-            <button onclick="playColumn(3)" class="py-2 px-1 rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm transition flex flex-col items-center justify-center">
-              <span>え段</span>
-              <span class="text-[10px] font-normal opacity-75">母音 e 🔊</span>
-            </button>
-            <button onclick="playColumn(4)" class="py-2 px-1 rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm transition flex flex-col items-center justify-center">
-              <span>お段</span>
-              <span class="text-[10px] font-normal opacity-75">母音 o 🔊</span>
-            </button>
-          </div>
+          <div id="chartColHeader" class="mb-2.5"></div>
 
           <!-- Rows Container -->
           <div id="kanaMatrixBody" class="space-y-2"></div>
@@ -369,21 +375,22 @@
       <!-- Canvas & Info Layout (Tablet Friendly 2-column on lg) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
         <!-- Left: Interactive Canvas -->
-        <div class="lg:col-span-7 bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs flex flex-col items-center space-y-3.5">
-          <!-- Grid Mode Switcher -->
-          <div class="w-full max-w-[420px] flex flex-wrap items-center justify-between gap-2">
+        <div id="writeCanvasCard" class="lg:col-span-7 bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs flex flex-col items-center space-y-3.5">
+          <!-- Grid Mode Switcher + Guide Controls -->
+          <div class="write-w flex flex-wrap items-center justify-between gap-2">
             <div class="inline-flex rounded-xl bg-washi border border-washiBorder p-1 gap-1">
               <button onclick="setWriteGrid('rooms')" id="btnGridRooms" class="px-2.5 py-1 rounded-lg text-xs font-bold transition">四個房間 (小一)</button>
               <button onclick="setWriteGrid('rice')" id="btnGridRice" class="px-2.5 py-1 rounded-lg text-xs font-bold transition">傳統米字格</button>
               <button onclick="setWriteGrid('blank')" id="btnGridBlank" class="px-2.5 py-1 rounded-lg text-xs font-bold transition">無格線</button>
             </div>
-            <button id="toggleGuideBtn" onclick="toggleTracingGuide()" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-indigoJp text-white border-indigoJp">
-              描紅字帖：顯示
-            </button>
+            <div class="flex items-center gap-1.5">
+              <button id="toggleNumsBtn" onclick="toggleStrokeNumbers()" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-indigoJp text-white border-indigoJp">筆順編號：顯示</button>
+              <button id="toggleGuideBtn" onclick="toggleTracingGuide()" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-indigoJp text-white border-indigoJp">描紅字帖：顯示</button>
+            </div>
           </div>
 
           <!-- Canvas Container -->
-          <div id="canvasContainer" class="relative w-full max-w-[420px] aspect-square rounded-2xl border-2 border-indigoJp/35 grid-rooms overflow-hidden shadow-inner">
+          <div id="canvasContainer" class="write-w relative aspect-square rounded-2xl border-2 border-indigoJp/35 grid-rooms overflow-hidden shadow-inner">
             <!-- 4 Rooms Overlay (Visible only when grid === 'rooms') -->
             <div id="fourRoomsOverlay" class="absolute inset-0 pointer-events-none select-none grid-rooms-lines grid grid-cols-2 grid-rows-2">
               <div class="p-2.5 text-left"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigoJp/10 text-indigoJp/50 font-bold text-xs">1</span></div>
@@ -392,21 +399,23 @@
               <div class="p-2.5 flex items-end justify-end"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigoJp/10 text-indigoJp/50 font-bold text-xs">4</span></div>
             </div>
 
-            <!-- Tracing Guide Watermark -->
-            <div id="tracingWatermark" class="absolute inset-0 flex items-center justify-center font-jp text-indigoJp/15 select-none pointer-events-none leading-none">
-              く
-            </div>
+            <!-- 筆順描紅（KanjiVG 筆畫資料） -->
+            <svg id="strokeGuide" viewBox="0 0 109 109" class="absolute inset-0 w-full h-full pointer-events-none select-none" aria-hidden="true">
+              <g id="guideStrokes"></g>
+              <g id="animStrokes"></g>
+              <g id="guideNumbers"></g>
+            </svg>
 
             <!-- Hanamaru Stamp Overlay (Animated on completion) -->
             <div id="hanamaruOverlay" class="hidden absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-              <svg viewBox="0 0 220 220" class="w-48 h-48 sm:w-56 sm:h-56 text-vermilion drop-shadow-md">
+              <svg viewBox="0 0 220 220" class="w-48 h-48 sm:w-64 sm:h-64 text-vermilion drop-shadow-md">
                 <!-- Outer Flower Petals -->
                 <path fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"
                   d="M110,22 C128,12 152,26 148,46 C168,42 186,62 174,82 C194,90 196,118 178,130 C188,150 172,174 150,170 C148,190 124,202 108,188 C90,202 66,190 66,170 C44,174 28,150 38,130 C20,118 22,90 42,82 C30,62 48,42 68,46 C64,26 88,12 110,22 Z" />
                 <!-- Inner Spiral Circle -->
                 <path fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"
                   d="M110,56 C142,56 164,80 164,110 C164,142 138,164 108,164 C78,164 56,140 56,110 C56,82 78,64 105,64 C130,64 148,82 148,108 C148,132 130,148 108,148" />
-                <text x="110" y="116" text-anchor="middle" fill="currentColor" font-size="22" font-weight="bold" font-family="Noto Serif JP, serif">はなまる</text>
+                <text x="110" y="116" text-anchor="middle" fill="currentColor" font-size="22" font-weight="bold" font-family="Klee One, Noto Serif JP, serif">はなまる</text>
               </svg>
             </div>
 
@@ -414,39 +423,51 @@
             <canvas id="writingCanvas" class="relative z-10 w-full h-full cursor-crosshair"></canvas>
           </div>
 
+          <!-- Stage indicator + Stroke order play -->
+          <div class="write-w flex flex-wrap items-center justify-between gap-2">
+            <div id="writeStageBar" class="flex-1 min-w-[200px] rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold bg-matcha/10 text-matcha border border-matcha/30"></div>
+            <button onclick="playStrokeAnimation()" class="px-4 py-2 rounded-xl bg-indigoJp hover:bg-indigoSoft text-white text-xs sm:text-sm font-bold shadow-xs transition active:scale-95">▶ 筆順動畫</button>
+          </div>
+
           <!-- Four Rooms Spatial Hint -->
-          <div id="roomHintBar" class="w-full max-w-[420px] bg-indigoJp/5 border border-indigoJp/20 rounded-xl px-3.5 py-2 text-xs text-indigoJp leading-relaxed">
+          <div id="roomHintBar" class="write-w bg-indigoJp/5 border border-indigoJp/20 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-indigoJp leading-relaxed">
             <strong>🏠 四房定位提示：</strong><span id="writeRoomHintText"></span>
           </div>
 
           <!-- Primary Action: Stamp Hanamaru + Undo / Clear -->
-          <div class="w-full max-w-[420px] space-y-3">
+          <div class="write-w space-y-3">
             <div class="flex flex-wrap items-center gap-2">
-              <button onclick="stampHanamaru()" class="flex-1 py-3 px-4 rounded-xl bg-vermilion hover:opacity-95 text-white font-bold text-sm shadow-sm flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
-                <span>💮 完成練習・蓋花丸（はなまる）</span>
+              <button id="stampBtn" onclick="stampHanamaru()" class="flex-1 py-3 px-4 rounded-xl bg-vermilion hover:opacity-95 text-white font-bold text-sm sm:text-base shadow-sm flex items-center justify-center gap-1.5 transition active:scale-[0.98]">
+                <span id="stampBtnLabel">✓ 描寫完成</span>
               </button>
-              <button onclick="undoWritingStroke()" class="px-3 py-3 rounded-xl bg-washi border border-washiBorder hover:border-indigoJp text-xs font-bold text-indigoJp transition">
+              <button onclick="undoWritingStroke()" class="px-4 py-3 rounded-xl bg-washi border border-washiBorder hover:border-indigoJp text-sm font-bold text-indigoJp transition">
                 ↩ 復原
               </button>
-              <button onclick="clearWritingCanvas()" class="px-3 py-3 rounded-xl bg-washi border border-washiBorder hover:border-vermilion text-xs font-bold text-vermilion transition">
+              <button onclick="clearWritingCanvas()" class="px-4 py-3 rounded-xl bg-washi border border-washiBorder hover:border-vermilion text-sm font-bold text-vermilion transition">
                 清除
               </button>
             </div>
 
             <!-- Brush Color & Size -->
             <div class="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-washiBorder">
-              <div class="flex items-center gap-2.5">
+              <div class="flex items-center gap-3">
                 <span class="text-xs font-bold text-muted">筆刷：</span>
-                <button onclick="setBrushColor('#2C2A29')" data-bcolor="#2C2A29" class="bcolor-btn w-7 h-7 rounded-full bg-[#2C2A29] ring-2 ring-offset-2 ring-indigoJp transition" title="墨黑"></button>
-                <button onclick="setBrushColor('#C84B31')" data-bcolor="#C84B31" class="bcolor-btn w-7 h-7 rounded-full bg-[#C84B31] transition" title="朱紅"></button>
-                <button onclick="setBrushColor('#2B4C7E')" data-bcolor="#2B4C7E" class="bcolor-btn w-7 h-7 rounded-full bg-[#2B4C7E] transition" title="靛藍"></button>
+                <button onclick="setBrushColor('#2C2A29')" data-bcolor="#2C2A29" class="bcolor-btn w-11 h-11 rounded-full bg-[#2C2A29] ring-2 ring-offset-2 ring-indigoJp transition" title="墨黑" aria-label="墨黑"></button>
+                <button onclick="setBrushColor('#C84B31')" data-bcolor="#C84B31" class="bcolor-btn w-11 h-11 rounded-full bg-[#C84B31] transition" title="朱紅" aria-label="朱紅"></button>
+                <button onclick="setBrushColor('#2B4C7E')" data-bcolor="#2B4C7E" class="bcolor-btn w-11 h-11 rounded-full bg-[#2B4C7E] transition" title="靛藍" aria-label="靛藍"></button>
               </div>
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-bold text-muted">粗細：</span>
-                <button onclick="setBrushSize(0.016)" data-bsize="0.016" class="bsize-btn px-2.5 py-1 rounded-lg text-xs font-bold border border-washiBorder bg-washi text-muted">細</button>
-                <button onclick="setBrushSize(0.028)" data-bsize="0.028" class="bsize-btn px-2.5 py-1 rounded-lg text-xs font-bold border border-indigoJp bg-indigoJp text-white">中</button>
-                <button onclick="setBrushSize(0.042)" data-bsize="0.042" class="bsize-btn px-2.5 py-1 rounded-lg text-xs font-bold border border-washiBorder bg-washi text-muted">粗</button>
+                <button onclick="setBrushSize(0.018)" data-bsize="0.018" class="bsize-btn px-3.5 py-1 rounded-lg text-sm font-bold border border-washiBorder bg-washi text-muted">細</button>
+                <button onclick="setBrushSize(0.028)" data-bsize="0.028" class="bsize-btn px-3.5 py-1 rounded-lg text-sm font-bold border border-indigoJp bg-indigoJp text-white">中</button>
+                <button onclick="setBrushSize(0.042)" data-bsize="0.042" class="bsize-btn px-3.5 py-1 rounded-lg text-sm font-bold border border-washiBorder bg-washi text-muted">粗</button>
               </div>
+            </div>
+
+            <!-- Pen / Palm rejection status -->
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
+              <span id="penStatusText">✍️ 可用觸控筆或手指書寫。偵測到觸控筆後會自動忽略手掌誤觸。</span>
+              <button id="fingerToggleBtn" onclick="toggleFingerDrawing()" class="hidden px-3 py-1.5 rounded-lg border border-washiBorder bg-washi font-bold text-indigoJp">允許手指書寫</button>
             </div>
           </div>
         </div>
@@ -460,6 +481,7 @@
                 <div class="flex items-center gap-2">
                   <span id="writeDisplayRomaji" class="text-xl font-bold text-ink">ku</span>
                   <span id="writeDisplayPair" class="text-xs px-2 py-0.5 rounded-lg bg-washi border border-washiBorder text-muted font-jp">對應：ク</span>
+                  <span id="writeStrokeCount" class="text-xs px-2 py-0.5 rounded-lg bg-vermilion/10 text-vermilion font-bold">1 畫</span>
                 </div>
                 <div id="writeHanamaruBadge" class="text-xs font-bold mt-1 text-muted">尚未蓋花丸</div>
               </div>
@@ -474,7 +496,7 @@
             <div class="flex items-center gap-3">
               <span id="writeKidsEmoji" class="text-3xl leading-none">🚗</span>
               <div>
-                <div class="text-[11px] font-bold text-matcha">日本兒童一字一詞（點擊朗讀）</div>
+                <div class="text-xs font-bold text-matcha">日本兒童一字一詞（點擊朗讀）</div>
                 <div class="flex items-baseline gap-2 mt-0.5">
                   <span id="writeKidsWord" class="font-serifJp font-bold text-lg text-ink">くるま</span>
                   <span id="writeKidsZh" class="text-xs text-muted">車子</span>
@@ -486,14 +508,14 @@
 
           <!-- Etymology Box -->
           <div class="bg-washi rounded-xl p-3.5 border border-washiBorder space-y-1.5">
-            <div class="text-[11px] font-bold text-indigoJp uppercase tracking-wider">精準漢字字源</div>
+            <div class="text-xs font-bold text-indigoJp uppercase tracking-wider">精準漢字字源</div>
             <div class="grid grid-cols-2 gap-2 text-sm">
               <div class="bg-white rounded-lg p-2 border border-washiBorder/70">
-                <div class="text-[10px] text-muted">平假名（女手・草書）</div>
+                <div class="text-xs text-muted">平假名（女手・草書）</div>
                 <div id="writeOriginHira" class="font-serifJp font-bold text-indigoJp text-base mt-0.5">く ← 久</div>
               </div>
               <div class="bg-white rounded-lg p-2 border border-washiBorder/70">
-                <div class="text-[10px] text-muted">片假名（男手・偏旁）</div>
+                <div class="text-xs text-muted">片假名（男手・偏旁）</div>
                 <div id="writeOriginKata" class="font-serifJp font-bold text-vermilion text-base mt-0.5">ク ← 久</div>
               </div>
             </div>
@@ -526,8 +548,8 @@
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
               <div class="flex items-center gap-2">
-                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-matcha/15 text-matcha">日本經典聽音搶答</span>
-                <h2 class="text-base sm:text-lg font-serifJp font-bold text-indigoJp">日式歌牌（かるた）</h2>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-matcha/15 text-matcha">日本經典聽音搶答</span>
+                <h2 class="text-base sm:text-lg font-title font-bold text-indigoJp">日式歌牌（かるた）</h2>
               </div>
               <p class="text-xs text-muted mt-0.5">聽系統唸出「假名＋兒童代表單字」，用最快速度拍點對應的直式和風歌牌！每局 10 題。</p>
             </div>
@@ -583,18 +605,18 @@
           <!-- Karuta Result Summary -->
           <div id="karutaSummaryBox" class="hidden max-w-lg mx-auto bg-white rounded-2xl border-2 border-matcha p-5 text-center space-y-3 shadow-md animate-modal">
             <div class="text-3xl">🏆</div>
-            <h3 class="text-lg font-serifJp font-bold text-indigoJp">歌牌搶答完成！</h3>
+            <h3 class="text-lg font-title font-bold text-indigoJp">歌牌搶答完成！</h3>
             <div class="grid grid-cols-3 gap-2 text-center">
               <div class="bg-washi rounded-xl p-2.5 border border-washiBorder">
-                <div class="text-[11px] text-muted">得分</div>
+                <div class="text-xs text-muted">得分</div>
                 <div id="kResScore" class="text-lg font-bold text-matcha">0</div>
               </div>
               <div class="bg-washi rounded-xl p-2.5 border border-washiBorder">
-                <div class="text-[11px] text-muted">最高連勝</div>
+                <div class="text-xs text-muted">最高連勝</div>
                 <div id="kResCombo" class="text-lg font-bold text-vermilion">0</div>
               </div>
               <div class="bg-washi rounded-xl p-2.5 border border-washiBorder">
-                <div class="text-[11px] text-muted">平均反應</div>
+                <div class="text-xs text-muted">平均反應</div>
                 <div id="kResAvgTime" class="text-lg font-bold text-indigoJp">0.0s</div>
               </div>
             </div>
@@ -608,7 +630,7 @@
         <!-- Quiz Setup -->
         <div id="quizSetupView" class="bg-white rounded-2xl border border-washiBorder p-4 sm:p-6 shadow-xs space-y-5">
           <div>
-            <h2 class="text-lg font-serifJp font-bold text-indigoJp">分組互動測驗</h2>
+            <h2 class="text-lg font-title font-bold text-indigoJp">分組互動測驗</h2>
             <p class="text-xs sm:text-sm text-muted mt-0.5">建議每次只勾選 1～2 行分段練習，答錯會自動加入錯題本並顯示記憶口訣。</p>
           </div>
 
@@ -618,23 +640,23 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
               <button onclick="setQuizMode('audioToKana')" id="qmode-audioToKana" class="qmode-btn text-left p-3 rounded-xl border-2 transition">
                 <div class="font-bold text-xs sm:text-sm text-indigoJp">聽音選字</div>
-                <div class="text-[11px] text-muted mt-0.5">聽發音選假名</div>
+                <div class="text-xs text-muted mt-0.5">聽發音選假名</div>
               </button>
               <button onclick="setQuizMode('kanaToRomaji')" id="qmode-kanaToRomaji" class="qmode-btn text-left p-3 rounded-xl border-2 transition">
                 <div class="font-bold text-xs sm:text-sm text-indigoJp">看字選音</div>
-                <div class="text-[11px] text-muted mt-0.5">看假名選拼音</div>
+                <div class="text-xs text-muted mt-0.5">看假名選拼音</div>
               </button>
               <button onclick="setQuizMode('scriptSwap')" id="qmode-scriptSwap" class="qmode-btn text-left p-3 rounded-xl border-2 transition">
                 <div class="font-bold text-xs sm:text-sm text-indigoJp">平片互換</div>
-                <div class="text-[11px] text-muted mt-0.5">平片假名對應</div>
+                <div class="text-xs text-muted mt-0.5">平片假名對應</div>
               </button>
               <button onclick="setQuizMode('confusing')" id="qmode-confusing" class="qmode-btn text-left p-3 rounded-xl border-2 transition">
                 <div class="font-bold text-xs sm:text-sm text-vermilion">易混淆特訓</div>
-                <div class="text-[11px] text-muted mt-0.5">シツソンぬめ等</div>
+                <div class="text-xs text-muted mt-0.5">シツソンぬめ等</div>
               </button>
               <button onclick="setQuizMode('weak')" id="qmode-weak" class="qmode-btn text-left p-3 rounded-xl border-2 transition">
                 <div class="font-bold text-xs sm:text-sm text-matcha">錯題本特訓</div>
-                <div class="text-[11px] text-muted mt-0.5">專攻歷史錯題</div>
+                <div class="text-xs text-muted mt-0.5">專攻歷史錯題</div>
               </button>
             </div>
           </div>
@@ -666,11 +688,13 @@
               <label class="text-xs font-bold text-indigoJp uppercase tracking-wider">3. 選擇練習行（可只選 1～2 行）</label>
               <div class="flex items-center gap-1.5 text-xs">
                 <button onclick="presetQuizRows('start')" class="px-2.5 py-1 rounded-lg bg-washi border border-washiBorder hover:border-indigoJp text-indigoJp font-medium">新手 (あ+か)</button>
-                <button onclick="presetQuizRows('all')" class="px-2.5 py-1 rounded-lg bg-washi border border-washiBorder hover:border-indigoJp text-indigoJp font-medium">全選</button>
+                <button onclick="presetQuizRows('seion')" class="px-2.5 py-1 rounded-lg bg-washi border border-washiBorder hover:border-indigoJp text-indigoJp font-medium">清音全選</button>
+                <button onclick="presetQuizRows('dakuon')" class="px-2.5 py-1 rounded-lg bg-washi border border-washiBorder hover:border-indigoJp text-indigoJp font-medium">濁音全選</button>
+                <button onclick="presetQuizRows('yoon')" class="px-2.5 py-1 rounded-lg bg-washi border border-washiBorder hover:border-indigoJp text-indigoJp font-medium">拗音全選</button>
                 <button onclick="presetQuizRows('none')" class="px-2.5 py-1 rounded-lg bg-washi border border-washiBorder hover:border-vermilion text-muted font-medium">清除</button>
               </div>
             </div>
-            <div id="quizRowGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-2"></div>
+            <div id="quizRowGrid" class="space-y-3"></div>
           </div>
 
           <div class="pt-1 flex items-center flex-wrap gap-3">
@@ -716,7 +740,7 @@
         <div id="quizResultView" class="hidden max-w-2xl mx-auto bg-white rounded-2xl border border-washiBorder p-6 sm:p-8 shadow-xs text-center space-y-5">
           <div>
             <div id="quizResEmoji" class="text-4xl mb-2">🎉</div>
-            <h3 class="text-xl font-serifJp font-bold text-indigoJp">測驗完成！</h3>
+            <h3 class="text-xl font-title font-bold text-indigoJp">測驗完成！</h3>
             <p id="quizResSubtitle" class="text-sm text-muted mt-1"></p>
           </div>
           <div class="grid grid-cols-3 gap-3">
@@ -749,7 +773,7 @@
         <div class="bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 class="text-lg font-serifJp font-bold text-indigoJp">4×4 翻牌配對遊戲</h2>
+              <h2 class="text-lg font-title font-bold text-indigoJp">4×4 翻牌配對遊戲</h2>
               <p class="text-xs text-muted">共 8 組 16 張牌，配對成功自動朗讀發音加深記憶！</p>
             </div>
             <button onclick="initMatchGame()" class="px-4 py-2 rounded-xl bg-indigoJp hover:bg-indigoSoft text-white text-xs sm:text-sm font-bold transition">
@@ -765,15 +789,15 @@
             </select>
             <div class="grid grid-cols-3 gap-2 text-center">
               <div class="bg-washi rounded-xl py-1.5 px-2 border border-washiBorder/60">
-                <div class="text-[10px] text-muted">進度</div>
+                <div class="text-xs text-muted">進度</div>
                 <div id="matchPairStat" class="text-sm font-bold text-matcha">0 / 8</div>
               </div>
               <div class="bg-washi rounded-xl py-1.5 px-2 border border-washiBorder/60">
-                <div class="text-[10px] text-muted">翻牌次數</div>
+                <div class="text-xs text-muted">翻牌次數</div>
                 <div id="matchFlipStat" class="text-sm font-bold text-indigoJp">0</div>
               </div>
               <div class="bg-washi rounded-xl py-1.5 px-2 border border-washiBorder/60">
-                <div class="text-[10px] text-muted">時間</div>
+                <div class="text-xs text-muted">時間</div>
                 <div id="matchTimeStat" class="text-sm font-bold text-indigoJp">00:00</div>
               </div>
             </div>
@@ -795,8 +819,8 @@
     <section id="tab-read" class="tab-panel hidden space-y-4">
       <div class="bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs space-y-2">
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-vermilion/10 text-vermilion">實戰跟讀法</span>
-          <h2 class="text-base sm:text-lg font-serifJp font-bold text-indigoJp">短句與歌詞慢速跟讀</h2>
+          <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-vermilion/10 text-vermilion">實戰跟讀法</span>
+          <h2 class="text-base sm:text-lg font-title font-bold text-indigoJp">短句與歌詞慢速跟讀</h2>
         </div>
         <p class="text-xs sm:text-sm text-ink leading-relaxed">
           預設不顯示羅馬拼音，先試著直接唸，<strong>遇到不會的假名點一下就會標出淡朱紅羅馬音</strong>並統計標記數，搭配 0.6x 慢速朗讀多練幾次，標記越變越少就能整句流暢唸出！
@@ -877,7 +901,7 @@
       <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-5">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 class="text-lg font-serifJp font-bold text-indigoJp">單機學習進度儀表板</h2>
+            <h2 class="text-lg font-title font-bold text-indigoJp">單機學習進度儀表板</h2>
             <p class="text-xs text-muted mt-0.5">所有花丸印章、歌牌紀錄與錯題本皆自動儲存於本裝置瀏覽器中。</p>
           </div>
           <button onclick="openResetModal()" class="text-xs px-3 py-1.5 rounded-xl border border-vermilion/40 text-vermilion hover:bg-red-50 font-bold transition">
@@ -897,12 +921,12 @@
           <div class="bg-washi rounded-xl p-3.5 border border-washiBorder">
             <div class="text-xs text-muted">🎯 測驗總正確率</div>
             <div id="dashQuizAcc" class="text-xl sm:text-2xl font-bold text-matcha mt-1">--%</div>
-            <div id="dashQuizTotalSub" class="text-[10px] text-muted mt-0.5">共 0 題</div>
+            <div id="dashQuizTotalSub" class="text-xs text-muted mt-0.5">共 0 題</div>
           </div>
           <div class="bg-washi rounded-xl p-3.5 border border-washiBorder">
             <div class="text-xs text-muted">🎴 歌牌最佳紀錄</div>
             <div id="dashKarutaBest" class="text-lg sm:text-xl font-bold text-indigoJp mt-1">0 連勝</div>
-            <div id="dashKarutaFast" class="text-[10px] text-muted mt-0.5">最快 --s</div>
+            <div id="dashKarutaFast" class="text-xs text-muted mt-0.5">最快 --s</div>
           </div>
         </div>
 
@@ -910,11 +934,12 @@
         <div class="pt-3 border-t border-washiBorder space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 class="text-sm sm:text-base font-bold text-vermilion">📌 弱點錯題本</h3>
-              <p class="text-[11px] text-muted">已記熟的字可點擊右側「✓ 已克服」移除。</p>
+              <h3 class="text-sm sm:text-base font-bold text-vermilion">📌 弱點錯題本・間隔複習</h3>
+              <p class="text-xs text-muted">答錯的字會排進複習：隔 1、3、7、14 天再出現，連續答對就會自動畢業。</p>
+              <p id="dashDueText" class="text-sm font-bold text-indigoJp mt-1"></p>
             </div>
             <button id="dashWeakQuizBtn" onclick="launchWeakQuizFromDash()" class="px-4 py-2 rounded-xl bg-vermilion hover:opacity-90 text-white text-xs sm:text-sm font-bold shadow-xs transition disabled:opacity-40 disabled:cursor-not-allowed">
-              立即針對錯題測驗
+              開始今日複習
             </button>
           </div>
           <div id="dashMistakeList" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
@@ -924,24 +949,24 @@
       <!-- 2. Beginner Self-Study Mindsets & Japanese Elementary Methods -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-2">
-          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigoJp/10 text-indigoJp">心法 01・打破卡關</span>
-          <h3 class="text-base font-serifJp font-bold text-indigoJp">別在五十音停太久！</h3>
+          <span class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigoJp/10 text-indigoJp">心法 01・打破卡關</span>
+          <h3 class="text-base font-title font-bold text-indigoJp">別在五十音停太久！</h3>
           <p class="text-xs sm:text-sm text-muted leading-relaxed">
             不需要背到 100% 完美才往下走。只要每次練熟 1～2 行，就大膽切到「短句跟讀」與「歌牌搶答」，透過真實單字與聽音反應，反而能最快把五十音刻進長期記憶。
           </p>
         </div>
 
         <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-2">
-          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-matcha/15 text-matcha">心法 02・日本小一法</span>
-          <h3 class="text-base font-serifJp font-bold text-indigoJp">一字一詞＋由簡入繁＋四房定位</h3>
+          <span class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-matcha/15 text-matcha">心法 02・日本小一法</span>
+          <h3 class="text-base font-title font-bold text-indigoJp">一字一詞＋由簡入繁＋四房定位</h3>
           <p class="text-xs sm:text-sm text-muted leading-relaxed">
             日本小朋友學假名不死背單一符號，而是<strong>綁定具體單字</strong>（あ＝あめ糖果），寫字則先從無交叉的 <strong>く・し・つ・へ</strong> 開始，並用 <strong>1～4 號房</strong>抓準筆畫位置，練完蓋花丸累積成就感！
           </p>
         </div>
 
         <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-2">
-          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-vermilion/10 text-vermilion">心法 03・女手與男手</span>
-          <h3 class="text-base font-serifJp font-bold text-indigoJp">善用中文母語的漢字字源優勢</h3>
+          <span class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-vermilion/10 text-vermilion">心法 03・女手與男手</span>
+          <h3 class="text-base font-title font-bold text-indigoJp">善用中文母語的漢字字源優勢</h3>
           <p class="text-xs sm:text-sm text-muted leading-relaxed">
             <strong>平假名（女手）</strong>源自漢字草書，線條圓潤；<strong>片假名（男手）</strong>取自楷書偏旁，筆畫方正。遇到容易忘記的字，打開字卡看一眼字源漢字與口訣，記憶力馬上倍增。
           </p>
@@ -951,8 +976,8 @@
       <!-- 3. Long Vowel / Sokuon / Yoon Rules -->
       <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-4">
         <div>
-          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigoJp/10 text-indigoJp mb-1">必學發音規則</span>
-          <h3 class="text-lg font-serifJp font-bold text-indigoJp">長音・促音（っ）・拗音（きゃ）單字示範</h3>
+          <span class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigoJp/10 text-indigoJp mb-1">必學發音規則</span>
+          <h3 class="text-lg font-title font-bold text-indigoJp">長音・促音（っ）・拗音（きゃ）單字示範</h3>
           <p class="text-xs text-muted mt-0.5">點擊單字按鈕即可直接聽日語標準發音。</p>
         </div>
 
@@ -1010,21 +1035,70 @@
       <!-- 4. Confusing Characters Showdown Table -->
       <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-4">
         <div>
-          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-vermilion/10 text-vermilion mb-1">魔王剋星</span>
-          <h3 class="text-lg font-serifJp font-bold text-indigoJp">易混淆字魔王對決表</h3>
+          <span class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-vermilion/10 text-vermilion mb-1">魔王剋星</span>
+          <h3 class="text-lg font-title font-bold text-indigoJp">易混淆字魔王對決表</h3>
           <p class="text-xs text-muted mt-0.5">點擊假名按鈕即可聽發音，搭配口訣一次分清楚！</p>
         </div>
         <div id="confusingShowdownGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
       </div>
 
-      <!-- 5. 12 Practical Japanese Travel & Daily Words -->
-      <div class="bg-white rounded-2xl border border-washiBorder p-5 shadow-xs space-y-4">
+      <!-- 5. Link to Travel Vocab -->
+      <button onclick="switchTab('vocab')" class="w-full text-left bg-white rounded-2xl border border-washiBorder hover:border-matcha p-5 shadow-xs flex items-center justify-between gap-3 transition">
         <div>
-          <span class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-matcha/15 text-matcha mb-1">實戰速查</span>
-          <h3 class="text-lg font-serifJp font-bold text-indigoJp">12 個日本旅遊與生活實用單字</h3>
-          <p class="text-xs text-muted mt-0.5">點擊卡片直接聽標準發音，去日本馬上用得到！</p>
+          <span class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-matcha/15 text-matcha mb-1">實戰速查</span>
+          <h3 class="text-lg font-title font-bold text-indigoJp">日本旅遊初學者單字</h3>
+          <p class="text-xs sm:text-sm text-muted mt-0.5">交通、餐廳、購物、住宿、觀光、緊急狀況等分類單字，附字卡練習。</p>
         </div>
-        <div id="travelWordsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5"></div>
+        <span class="text-matcha font-bold shrink-0">前往 →</span>
+      </button>
+    </section>
+
+    <!-- ==================== TAB 6: 旅遊單字 ==================== -->
+    <section id="tab-vocab" class="tab-panel hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-washiBorder p-4 sm:p-5 shadow-xs space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-matcha/15 text-matcha">初學者必備</span>
+              <h2 class="text-base sm:text-lg font-title font-bold text-indigoJp">日本旅遊單字</h2>
+            </div>
+            <p class="text-xs sm:text-sm text-muted mt-0.5">點卡片聽發音；記住了就按 ☆ 標記。漢字只是參考，先認得假名就好。</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="vocabProgress" class="px-3 py-1.5 rounded-xl bg-matcha/15 text-matcha text-xs sm:text-sm font-bold">已記住 0 / 0</span>
+            <div class="inline-flex rounded-xl bg-washi border border-washiBorder p-1 gap-1">
+              <button onclick="setVocabMode('browse')" id="vmode-browse" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">📖 瀏覽</button>
+              <button onclick="setVocabMode('cards')" id="vmode-cards" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">🃏 字卡練習</button>
+            </div>
+          </div>
+        </div>
+        <div id="vocabCatBar" class="flex items-center gap-1.5 overflow-x-auto pb-1"></div>
+      </div>
+
+      <!-- Browse Mode -->
+      <div id="vocabBrowse" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+
+      <!-- Flashcard Mode -->
+      <div id="vocabCards" class="hidden max-w-xl mx-auto space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="inline-flex rounded-xl bg-white border border-washiBorder p-1 gap-1">
+            <button onclick="setVocabDir('jz')" id="vdir-jz" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">看日文 → 想中文</button>
+            <button onclick="setVocabDir('zj')" id="vdir-zj" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition">看中文 → 想日文</button>
+          </div>
+          <span id="vocabCardCounter" class="text-xs sm:text-sm font-bold text-muted"></span>
+        </div>
+        <div class="bg-white rounded-3xl border-2 border-washiBorder p-6 sm:p-8 shadow-xs text-center space-y-4 min-h-[300px] flex flex-col justify-center">
+          <div id="vocabCardFront" class="space-y-2"></div>
+          <div id="vocabCardBack" class="hidden space-y-1.5 pt-4 border-t border-washiBorder"></div>
+        </div>
+        <div id="vocabRevealWrap" class="grid grid-cols-2 gap-3">
+          <button onclick="speakVocabCard()" class="py-3.5 rounded-xl bg-washi border border-washiBorder hover:border-indigoJp text-indigoJp font-bold text-sm sm:text-base transition">🔊 聽發音</button>
+          <button onclick="revealVocabCard()" class="py-3.5 rounded-xl bg-indigoJp hover:bg-indigoSoft text-white font-bold text-sm sm:text-base transition">看答案</button>
+        </div>
+        <div id="vocabJudgeWrap" class="hidden grid grid-cols-2 gap-3">
+          <button onclick="judgeVocabCard(false)" class="py-3.5 rounded-xl bg-vermilion/10 border border-vermilion/40 text-vermilion font-bold text-sm sm:text-base transition">還不熟，再練</button>
+          <button onclick="judgeVocabCard(true)" class="py-3.5 rounded-xl bg-matcha hover:opacity-90 text-white font-bold text-sm sm:text-base transition">記住了 ✓</button>
+        </div>
       </div>
     </section>
 
@@ -1054,7 +1128,7 @@
         <div class="flex items-center gap-3">
           <span id="modalKidsEmoji" class="text-3xl leading-none">🍬</span>
           <div>
-            <div class="text-[11px] font-bold text-matcha">日本兒童一字一詞（點擊朗讀單字）</div>
+            <div class="text-xs font-bold text-matcha">日本兒童一字一詞（點擊朗讀單字）</div>
             <div class="flex items-baseline gap-2 mt-0.5">
               <span id="modalKidsWord" class="text-lg font-serifJp font-bold text-ink">あめ</span>
               <span id="modalKidsZh" class="text-xs text-muted">糖果</span>
@@ -1067,11 +1141,11 @@
       <!-- Etymology Pair -->
       <div class="grid grid-cols-2 gap-2.5">
         <div class="bg-washi rounded-xl p-3 border border-washiBorder">
-          <div class="text-[11px] text-muted">平假名（女手・草書）</div>
+          <div class="text-xs text-muted">平假名（女手・草書）</div>
           <div id="modalOrigH" class="text-base font-serifJp font-bold text-indigoJp mt-0.5">あ ← 安</div>
         </div>
         <div class="bg-washi rounded-xl p-3 border border-washiBorder">
-          <div class="text-[11px] text-muted">片假名（男手・偏旁）</div>
+          <div class="text-xs text-muted">片假名（男手・偏旁）</div>
           <div id="modalOrigK" class="text-base font-serifJp font-bold text-vermilion mt-0.5">ア ← 阿</div>
         </div>
       </div>
@@ -1121,10 +1195,10 @@
 
       // か行
       { h: 'か', k: 'カ', r: 'ka', row: 'か行', col: 0, oh: '加', ok: '加', w: 'かめ', wZh: '烏龜', emoji: '🐢', roomHint: '左半「力」跨1、3號房，斜撇居中穿過，右上方小點落在2號房。', tip: '「か」像「力」加一點，用力打蚊子「啪(ka)！」；「カ」直接就是「力」字。' },
-      { h: 'き', k: 'キ', r: 'ki', row: 'か行', col: 1, oh: '機', ok: '機', w: 'きりん', wZh: '長頸鹿', emoji: '🦒', roomHint: '兩橫平行微右上斜跨1、2號房，斜豎穿過中心，下方圓弧落在3、4號房。', tip: '「き」與「キ」長得超像一把「鑰匙(key)」，有兩條橫齒！' },
+      { h: 'き', k: 'キ', r: 'ki', row: 'か行', col: 1, oh: '幾', ok: '幾', w: 'きりん', wZh: '長頸鹿', emoji: '🦒', roomHint: '兩橫平行微右上斜跨1、2號房，斜豎穿過中心，下方圓弧落在3、4號房。', tip: '「き」與「キ」長得超像一把「鑰匙(key)」，有兩條橫齒！' },
       { h: 'く', k: 'ク', r: 'ku', row: 'か行', col: 2, oh: '久', ok: '久', w: 'くるま', wZh: '車子', emoji: '🚗', roomHint: '從2號房往左斜進1與3號房交界折轉，再往4號房穩穩收筆。', tip: '「く」像小鳥張嘴，也像嘴角下垂在「哭(ku)」；「ク」像「久」的左半邊。' },
-      { h: 'け', k: 'ケ', r: 'ke', row: 'か行', col: 3, oh: '計', ok: '介', w: 'けーき', wZh: '蛋糕', emoji: '🍰', roomHint: '左豎弧住1→3號房，右邊一橫一豎撇住在2→4號房。', tip: '「け」來自「計」，像打開的木桶(keg)；「ケ」取自「介」，像大寫 K 的變形。' },
-      { h: 'こ', k: 'コ', r: 'ko', row: 'か行', col: 4, oh: '己', ok: '己', w: 'こあら', wZh: '無尾熊', emoji: '🐨', roomHint: '上橫弧安穩住1、2號房，下橫弧住3、4號房，上下微抱合。', tip: '「こ」像兩條游動的錦鯉(koi)；「コ」像一個「口(ko)」少掉左邊一豎。' },
+      { h: 'け', k: 'ケ', r: 'ke', row: 'か行', col: 3, oh: '計', ok: '介', w: 'けむし', wZh: '毛毛蟲', emoji: '🐛', roomHint: '左豎弧住1→3號房，右邊一橫一豎撇住在2→4號房。', tip: '「け」來自「計」，像打開的木桶(keg)；「ケ」取自「介」，像大寫 K 的變形。' },
+      { h: 'こ', k: 'コ', r: 'ko', row: 'か行', col: 4, oh: '己', ok: '己', w: 'こめ', wZh: '米', emoji: '🌾', roomHint: '上橫弧安穩住1、2號房，下橫弧住3、4號房，上下微抱合。', tip: '「こ」像兩條游動的錦鯉(koi)；「コ」像一個「口(ko)」少掉左邊一豎。' },
 
       // さ行
       { h: 'さ', k: 'サ', r: 'sa', row: 'さ行', col: 0, oh: '左', ok: '散', w: 'さくら', wZh: '櫻花', emoji: '🌸', roomHint: '一橫跨1、2號房，斜豎向下，底部圓弧輕輕落在3、4號房。', tip: '「さ」字源是「左」，像微笑臉；「サ」像「草字頭(艹)」，來自「散」上方。' },
@@ -1167,15 +1241,15 @@
       { h: 'よ', k: 'ヨ', r: 'yo', row: 'や行', col: 4, oh: '与', ok: '与', w: 'よる', wZh: '夜晚', emoji: '🌃', roomHint: '小橫住2號房，中豎從1、2中線直下並在3、4號房畫扁結。', tip: '「よ」像溜溜球(yo-yo)；「ヨ」像倒過來的 E，打招呼說「喲(yo)！」。' },
 
       // ら行
-      { h: 'ら', k: 'ラ', r: 'ra', row: 'ら行', col: 0, oh: '良', ok: '良', w: 'らいおん', wZh: '獅子', emoji: '🦁', roomHint: '上方小點在1、2交界，下方從1號房滑下3號房再往4號房畫飽滿弧線。', tip: '「ら」像數字「5」啦啦隊(ra)；「ラ」像一碗冒熱氣的拉麵(ramen)。' },
+      { h: 'ら', k: 'ラ', r: 'ra', row: 'ら行', col: 0, oh: '良', ok: '良', w: 'らっぱ', wZh: '喇叭', emoji: '🎺', roomHint: '上方小點在1、2交界，下方從1號房滑下3號房再往4號房畫飽滿弧線。', tip: '「ら」像數字「5」啦啦隊(ra)；「ラ」像一碗冒熱氣的拉麵(ramen)。' },
       { h: 'り', k: 'リ', r: 'ri', row: 'ら行', col: 1, oh: '利', ok: '利', w: 'りす', wZh: '松鼠', emoji: '🐿️', roomHint: '左豎住1→3號房並微微上勾，右長撇住2→4號房自然往左收尾。', tip: '「り」和「リ」都取自「利(ri)」的立刀旁，像兩條河流(river)。' },
-      { h: 'る', k: 'ル', r: 'ru', row: 'ら行', col: 2, oh: '留', ok: '流', w: 'るびー', wZh: '紅寶石', emoji: '💎', roomHint: '橫折在1、2號房，大肚圓弧進4號房，最後在3、4號房交界捲一個小圈。', tip: '「る」像數字「3」尾巴捲著一顆紅寶石(ruby)；「ル」取自「流」右下角。' },
+      { h: 'る', k: 'ル', r: 'ru', row: 'ら行', col: 2, oh: '留', ok: '流', w: 'るすばん', wZh: '看家', emoji: '🏠', roomHint: '橫折在1、2號房，大肚圓弧進4號房，最後在3、4號房交界捲一個小圈。', tip: '「る」像數字「3」尾巴捲著一顆紅寶石(ruby)；「ル」取自「流」右下角。' },
       { h: 'れ', k: 'レ', r: 're', row: 'ら行', col: 3, oh: '礼', ok: '礼', w: 'れもん', wZh: '檸檬', emoji: '🍋', roomHint: '左豎在1、3號房，Z 字繞過中心進入2號房，最後在4號房往外瀟灑挑起。', tip: '「れ」尾巴往外甩開，像累了(re)踢腳；「レ」是「礼」的右邊一豎勾。' },
-      { h: 'ろ', k: 'ロ', r: 'ro', row: 'ら行', col: 4, oh: '呂', ok: '呂', w: 'ろけっと', wZh: '火箭', emoji: '🚀', roomHint: '結構和「る」幾乎相同，但進4號房繞到3號房後直接收尾不打圈！', tip: '「ろ」是沒捲尾巴的數字「3」，像「裸(ro)體」；「ロ」是「呂」的方正「口」。' },
+      { h: 'ろ', k: 'ロ', r: 'ro', row: 'ら行', col: 4, oh: '呂', ok: '呂', w: 'ろうそく', wZh: '蠟燭', emoji: '🕯️', roomHint: '結構和「る」幾乎相同，但進4號房繞到3號房後直接收尾不打圈！', tip: '「ろ」是沒捲尾巴的數字「3」，像一條平順的道路(road)；「ロ」是「呂」的方正「口」。' },
 
       // わ行 + ん
       { h: 'わ', k: 'ワ', r: 'wa', row: 'わ行', col: 0, oh: '和', ok: '和', w: 'わに', wZh: '鱷魚', emoji: '🐊', roomHint: '左豎在1、3號房，Z 字繞過中心進入2號房，最後在4號房大圓弧往內收。', tip: '「わ」像大肚子圓弧「哇(wa)」；「ワ」像紅酒杯(wine)，字源「和」。' },
-      { h: 'を', k: 'ヲ', r: 'wo', row: 'わ行', col: 4, oh: '遠', ok: '乎', w: 'ほんをよむ', wZh: '讀書（助詞）', emoji: '📖', roomHint: '上橫與折筆跨1、2號房，下方像「C」的圓弧安穩坐在3、4號房。', tip: '「を」像跳高跨欄喊「喔(wo)！」（現代多當助詞）；「ヲ」像「乎」的上半部。' },
+      { h: 'を', k: 'ヲ', r: 'wo', row: 'わ行', col: 4, oh: '遠', ok: '乎', w: 'ほんをよむ', wZh: '讀書（助詞）', emoji: '📖', roomHint: '上橫與折筆跨1、2號房，下方像「C」的圓弧安穩坐在3、4號房。', tip: '「を」像跳高跨欄喊「喔」！現代只當助詞，發音和「お」一樣唸 o；「ヲ」像「乎」的上半部。' },
       { h: 'ん', k: 'ン', r: 'n', row: 'ん(撥音)', col: 0, oh: '无', ok: '尔', w: 'りんご', wZh: '蘋果（字中撥音）', emoji: '🍎', roomHint: '從1、2號房交界斜撇進3號房，順勢往上拱進中央再滑往4號房微翹。', tip: '「ん」直接就是草寫英文「n」，發鼻音「嗯(n)」！片假名「ン」由左下往右上挑。' }
     ];
 
@@ -1189,6 +1263,56 @@
       { id: 't4', name: '第4階・繞圈進階字', chars: ['き', 'た', 'な', 'ふ', 'み', 'む', 'お', 'め', 'ぬ', 'ね', 'あ', 'を'] }
     ];
     const EASY_FLAT_ORDER = EASY_TIERS.flatMap(t => t.chars);
+
+    // 「を」「ぢ」「づ」與其他假名同音：聽音題不可同時出現
+    const SAME_SOUND = { 'を': 'o', 'ぢ': 'ji', 'づ': 'zu', 'ヲ': 'o', 'ヂ': 'ji', 'ヅ': 'zu' };
+    function soundOf(it) { return SAME_SOUND[it.h] || it.r; }
+
+    // 濁音・半濁音（加「゛」聲帶震動；加「゜」雙唇爆破）
+    // 歌牌額外的形近字（干擾牌用）
+    const HIRA_LOOKALIKE = {
+      'は': ['ほ', 'け'], 'ほ': ['は', 'ま'], 'け': ['は', 'に'], 'ま': ['ほ', 'も'], 'い': ['り', 'こ'], 'り': ['い', 'ら'],
+      'こ': ['に', 'い'], 'に': ['こ', 'け'], 'あ': ['お', 'め'], 'お': ['あ', 'む'], 'ち': ['さ', 'ら'], 'ら': ['ち', 'う'],
+      'う': ['ら', 'つ'], 'し': ['つ', 'く'], 'つ': ['し', 'う'], 'く': ['へ', 'し'], 'へ': ['く'], 'た': ['な'], 'な': ['た', 'ぬ']
+    };
+    const KATA_LOOKALIKE = {
+      'シ': ['ツ', 'ン', 'ミ'], 'ツ': ['シ', 'ソ', 'ン'], 'ソ': ['ン', 'ツ'], 'ン': ['ソ', 'シ'], 'ク': ['ケ', 'タ', 'ワ'], 'ケ': ['ク', 'ナ'],
+      'タ': ['ク', 'ヌ'], 'ワ': ['ウ', 'ク', 'フ'], 'ウ': ['ワ', 'ラ'], 'ラ': ['ウ', 'フ'], 'フ': ['ラ', 'ワ', 'ヌ'], 'ヌ': ['ス', 'メ', 'フ'],
+      'ス': ['ヌ', 'ネ'], 'メ': ['ヌ', 'ナ'], 'コ': ['ユ', 'ロ'], 'ユ': ['コ', 'エ'], 'ロ': ['コ'], 'チ': ['テ', 'ナ'], 'テ': ['チ'],
+      'ア': ['マ', 'ヤ'], 'マ': ['ア', 'ム'], 'ヤ': ['セ', 'ア'], 'セ': ['ヤ'], 'ノ': ['ソ', 'メ'], 'ル': ['レ', 'ハ'], 'レ': ['ル'], 'ハ': ['ル', 'ト']
+    };
+
+    const DAKUON_DEF = [
+      ['が行', 'がぎぐげご', 'ガギグゲゴ', ['ga', 'gi', 'gu', 'ge', 'go']],
+      ['ざ行', 'ざじずぜぞ', 'ザジズゼゾ', ['za', 'ji', 'zu', 'ze', 'zo']],
+      ['だ行', 'だぢづでど', 'ダヂヅデド', ['da', 'ji', 'zu', 'de', 'do']],
+      ['ば行', 'ばびぶべぼ', 'バビブベボ', ['ba', 'bi', 'bu', 'be', 'bo']],
+      ['ぱ行', 'ぱぴぷぺぽ', 'パピプペポ', ['pa', 'pi', 'pu', 'pe', 'po']]
+    ];
+    const DAKUON_DATA = DAKUON_DEF.flatMap(([row, hs, ks, rs]) =>
+      [...hs].map((h, i) => ({ h, k: ks[i], r: rs[i], row, col: i, kind: 'dakuon' })));
+    const DAKUON_ROWS = DAKUON_DEF.map(d => d[0]);
+
+    // 拗音（い段＋小ゃゅょ，合唸一拍）
+    const YOON_BASE = [['き', 'キ', 'ky'], ['し', 'シ', 'sh'], ['ち', 'チ', 'ch'], ['に', 'ニ', 'ny'], ['ひ', 'ヒ', 'hy'], ['み', 'ミ', 'my'],
+      ['り', 'リ', 'ry'], ['ぎ', 'ギ', 'gy'], ['じ', 'ジ', 'j'], ['び', 'ビ', 'by'], ['ぴ', 'ピ', 'py']];
+    const YOON_SMALL = [['ゃ', 'ャ', 'a'], ['ゅ', 'ュ', 'u'], ['ょ', 'ョ', 'o']];
+    const YOON_DATA = YOON_BASE.flatMap(([bh, bk, pre]) =>
+      YOON_SMALL.map(([sh, sk, v], i) => ({ h: bh + sh, k: bk + sk, r: pre + v, row: `${bh}ゃ行`, col: i, kind: 'yoon' })));
+    const YOON_ROWS = YOON_BASE.map(b => `${b[0]}ゃ行`);
+
+    SEION_DATA.forEach(d => { d.kind = 'seion'; });
+    const ALL_KANA = [...SEION_DATA, ...DAKUON_DATA, ...YOON_DATA];
+    const ROW_GROUPS = [
+      { id: 'seion', name: '清音', rows: SEION_ROWS },
+      { id: 'dakuon', name: '濁音・半濁音', rows: DAKUON_ROWS },
+      { id: 'yoon', name: '拗音', rows: YOON_ROWS }
+    ];
+    function findKana(ch) { return ALL_KANA.find(s => s.h === ch || s.k === ch); }
+
+    // 筆順資料：KanjiVG (https://kanjivg.tagaini.net) © Ulrich Apel，CC BY-SA 3.0
+    // 每個假名依筆順排列的筆畫路徑（座標系 109×109）
+    const KANA_STROKES = {"あ":["M31.01,33c0.88,0.88,2.75,1.82,5.25,1.75c8.62-0.25,20-2.12,29.5-4.25c1.51-0.34,4.62-0.88,6.62-0.5","M49.76,17.62c0.88,1,1.82,3.26,1.38,5.25c-3.75,16.75-6.25,38.13-5.13,53.63c0.41,5.7,1.88,10.88,3.38,13.62","M65.63,44.12c0.75,1.12,1.16,4.39,0.5,6.12c-4.62,12.26-11.24,23.76-25.37,35.76c-6.86,5.83-15.88,3.75-16.25-8.38c-0.34-10.87,13.38-23.12,32.38-26.74c12.42-2.37,27,1.38,30.5,12.75c4.05,13.18-3.76,26.37-20.88,30.49"],"い":["M21.5,29.66c2.01,2.17,2.61,4.68,2.17,7.43c-3.09,19.16-1.03,32.01,7.93,41.45c6.12,6.45,6.26,3.14,7.04-5.21","M72.96,36.51c9.44,8.05,17.79,18.82,18.41,33.83"],"う":["M42,15.5c5.62,2.12,9.62,3,12.88,3c8.27,0,8,1.12-0.38,5.5","M33,42.38c2.12,1.12,4.12,2.88,8.5,1.38c4.38-1.5,12.75-7.12,18.5-7c5.75,0.12,10.25,5,10.25,18c0,15.49-8.25,30.24-24.37,41.24"],"え":["M40.52,13.25c5.62,2.12,10,3,14.12,3c8.27,0,8,1.12-0.38,5.5","M32.52,45.12c1.88,1.25,4.5,1.75,7.38,0.62c3.29-1.29,17-7.88,21.25-9.88c4.25-2,8.32,0.04,4.38,4.62c-12.26,14.27-27.26,31.52-39.51,44.4c-3.26,3.42-0.58,3.54,1.5,1.37c13.5-14.12,18.12-20.12,23.62-20.12c7.13,0,3.5,16.75,6.75,22.38c3.25,5.63,19.12,3.75,26.12,2.12"],"お":["M22.88,35.12c1.38,1,3.62,2.38,6,2.12c2.38-0.26,19.62-5.12,21.12-5.74c1.5-0.62,4-1.25,5.88-2","M41.5,16.12c2.25,1,3.59,4.39,3.12,7.38c-2.5,16.12-3.37,45.53-2.25,58.38c0.75,8.62-0.64,10.45-7.12,7.12c-5.13-2.62-13.75-8-13.75-12.38c0-7.5,24.38-23.62,44.75-23.62c17.25,0,25,8.25,25,17.25c0,8.25-9.38,18.88-26.75,21","M73,22.12c5.38,2.62,8.88,5.88,10.62,8.25c2.27,3.08,0.38,4.5-1.12,5"],"か":["M24.62,38.62c1.88,1.62,4.65,2.33,8.62,1c25.5-8.5,29.5-4.13,29.5,7.62c0,9.38-1.24,17.46-4.25,25.25c-7.62,19.76-10.87,17.39-16.12,10.89","M48.5,17.5c1,1.38,1.29,4.7,0.5,7.12c-5,15.25-18.02,40.93-19.62,43.88c-3.12,5.75-6.38,11.88-9.38,16.25","M77.37,31.62c7.5,6.88,13.25,15.75,15,24.88"],"き":["M30.5,30.25c1.88,0.75,4.64,1.06,5.88,0.88c6.75-1,22.25-4.5,26.5-6c2.17-0.76,3.5-1.25,4.88-2.12","M36.25,48.7c2.01,0.85,4.97,1.2,6.29,0.99c7.23-1.13,23.82-5.09,28.37-6.79c2.32-0.86,3.75-1.41,5.22-2.4","M42,14.12c1.5,0.88,3.13,2.94,4,5.12c5.5,13.76,16,29.26,26.37,40.76c7.64,8.47,9.12,9.38-6,3.88","M33.75,83.25c10.62,9.75,27.25,8.62,38.12,5"],"く":["M60.66,15c0.5,1.62,0.35,5.44-1,7.38c-6.75,9.62-14.3,19.08-18.62,24.5c-4,5-3.79,7.03-0.88,11c5.5,7.5,12.75,18.75,17.62,27.25c1.48,2.59,2.75,4.75,4.5,8.62"],"け":["M24.67,19.75c1.25,1.5,2.62,3.75,2.12,6.38c-3,15.88-6.5,29.5-4.88,44.62c2.02,18.84,2.25,4.75,6.75-3.5","M53.67,38.62c2.12,1.38,4.28,1.89,6.88,1.5c8.25-1.25,15.39-2.57,20.62-4c2.76-0.74,5.26-1.12,6.88-1.12","M71.67,14.38c2.13,1.37,2.88,3.35,2.88,5.12c0,11.62,0.12,20.38,0.12,30.12c0,20.75-0.62,30.88-12.5,42.25"],"こ":["M34.75,26.75c1.12,0.88,2.91,2.01,6,1.5c7.62-1.25,14.11-2.56,22.38-2.62c15.5-0.12,5.88,5-5.75,9","M30,68.12c2.25,14.5,15.26,17.96,31,16.75c6.5-0.5,11.88-1.25,17.62-2.88"],"さ":["M27,38.9c2.42,1.33,5.38,1.47,8.32,1.06c8.79-1.24,28.67-7.76,34.15-10.43c2.79-1.36,3.78-1.91,6.28-3.53","M41.5,13.88c1.5,0.88,3.63,2.94,4.5,5.12c5.5,13.75,15.25,27.62,26.87,39.5c7.98,8.15,6.38,10-6,3.12","M35.25,80.5c4.5,11.75,20.88,12.5,38.38,7.5"],"し":["M39.12,17.5c1.25,3.12,0.93,6.74,0.38,10.25c-2.12,13.5-3,26.5-3,39.12c0,27.38,19.88,30.12,45.5,17.25"],"す":["M15.5,37.12c2.88,2.12,6.94,1.51,12.75,0.25c16.12-3.5,36.14-5.38,46.62-6.5c7-0.75,11.88-0.62,17.75,0.12","M57.62,13.38c2,1.5,2.75,3.25,2.75,5.88c0,10.38,0,35.12,0,40.75c0,14.62-15.62,16.38-15.62,1.75c0-14.25,18-14.12,18,6.38c0,13.25-7.75,21.5-16,28.38"],"せ":["M16.5,49.93c2.88,2.42,6.86,1.57,12.75,0.53c19-3.34,33-5.72,47.12-7.64c6.99-0.95,11.88-1.21,17.75-0.36","M69.74,17.75c2,1.5,2.75,3.25,2.75,5.88c0,10.38,0,17.88,0,23.5c0,25.62-5.75,23.25-11.88,19","M35.62,26.25c2,1.5,2.75,3.25,2.75,5.88c0,10.38,0,28.38,0,34c0,14.5,6.38,19.55,20.14,19.55c10.24,0,13.74,0.07,22.61-1.68"],"そ":["M38.4,22c1.88,1.25,4.98,1.05,7.5,0.38c6.5-1.75,13.25-3.75,19.38-5.38c4.63-1.23,7.18,2.06,3.62,5.25c-12.12,10.87-31.14,24.4-40,30.25c-6.25,4.12-5.88,5.75,1.38,3.88c17.08-4.42,35.96-8.68,50.12-10.38c9.38-1.12,9.62,0.12,0.5,1.38c-15.82,2.17-34.38,14.25-34.38,26.5c0,12.88,11.62,20.38,31.5,16.62"],"た":["M24.38,35.38c1.38,0.62,3.88,1.51,6.38,1.12c6.5-1,16.25-2.88,24.88-4.75c2.64-0.57,5.38-1.5,7.62-2.38","M45,16.88c0.75,1.25,0.87,3.62,0.38,5.25c-6.35,20.94-12.75,36.37-18.88,52.37c-1.36,3.56-4.75,11.75-6,14.62","M56.38,53.25c12.38-2.75,18.25-3.7,23.62-3.12c15.12,1.62-1.12,2.25-4.25,4.88","M54.13,82.25c4.38,7,14.25,8.12,34.5,5.62"],"ち":["M24.5,32.62c1.38,0.62,3.88,1.51,6.38,1.12c6.5-1,18.25-4.12,26.88-6c2.64-0.57,5.38-1.5,7.62-2.38","M45.62,15.62c0.75,1.25,0.71,3.58,0.38,5.25c-3,15-4.25,22.59-8.38,38.62c-3.25,12.62-5.38,11.12,3.62,4.38c8.29-6.21,19.75-9.5,28.5-9.5c8.62,0,14.58,5.88,14.5,14.5c-0.12,13.5-16.5,20.62-29.88,23.25"],"つ":["M14,44.75c1.88,1.62,4.68,2.09,8.12,0.62c17.88-7.62,30-11.12,44.88-10.88c12.56,0.21,22.98,7.17,22.87,19.17c-0.18,18.77-24.75,28.71-45.01,32.08"],"て":["M20.5,26.38c1.87,1.62,4.42,1.97,8.12,1.37c21.75-3.5,33-5.12,50.12-8.38c12.34-2.34,13-0.88,0.38,1.38c-17.89,3.19-33.78,19.12-33.78,37.62c0,20.5,17.91,30.25,35.16,30.25"],"と":["M35.5,18.38c1.74,0.74,3.62,2.62,4.12,5.37c0.5,2.75,4.75,25,5.38,28.12","M78.12,25.5c0.25,1.88,0.04,4.09-2.25,5.75c-6.37,4.63-13.22,8.49-22.75,15.25c-12.88,9.12-21.62,18.38-21.62,27.5c0,10.12,8.5,13.88,26.88,13.88c6.25,0,14.75-0.12,21.62-1.25"],"な":["M22.88,28.96c1.18,0.58,3.3,1.1,5.47,1.05c5.53-0.13,10.9-0.98,16.52-2.42c4.82-1.23,9.13-3.12,11.38-4.22","M42.99,14c0.63,0.89,0.56,2.52,0.31,3.72c-2.96,14.16-7.95,26.56-14.25,37.87c-2.05,3.69-4.25,7.24-6.55,10.65","M72.26,23.25c6.88,2.5,12.62,5.62,14.75,9.5c4.06,7.41-0.25,3.38-3.5,3.88","M68.88,44.62c-1,1.88-2.14,5.24-1.88,8.25c0.62,7,1.5,13.12,1.5,20.62c0,20-27.88,19.75-27.88,9.38c0-5.62,8.25-8.25,13.88-8.25c8.75,0,21.5,3.25,29.75,11.5"],"に":["M24.53,22.75c1.25,1.5,1.62,3.75,1.12,6.38c-3,15.88-9,32.5-7.38,47.62c2.02,18.84,4.5,5.75,8.5-3.5","M53.2,30.64c0.96,0.79,2.44,1.58,5.1,1.35c6.98-0.61,15.01-3.3,22.04-3.36c13.19-0.11,1.5,3.75-8.39,7.35","M52.53,68c1.76,12.92,11.92,16.01,24.23,14.93c5.08-0.45,8.9-0.8,14.27-2.06"],"ぬ":["M25.38,28.5c2,1.38,2.97,3.23,3.38,5.88c1.87,12.18,4.12,23.92,8.54,34.67c1.79,4.36,3.96,8.33,6.84,12.46","M57.12,19.25c0.88,2.12,1.06,3.79,0.62,5.88c-3.12,15-13.14,39.81-18.12,48.62c-11.87,21-20.62,1.25-20.62-4.5c0-22.63,43.75-44.25,62.36-29.59c7.66,6.03,9.8,14.58,9.14,23.34c-2,26.75-32.88,28.38-32.88,16.88c0-9.38,17.38-7.12,27.12-1.12c3.1,1.91,7.25,5.25,9.5,7.5"],"ね":["M33.29,14.5c1.62,1.62,2.1,3.21,1.88,5.88c-1.03,11.93-2.06,31.66-2.53,53.12c-0.1,4.62-0.18,9.31-0.22,14","M17.16,37.88c1.62,0.88,3.25,1.38,5.62,0.75c2.14-0.56,7.8-2.31,12.37-4.03c6.26-2.35,6.88-1.47,3.12,3.63c-5.56,7.53-13.02,17.38-18.48,26.77c-5.6,9.62-3.45,8.3,2,3c19.12-18.62,38.5-39.12,54.12-39.12c11.38,0,12.88,11.25,12.88,32.5c0,28.62-30.18,24.88-30.18,16.26c0-9.63,18.73-7.82,28.06-1.88c2.75,1.75,5.88,4.88,7.5,6.75"],"の":["M53.82,28.62c1,1.5,1.34,4.12,0.88,6.62c-1.75,9.5-6.89,25-10.75,33.12c-9.63,20.26-16.55,14.74-24.38-1.98c-9.13-19.5,23.5-48.88,50.63-40.38c32.38,10.15,28,54.62-4.75,60.88"],"は":["M24.51,18c1.25,1.5,2.15,4,1.62,6.62c-3.5,17.62-6.98,36.4-4,54.88c2.5,15.5,1.12,2,5.62-6.25","M49.64,37.89c2.41,1.57,4.85,2.16,7.8,1.71c9.36-1.43,17.46-2.94,23.4-4.57c3.12-0.86,5.96-1.29,7.8-1.29","M69.77,16.5c2.25,2.12,2.88,4.12,2.88,6.5c0,2.38,1.5,38.62,1.5,48c0,22.5-30.62,19.62-30.62,10.5c0-9.75,23.88-5.62,29.5-2.88c5.62,2.74,11.98,8.26,13.36,9.38"],"ひ":["M20,25.12c1.25,0.88,3.75,2.25,6.5,1.38c2.75-0.87,7.31-2.38,11.38-4.5c6-3.12,8.42-1.01,4.25,4c-27.13,32.62-23.76,58.5-1.52,62.88c18.07,3.56,37.63-16.38,35.63-56.51c-0.72-14.5-0.17-14.78,4.12-1.75c3.76,11.38,10.26,20.76,16.14,26.5"],"ふ":["M42.63,15.62c3.62,3.38,7.5,5.38,12.74,6.13c9.59,1.37,3.5,3.38-1.88,6.12","M43.63,46.88c1.88,4.62,7.5,9.41,14.25,17.5c10.62,12.74,0.49,30-19.13,21.62","M16.5,73.38c0.75,4,1.88,8.12,5,10.12c1.16,0.74,0.12-3.38,13.25-9.12","M80.13,61.88c5.12,3.38,10.28,7.49,11.38,8.88c6.75,8.5-0.25,4.62-4.62,7.12"],"へ":["M15,48.75c2.25,1.62,4.67,1.96,7-0.38c3.62-3.62,7.46-6.54,11.25-10.5c5.5-5.75,8.48-4.75,13.12-0.88c12.12,10.12,30.38,25.12,33.38,27.38c3,2.26,12.37,10.38,13.87,11.63"],"ほ":["M24.51,18.75c1.25,1.5,2.15,4,1.62,6.62c-3.5,17.63-6.98,37.4-4,55.88c2.5,15.5,1.12,2,5.62-6.25","M53.08,21.13c1.9,1.28,3.82,1.76,6.14,1.4c7.36-1.17,13.73-2.4,18.41-3.73c2.46-0.7,4.69-1.05,6.13-1.05","M53.83,44.3c2.21,1.44,4.46,1.98,7.16,1.57c8.59-1.31,15.78-2.44,21.23-3.94c2.87-0.79,5.72-1.18,7.41-1.18","M72.51,23c1.38,1.62,1.62,4.12,1.62,6.5c0,2.38,2,35.12,2,44.5c0,17.5-29.88,17.12-29.88,8c0-9.75,21.38-7.88,29.5-2.88c5.33,3.28,12,8.25,13.38,9.38"],"ま":["M29.83,32.28c2.2,1.15,4.43,1.5,7.14,1.26c11.54-1.04,25.94-3.12,34.66-4.85c2.87-0.57,5.45-0.44,7.13-0.44","M33.83,51.84c2.45,1.61,4.94,1.72,7.94,1.26c9.52-1.46,17.87-3.1,27.03-5.16c3.22-0.72,6.34-1.32,8.21-1.32","M55.81,14c1.52,1.8,1.8,4.57,1.8,7.19c0,2.63,0.46,43.88,0.46,54.25c0,21.3-30.07,19.96-30.07,9.86c0-10.79,25.88-9.93,38.57-3.18c6.12,3.25,11.55,6.38,14.8,9.13"],"み":["M32.5,26c1.88,1.75,4.06,1.7,6.88,1.25c3.88-0.62,7.62-1.75,11.88-3.12c4.26-1.37,6.25-0.12,4.5,5.12c-1.75,5.24-6.66,17.39-12,30.12c-13.63,32.51-29.26,29.26-29.26,18.63c0-14.25,20.48-15.36,33-13.5c18.5,2.75,30,6.62,44.38,14.25","M79.38,54.75c0.75,2.38,0.49,4.37,0,6.25c-2.12,8.12-7.5,25-22.12,33.75"],"む":["M19.59,31.65c2.1,1.55,4.24,1.66,6.81,1.21c8.17-1.41,15.33-2.98,23.19-4.96c2.76-0.69,5.44-1.27,7.05-1.27","M37.02,15.5c1.62,1.25,2.31,2.88,2.12,5.25c-0.88,11.12-1.5,20.75-4,34.88c-3.61,20.44-19.25,16.99-18.62,7.37c0.5-7.74,6.25-12.86,12.62-13.5c5-0.5,14.28,1.93,5.88,15c-12.62,19.62-11.42,24.51,5.11,25.54c10.98,0.68,19.26,0.72,28.49-0.92c14.15-2.5,7.4-2.63,7.4-11.13","M78.52,36.25c6.88,3.12,11.71,5.95,14.88,10.12c6.25,8.25-1.38,3.62-4.5,4.5"],"め":["M27.48,31.75c1.75,1,2.41,3.09,2.5,5.25c0.5,11.62,2.75,23.5,7.25,31.38c1.39,2.44,5.38,8.5,7.25,10.38","M59.6,19.38c1,1.5,1.35,4.12,0.88,6.62c-2.75,14.62-13.62,37.75-20.1,47.24c-12.28,17.14-16.78,13.14-22.28,0.64c-5.38-15.38,26.4-42.18,53.42-35.28c29.08,8.27,23.96,46.02-7.98,50.15"],"も":["M49.17,14.75c1.88,1.88,1.86,4.52,1.12,8c-3,14.25-5,26.62-7,42.12c-2.55,19.73-0.75,29.88,17,29.86c20.25-0.02,28.63-13.11,20.01-35.73","M26.54,34.62c1.12,0.88,2.87,2.21,6,2c11.12-0.75,20-2.12,27.74-3.46c3.88-0.67,5.88-1.17,8.88-1.04","M26.42,53.38c-1.5,4,1,6.75,7.75,6.75c8.75,0,17.62-1,22.88-1.88c2.01-0.33,5.38-1,7.5-1.75"],"や":["M18,49.38c1.88,1.62,5.25,2.5,8.62,0.88c18.51-8.88,35.76-19.38,50.83-19.26c9.02,0.14,16.01,4.13,15.93,12.29c0,8.33-10.88,16.58-24.5,17.83","M47.13,15.88c5.12,0.88,10.41,4.05,11.5,6.62c2.12,5-1,2.38-2.88,2.62","M30,24.38c2.38,1.88,3.28,2.87,3.88,5.25c2.62,10.5,11.12,41.12,14.75,52.5c0.65,2.04,1.88,6.25,2.88,9.38"],"ゆ":["M21.05,25.38c1.38,1.5,2.02,4.13,1.5,6.25c-2.88,11.75-4,22.25-2.12,35c2.77,18.85,1.12,3.88,3.25-1.5c9-22.75,27.24-34.5,44.38-34.5c16.88,0,21.88,11.38,21.88,20.25c0,27.38-30.88,29.62-43,16.75","M58.42,16.75c2.62,1.75,3.17,3.13,3.5,7.12c0.88,10.5,1.4,18.72,1.62,29.38c0.5,24-6.25,32-12.38,39.25"],"よ":["M58.24,35.38c7.5-1.28,13.74-2.63,18.5-4.1c2.5-0.77,4.77-1.15,6.25-1.15","M54.62,13.88c2.25,2.12,2.98,4.13,2.88,6.5c-0.75,17-0.12,34.88,1.39,53.5c1.88,23.07-34.89,20.88-34.89,11.5c0-12,26.25-8,35.98-4.12c8.1,3.23,11.52,4.88,18.52,10.38"],"ら":["M35.33,15c3.75,3,9.22,4.41,16.5,4.25c11.12-0.25-0.25,2.38-1.25,3.5","M35.83,35.75c-2.14,4.34-2.79,8.67-3.11,13.24c-0.42,5.84-0.31,12.05-2.14,19.13c-3.16,12.27,1.49,4.77,3,3.5c11.88-10,21.7-12.67,32.61-12.49c9.21,0.15,16.85,5.19,16.76,13.88c-0.12,13.6-14.24,21.49-32.49,22.49"],"り":["M38.75,25.25c1.25,1.5,2.24,4.03,1.62,6.62c-2.88,12.13-6.29,29.65-4.25,42.38c2,12.5,1.75-0.75,5.62-6.25","M69.37,18.75c2.25,2.12,2.88,4.12,2.88,6.5c0,2.38,0,26.38,0,35.75c0,16.5-5,25.75-12.62,33.12"],"る":["M34.31,20.38c1.75,1.25,4.62,2.62,8.5,1.5c3.88-1.12,9.62-2.5,15.62-4.62c6-2.12,7.5-0.12,4.38,4.25c-3.12,4.37-18.89,24.62-27.75,34c-8.5,9-13.09,11.89,0.75,3.25c15.62-9.75,43-10.88,43,13.38c0,22.5-40.88,24.5-40.88,12.62c0-11.25,18.12-8.75,24.38-0.38"],"れ":["M34.48,13c1.5,1.38,2.83,3.74,2.5,6.38c-0.5,4-2.75,44.5-2.75,52.88c0,8.38,0.12,16.62,0.12,19.5","M16.98,40.75c2.12,1.38,3.74,1.46,7.5,0c4.5-1.75,6.55-2.66,13-5.5c4.25-1.88,4.4,0.24,2.5,3.5c-5.25,9-10.5,16.75-18.88,27.62c-7.55,9.81-6.93,12.85,3.25,3.12c14-13.38,20.34-19.76,33.88-32.5c6.38-6,19.39-12.09,18.14,0.88c-1.02,10.63-1.89,22.13-2.29,30.75c-1.02,21.71,11.53,18,20.15,8.63"],"ろ":["M36.95,21.88c1.5,2,4.62,3.62,8.5,2.5c3.88-1.12,8.12-2.25,14.12-4.38c6-2.13,6.53-0.1,3.38,4.25c-7.88,10.88-18,22.75-27.5,35.25c-7.49,9.86-10.68,11.32,2.88,2.25c17.38-11.62,46.62-14,46.62,8.12c0,15.62-16,22.5-32.12,25.12"],"わ":["M38.53,14.75c1.5,1.38,2.22,3.73,2,6.38c-1,11.87-2.75,44.49-2.75,52.87c0,8.38-0.62,16.62-0.62,19.5","M17.53,40.75c2.12,1.38,3.68,1.3,7.5,0c5.88-2,9.8-3.16,16.25-6c4.25-1.88,6.12,0,2.75,4c-6.72,7.96-13,16.5-22.12,27.88c-7.75,9.66-7.54,12.21,3,2.88c21.88-19.38,49.75-35.62,63.5-21c14.36,15.27,1.62,36.62-23.38,42.62"],"を":["M28.56,27.87c1.62,1.13,3.17,1.64,6.01,1.12c10.86-1.99,16.74-3.37,24.71-4.72c3.64-0.62,5.65-0.93,8.4-0.75","M49.93,14.38c0.75,1,1.48,3.22,0.38,5.62c-4.62,10.12-10,20.75-17.12,30.25c-9.25,12.33-9.25,11.19,2.12,2.5c9-6.88,23.75-12.12,22.88,19.88","M83.06,39.88c0.62,1.75,0,4-3,5.75c-3,1.75-49.62,24.16-44.75,38.25c3.28,9.48,17.93,9.12,29.98,7.75c4.48-0.51,9.15-1.12,12.4-1.75"],"ん":["M56.35,16.5c0.75,1.75,1.13,5.83-0.38,8.25c-7,11.25-27.22,43.47-33.88,54.37c-9,14.75-7.62,16.25,1.5,1.25c17.86-29.36,32-23.76,32-6.75c0,25,19,26.5,34.25-5"],"ア":["M23.5,26.25c2.41,1.56,3.98,1.44,8.51,0.75c11.4-1.75,37.77-5.5,48.28-6.78c5.23-0.64,7.99,2.06,2.62,6.04c-6.75,5-13.12,9.5-23.25,16","M53.12,41.12c0.79,1.5,1.02,3.24,0.58,5.28c-4.04,18.48-9.92,31.85-19.92,45.48"],"イ":["M69.75,16.75c0.12,1.75-0.34,3.86-1.62,5.5c-10.13,12.87-23.75,29.63-45.63,42.87","M56.38,43.88c1,1.12,1.25,3,1.25,4.62c0,1.62,0,32.75,0,34.62c0,1.87-0.13,9.13-0.13,11.76"],"ウ":["M53.25,14.62c1,1.12,1.25,3,1.25,4.62c0,1.62,0,10.76,0,12.64","M26.5,31.25c1,1.12,1.22,3,1.25,4.62c0.09,4.45,0.29,10.95,0.45,16.37c0.07,2.5,0.14,4.77,0.18,6.5","M29.12,35.88c19.38-2.25,40.25-4.25,49-5.5c8.75-1.25,8.28,0.84,6.25,6.88c-5,14.88-20.12,43.5-41,56.62"],"エ":["M31.87,35.68c2.32,0.71,5.14,0.66,7.48,0.29c8.57-1.35,22.4-2.85,33.66-3.85c2.26-0.2,4.52-0.19,6.77,0.22","M53.34,38.13c1,1.12,1.31,3,1.25,4.62c-0.18,4.74-0.51,12.89-0.83,22.25c-0.08,2.31-0.16,4.7-0.23,7.12","M19,75.46c3.41,0.94,7.57,0.88,11.01,0.39c17.78-2.48,34.53-3.86,50.55-3.9c3.34-0.01,7.23,0.42,10.46,1.8"],"オ":["M19.5,37.85c3.91,1.78,7.55,1.55,11.01,1.02c18.03-2.75,34.4-4.5,50.55-5.41c3.34-0.19,6.35,0.17,10.46,1.38","M60.38,16.38c1.32,1.49,1.65,3.97,1.65,6.12c0,8-0.25,46.23-0.25,58.63c0,20.38-5.88,7.5-9.25,5.5","M60.29,36.38c0,1.62-1.64,3.61-3.62,6c-7.88,9.5-21.12,22.75-34.62,33"],"カ":["M25.5,40.62c1.88,1.25,4.51,1.87,7.12,1.5c17.88-2.5,32.78-4.51,42.5-5.88c7.12-1,10.59,0.24,8.62,7.88c-2.12,8.25-4.47,17.81-9.25,29.12c-10.49,24.88-14.11,14.51-19.24,11.88","M55.88,17.12c0.88,1.62,1.29,3.83,0.75,6.75c-4.25,22.88-15.88,45.25-30.25,58.88"],"キ":["M27,40.5c1.75,0.62,4.77,1.09,7.25,0.38c11.75-3.38,30.62-8.13,37.5-9.88c2.62-0.67,6.75-1.12,9-1","M19.5,65.8c2.28,0.84,6.24,1.18,9.46,0.17c17.79-5.59,32.67-9.09,49.17-12.99c3.43-0.81,8.81-1.52,11.74-1.35","M48.87,16.75c2.5,1.75,3.43,3.24,3.88,6.12c2.12,13.62,6.38,45.38,8.25,59.25c0.4,3,1,8.38,1.38,11.12"],"ク":["M50,19.62c0.38,1.5,0.34,3.48-0.5,5.12c-4.12,8.12-7.88,15.5-16.12,24.12","M51.25,28.62c2.62,0.25,5.67-0.39,7.62-0.88c6-1.5,9.75-2.38,15.12-3.88c5.79-1.62,7.53-0.42,5.12,4.88c-10.36,22.88-26.24,44.14-48.61,60.51"],"ケ":["M40.96,17.88c0.44,1.9,0.39,4.42-0.59,6.5c-4.82,10.31-9.21,19.67-18.87,30.62","M37.88,37.62c2.12,0.88,4.15,1.04,6.62,0.5c12.62-2.75,25.5-4.88,35.75-6.5c3.61-0.57,6.25-0.75,9.25-0.5","M64.46,38.88c0.44,1.9,0.5,4.27-0.08,6.5c-3.63,13.75-9.25,31.25-24.63,43.87"],"コ":["M30.13,35c1.75,1,3.01,2.18,6.5,1.62c14.25-2.25,29.62-4.25,37.38-5.5c9.37-1.51,9.88,0.25,8,7.5c-2.77,10.71-5.25,22.12-7,34.88","M27.5,77.38c2.62,1.12,4.38,1.51,8.25,1c11.38-1.5,22.62-3,33.75-3.38c4-0.13,5.88,0,9.62,0.5"],"サ":["M16.5,44.34c2.84,1.27,4.77,1.91,8.93,1.13c17.2-3.22,40.45-5.35,58.53-5.34c4.33,0,6.92,0.37,10.42,0.82","M36.63,23.38c1.12,1.38,1.19,2.5,1.25,4.75c0.25,9,0.38,20.25,0.75,28.88c0.14,3.25,0.38,7.12,0.38,9.25","M69.63,16.62c1.5,2,1.62,2.87,1.62,6.25c0,8.25-0.16,9-0.16,15.88c0,23.25-9.34,42.5-23.21,53"],"シ":["M39.87,19.75c5.14,1.57,9.79,6.01,11.5,8.62","M26,42.62c3.25,0.88,10.25,5.5,12.25,8.13","M33,85c3.75,0.88,7.12,0.49,10.38-1.38c17.87-10.24,32.37-23.87,46.12-42.87"],"ス":["M30.13,29.38c1.75,1.5,4.15,1.98,6.62,1.38c13.25-3.25,24.25-5.62,31.25-7.38c7-1.76,8.64,1.16,6.5,5.75c-11.24,24.12-28.37,45.87-53.5,57.25","M61,57.25c11,7.38,21,17,28,28.62"],"セ":["M17,49.38c3.12,1.5,5.04,2.18,8.62,1.38c23.5-5.25,31.24-7.43,50.62-11.62c23.12-5,6.5,7.75-3.25,18.12","M42.38,19.5c2,2.25,2.15,3.5,2.12,6.62c-0.12,17.5-0.88,31.75-0.88,41.12c0,14,3.13,16.99,12.38,17.12c8.38,0.12,14.12,0.12,18,0.12c3.88,0,7.5-0.5,10.5-1.12"],"ソ":["M23.5,25.5c3.92,4.1,7.71,9.93,10.75,17.88","M83.5,21c1.25,2.5,1.3,4.44,0.12,8.5c-5.87,20.38-26.24,49.5-45.62,61.25"],"タ":["M48.83,19.75c0.43,1.72,0.39,4-0.58,5.89c-4.77,9.34-9.1,17.82-18.63,27.73","M49.75,30.38c2.75,0.5,5,0,7.62-0.62c6.02-1.43,10.5-2.62,15.88-4.12c5.79-1.62,8.22,0.31,5.88,5.62c-10.88,24.62-22.13,43.99-50.13,59.99","M43.38,45.62c6.75,3.5,10.62,7.88,14.75,15.25"],"チ":["M69.76,15.25c-0.38,2.62-2.01,4.37-3.88,5.38c-7.88,4.25-18.62,9.75-35.5,13.25","M18.5,51.5c2.88,0.88,4.39,1.65,7.88,1.25c22-2.5,36.38-4.25,56.12-4.88c4.88-0.15,7.88,0.51,10.88,1.51","M54.88,30.75c0.88,0.75,1.75,2.49,1.75,4.75c0,6.03,0.03,11.25,0.03,18.27c0,14.98-5.03,29.48-16.53,39.23"],"ツ":["M21.5,31.38c2.38,3,4.5,9.38,4.88,13.88","M45.62,23.75c3.38,3.5,6.62,9.5,7,14.88","M84.62,27.88c0.75,2.25,0.39,5.26-0.75,8c-7.63,18.37-21.25,41.12-46,52.5"],"テ":["M36.5,21.5c2.12,1.25,4.38,1.59,7.25,1.25c10.62-1.25,16.88-2.25,24.62-3.25c3.73-0.48,5.63-0.5,8.13-0.25","M20,44.12c2.88,1,5.26,1.05,7.5,0.75c22.38-3,37-5.62,54.13-6.12c5.62-0.16,7.75,0,10.38,0.62","M58,43.25c0.88,1,1.32,2.63,1.12,4.38c-1.74,15.37-11.62,34.99-24.62,41.87"],"ト":["M44,16.38c1.25,1.12,2.12,3.25,2.12,5.5c0,26.12,0,53.5,0,57.62c0,4.12,0,10.5,0,13.38","M49.24,43.12c11.75,4.12,18.25,10.62,24.5,18.75"],"ナ":["M18.5,44.12c2.62,1,4.77,1.17,9.12,0.5c19.38-3,37.75-4.75,52.38-5.62c3.75-0.22,8.88-0.25,11.88,0.12","M53.26,14.5c1.75,1.25,2.75,3,2.75,6c0,3,0.12,21.5,0.12,24.25c0,20-6,37.62-18.38,49.12"],"ニ":["M32.63,34.69c2.5,1.19,4.33,1.6,7.45,1.35c11.55-0.91,18.3-2.41,27.04-3.18c2.64-0.23,6.27-0.16,8.39,0.08","M20,74.88c2.62,1,4.78,1.45,9.12,0.75c20.25-3.25,36.5-3.88,52.38-3.88c3.75,0,8,1,11.12,2.38"],"ヌ":["M33.38,27.62c2.75,1.25,5.38,1.16,8.5,0.62c10.12-1.75,19-3.12,28.62-5c6.67-1.3,7.75-0.12,5.38,5.62c-6.7,16.22-20.63,40.52-48.88,57.89","M44.88,46.38c12,6.75,22.38,15.38,30.62,28.12"],"ネ":["M51.38,12.38c3.38,2.12,8,5.88,11,10.88","M26.88,36.16c2.62,1.46,5.45,1.93,8.5,1.19c10.75-2.6,20.75-4.98,30.88-7.5c6.53-1.62,7.81,1.27,4.62,4.68c-11.63,12.47-22.76,23.35-48.88,37.97","M54.38,54.12c1.38,1.75,1.62,3.5,1.62,6c0,2.5,0,27.5,0,29.38c0,1.88,0,4,0,6.88","M65.38,53.62c12.5,6,19.88,11.75,24.88,18.88"],"ノ":["M72.37,25.25c0.75,2,0.92,4.89,0.25,7.25c-7.12,25-25.38,44.75-43.62,56.88"],"ハ":["M39.33,36.88c0.38,1.14,0.46,2.88-0.12,4.14c-6.33,13.73-13.33,23.86-22.21,32.23","M65.5,36.38c13,9.12,23.12,22.62,28,33.38"],"ヒ":["M35.38,44.5c1.75,1.38,4.51,2.19,6.88,1.88c10.24-1.38,17.24-2.88,24.24-4.26c3.01-0.59,7.12-1,9.38-0.88","M31,17.62c1.38,1.26,1.88,3.38,1.88,6.13c0,2.75-0.88,44-0.88,47.25c0,9.75,4,14.62,13.75,14.62c6,0,16.38,0.12,21.38,0c5-0.12,9.5-0.62,13.5-1.5"],"フ":["M24.5,30c1.88,1.88,3.5,2.04,6.5,1.62c14.5-2,29-4.38,43.75-6.88c6.82-1.16,10.58,2.29,6.88,9.12c-10.38,19.14-21.25,39.52-50.01,53.64"],"ヘ":["M15.5,49.02c2.78,1.55,5.39,0.64,6.95-0.9c4.05-4.01,9.47-8.3,12-10.88c3.16-3.23,7.32-5.26,12.01-1.16c11.25,9.82,25.03,21.45,35.78,30.36c4.28,3.55,7.71,6.85,11.25,9.56"],"ホ":["M22.63,40.38c2.62,1,4.75,1.71,9.12,1.25c17.75-1.88,29.25-2.75,45.38-3.88c3.74-0.26,7.38-0.12,11.12,0.62","M53.75,17.12c1.38,1.88,1.38,4.5,1.38,7.38c0,2.88-0.12,46.62-0.12,51.88c0,23.12-6.25,11.25-9.75,9.62","M27.38,59.38c0.5,9.25-1.38,16.62-6.38,21.88","M73.25,52.75c10.88,9.63,15.5,17.63,16.63,24.87"],"マ":["M21.5,33.75c1.88,1.88,3.5,1.99,6.5,1.62c19.62-2.38,33.5-4,51.25-6.38c6.85-0.92,9.37,1.67,4.38,7.62c-7.12,8.5-17.88,20-28.75,31.62","M43.38,58.88c8.43,6.5,16.6,15.93,20.25,26.25"],"ミ":["M41.87,20c10.4,2.57,20.5,6.3,25,10.38","M42,46.88c10.72,2.69,21.11,6.6,25.75,10.88","M36.5,75c15.71,4.49,30.95,11,37.75,18.12"],"ム":["M53.84,22.5c0.88,1.75,0.78,4.57-0.38,6.88c-9.25,18.38-16.19,30.96-25.25,45.75c-3.75,6.12-3,8.38,4.38,7.12c7.38-1.26,46.62-8.12,49.62-8.88","M72.21,60.12c6.88,6.38,13.62,14.88,16,25.38"],"メ":["M73.38,19.12c0.88,1.75,0.48,4.44-0.38,6.88c-7.75,22.12-21.75,47.62-45,62.88","M39.51,39.5c16.54,7.76,32.12,18,38.5,30.88"],"モ":["M27.88,26.19c2.5,1.19,4.33,1.6,7.45,1.35c11.55-0.91,21.93-2.16,32.79-3.93c2.62-0.42,6.27-0.41,8.39-0.17","M17.5,54.38c2.62,1,4.78,1.45,9.12,0.75c20.26-3.25,33.88-5.38,51.64-6.13c3.75-0.16,7.38,0.25,11.12,0.88","M48.76,29.88c1.12,1.62,1.42,3.62,1.42,6.12c0,6.53-0.65,33.56-0.65,35.88c0,7.67,3.09,11.08,10.53,11.76c5.33,0.49,12.31,0.24,16.37,0c4.46-0.26,6.52-0.74,9.59-1.43"],"ヤ":["M18,45.75c2.12,1.62,6.15,2.35,10.12,1.38c18.88-4.62,33.39-7.83,48.88-11.88c22-5.75,1.5,14.25-2.75,20","M38.47,19.38c1.65,1.4,2.54,2.67,3.18,5.21c0.64,2.54,11.95,52.9,12.59,55.57c0.64,2.67,2.16,9.16,3.05,12.46"],"ユ":["M29.5,35.38c2.38,1.5,5.14,2.08,9.25,1.5c13.25-1.88,18.02-2.4,27.62-4c6.75-1.12,7.78,0.16,6.5,6.38c-2.38,11.5-4.88,24.5-6.5,34.5","M17,76.88c2.75,1.5,4.76,2.05,9.12,1.5c22.62-2.88,36-3.88,54.12-3.88c3.75,0,7.38,0.5,11.12,1.12"],"ヨ":["M29.13,30.12c2.38,1.5,5.12,1.98,9.25,1.5c14-1.62,26.71-3.04,36.38-4.25c6-0.75,6.88,0.5,6.5,6.38c-1,15.51-1.89,30.63-3.01,42.25","M29.25,52.88c2.38,1.5,5.12,1.98,9.25,1.5c10.5-1.22,22.81-2.29,31.11-3.04c2.77-0.25,5.27,0.04,7.77,0.54","M23.5,78.84c2.75,1.3,4.74,1.68,9.12,1.3c12.5-1.08,29.37-2.9,41.38-2.9c3.38,0,5.62,0,9.38,0.54"],"ラ":["M38.63,21.06c2.07,1.86,4.43,2.53,8.05,2.15c9.2-0.96,14.34-2.01,21.57-2.95c2.41-0.31,4.13-0.53,6.51-0.19","M26,41.89c2.38,1.7,5.12,2.24,9.25,1.7c14-1.84,31.21-4.95,40.88-6.32c6-0.85,8.14,0.62,6.25,5.72c-6.88,18.62-22,38.25-45.25,48.62"],"リ":["M35,18.38c1.12,1.5,1.62,3,1.62,4.88c0,1.88,0,25,0,27c0,2,0,6.12,0,7.75","M71,15.38c1.5,1.25,2.38,3.12,2.38,5.38c0,2.26-0.12,28.88-0.12,32.88c0,19.62-9.5,32.25-21.75,40.38"],"ル":["M34.38,31.88c1.12,1.5,1.72,3,1.62,4.88c-1.12,22.88-8.88,40.62-17.5,49.5","M56.51,19.62c1.5,1.25,2.38,3.12,2.38,5.38c0,2.26-0.12,47.62-0.12,51.62c0,10.5,0.52,10.21,9.38,2.75c9.5-8,16.5-14.62,26.38-25.62"],"レ":["M34.5,19.75c1.5,1.25,2.38,3.12,2.38,5.38c0,2.26-0.12,50.12-0.12,54.12c-0.02,8.75-0.14,8.63,9.36,3.75c13.23-6.79,33.38-22.5,43.25-33.5"],"ロ":["M25,33.25c1.5,1.25,2.16,3.14,2.38,5.38c0.96,10.07,2.14,23.67,3.14,34.88c0.31,3.4,0.59,6.58,0.86,9.38","M28.13,36.12c9.25-1,37.62-3.12,45.62-4.25c8-1.13,9.57,0.53,8.38,6.62c-2.13,10.89-4.13,21.89-6.75,34.89","M32,78.12c5.38-0.5,33.62-3,36.5-3c2.88,0,7.88-0.25,11.5,0.25"],"ワ":["M25,23.62c1.5,1.25,2.16,3.14,2.38,5.38c0.96,10.07,0.89,8.17,1.89,19.38c0.31,3.4,0.59,6.58,0.86,9.38","M27.75,26.38c3.12,0.38,5.16,0.22,8.23-0.06c13.77-1.29,27.15-2.32,41.65-3.7c8.04-0.76,9.44,0.51,8.38,6.62c-4.76,27.26-20.64,47.64-43.88,61.51"],"ヲ":["M30.24,25.14c2.38,1.7,5.11,2.13,9.25,1.7c12.32-1.29,21.94-2.6,30.48-3.64c2.81-0.34,5.51-0.65,8.14-0.93","M29,46.69c2.25,1.44,4.44,1.9,8.05,1.4c8.19-1.15,19.93-2.64,28.56-3.79c2.38-0.31,4.65-0.62,6.75-0.92","M78,22.88c0.88,2,0.62,4.64,0.12,7c-4.88,22.5-23.5,47.12-44.12,60.74"],"ン":["M26.5,24.88c5.76,2.15,12.68,8.47,15.75,14.25","M28.62,83.75c2.5,1.62,5.12,0.96,7.75-0.62c20.13-12.13,35-24.63,49.63-41.13"]};
 
     // Confusing Character Groups
     const CONFUSING_GROUPS = [
@@ -1220,30 +1344,135 @@
       {
         title: 'る (ru) vs ろ (ro)',
         chars: [{ ch: 'る', r: 'ru', script: 'hiragana' }, { ch: 'ろ', r: 'ro', script: 'hiragana' }],
-        tip: '「る」像 3 捲著一顆紅寶石(ruby)；「ろ」尾巴空空的什麼都沒穿（裸 ro）。'
+        tip: '「る」像 3 尾巴捲一個小圈（紅寶石 ruby）；「ろ」尾巴乾淨沒有圈，像平順的道路（road）。'
       }
     ];
 
-    // 12 Practical Japanese Travel & Daily Words
-    const TRAVEL_WORDS = [
-      { jp: 'ありがとう', r: 'arigatou', zh: '謝謝', emoji: '🙏' },
-      { jp: 'すみません', r: 'sumimasen', zh: '不好意思／請問', emoji: '🙋' },
-      { jp: 'おいしい', r: 'oishii', zh: '好好吃', emoji: '😋' },
-      { jp: 'いくらですか', r: 'ikura desu ka', zh: '請問多少錢？', emoji: '💴' },
-      { jp: 'えき', r: 'eki', zh: '車站', emoji: '🚉' },
-      { jp: 'といれ', r: 'toire', zh: '洗手間', emoji: '🚻' },
-      { jp: 'みず', r: 'mizu', zh: '水', emoji: '💧' },
-      { jp: 'おかいけい', r: 'okaikei', zh: '結帳', emoji: '🧾' },
-      { jp: 'メニュー', r: 'menyū', zh: '菜單', emoji: '📖' },
-      { jp: 'ラーメン', r: 'rāmen', zh: '拉麵', emoji: '🍜' },
-      { jp: 'コンビニ', r: 'konbini', zh: '便利商店', emoji: '🏪' },
-      { jp: 'ホテル', r: 'hoteru', zh: '飯店', emoji: '🏨' }
+    // 日本旅遊初學者單字（jp 為朗讀用假名；kanji 為參考寫法）
+    const VOCAB_CATS = [
+      { id: 'basic', name: '基本用語', emoji: '🙏', words: [
+        { jp: 'はい', kanji: '', r: 'hai', zh: '是／好的', emoji: '🙆' },
+        { jp: 'いいえ', kanji: '', r: 'iie', zh: '不是／不用了', emoji: '🙅' },
+        { jp: 'ありがとう', kanji: '', r: 'arigatou', zh: '謝謝', emoji: '🙏' },
+        { jp: 'すみません', kanji: '', r: 'sumimasen', zh: '不好意思／請問', emoji: '🙋' },
+        { jp: 'おねがいします', kanji: 'お願いします', r: 'onegaishimasu', zh: '麻煩您／拜託', emoji: '🤲' },
+        { jp: 'だいじょうぶ', kanji: '大丈夫', r: 'daijoubu', zh: '沒問題／沒關係', emoji: '👌' },
+        { jp: 'わかりません', kanji: '分かりません', r: 'wakarimasen', zh: '我不懂', emoji: '🤔' },
+        { jp: 'にほんご', kanji: '日本語', r: 'nihongo', zh: '日語', emoji: '🗾' },
+        { jp: 'えいご', kanji: '英語', r: 'eigo', zh: '英語', emoji: '🔤' },
+        { jp: 'たいわん', kanji: '台湾', r: 'taiwan', zh: '台灣', emoji: '🇹🇼' }
+      ]},
+      { id: 'transport', name: '交通', emoji: '🚃', words: [
+        { jp: 'えき', kanji: '駅', r: 'eki', zh: '車站', emoji: '🚉' },
+        { jp: 'でんしゃ', kanji: '電車', r: 'densha', zh: '電車', emoji: '🚃' },
+        { jp: 'ちかてつ', kanji: '地下鉄', r: 'chikatetsu', zh: '地鐵', emoji: '🚇' },
+        { jp: 'しんかんせん', kanji: '新幹線', r: 'shinkansen', zh: '新幹線', emoji: '🚄' },
+        { jp: 'バス', kanji: '', r: 'basu', zh: '公車', emoji: '🚌' },
+        { jp: 'タクシー', kanji: '', r: 'takushii', zh: '計程車', emoji: '🚕' },
+        { jp: 'くうこう', kanji: '空港', r: 'kuukou', zh: '機場', emoji: '✈️' },
+        { jp: 'きっぷ', kanji: '切符', r: 'kippu', zh: '車票', emoji: '🎫' },
+        { jp: 'のりば', kanji: '乗り場', r: 'noriba', zh: '乘車處', emoji: '🚏' },
+        { jp: 'でぐち', kanji: '出口', r: 'deguchi', zh: '出口', emoji: '🚪' },
+        { jp: 'いりぐち', kanji: '入口', r: 'iriguchi', zh: '入口', emoji: '➡️' },
+        { jp: 'みぎ', kanji: '右', r: 'migi', zh: '右邊', emoji: '👉' },
+        { jp: 'ひだり', kanji: '左', r: 'hidari', zh: '左邊', emoji: '👈' },
+        { jp: 'まっすぐ', kanji: '', r: 'massugu', zh: '直走', emoji: '⬆️' }
+      ]},
+      { id: 'food', name: '餐廳', emoji: '🍱', words: [
+        { jp: 'メニュー', kanji: '', r: 'menyuu', zh: '菜單', emoji: '📋' },
+        { jp: 'みず', kanji: '水', r: 'mizu', zh: '水', emoji: '💧' },
+        { jp: 'おちゃ', kanji: 'お茶', r: 'ocha', zh: '茶', emoji: '🍵' },
+        { jp: 'ごはん', kanji: 'ご飯', r: 'gohan', zh: '白飯／餐點', emoji: '🍚' },
+        { jp: 'ラーメン', kanji: '', r: 'raamen', zh: '拉麵', emoji: '🍜' },
+        { jp: 'すし', kanji: '寿司', r: 'sushi', zh: '壽司', emoji: '🍣' },
+        { jp: 'ビール', kanji: '', r: 'biiru', zh: '啤酒', emoji: '🍺' },
+        { jp: 'からい', kanji: '辛い', r: 'karai', zh: '辣', emoji: '🌶️' },
+        { jp: 'おいしい', kanji: '美味しい', r: 'oishii', zh: '好吃', emoji: '😋' },
+        { jp: 'はし', kanji: '箸', r: 'hashi', zh: '筷子', emoji: '🥢' },
+        { jp: 'ひとり', kanji: '一人', r: 'hitori', zh: '一個人（一位）', emoji: '🧍' },
+        { jp: 'ふたり', kanji: '二人', r: 'futari', zh: '兩個人（兩位）', emoji: '👫' },
+        { jp: 'よやく', kanji: '予約', r: 'yoyaku', zh: '預約', emoji: '📅' },
+        { jp: 'おかいけい', kanji: 'お会計', r: 'okaikei', zh: '結帳', emoji: '🧾' }
+      ]},
+      { id: 'shopping', name: '購物', emoji: '🛍️', words: [
+        { jp: 'いくら', kanji: '', r: 'ikura', zh: '多少錢', emoji: '💴' },
+        { jp: 'これ', kanji: '', r: 'kore', zh: '這個', emoji: '👇' },
+        { jp: 'それ', kanji: '', r: 'sore', zh: '那個（你那邊的）', emoji: '👉' },
+        { jp: 'たかい', kanji: '高い', r: 'takai', zh: '貴', emoji: '💸' },
+        { jp: 'やすい', kanji: '安い', r: 'yasui', zh: '便宜', emoji: '🏷️' },
+        { jp: 'めんぜい', kanji: '免税', r: 'menzei', zh: '免稅', emoji: '🛂' },
+        { jp: 'げんきん', kanji: '現金', r: 'genkin', zh: '現金', emoji: '💵' },
+        { jp: 'カード', kanji: '', r: 'kaado', zh: '信用卡', emoji: '💳' },
+        { jp: 'ふくろ', kanji: '袋', r: 'fukuro', zh: '袋子', emoji: '🛍️' },
+        { jp: 'レシート', kanji: '', r: 'reshiito', zh: '收據', emoji: '🧾' },
+        { jp: 'おみやげ', kanji: 'お土産', r: 'omiyage', zh: '伴手禮', emoji: '🎁' },
+        { jp: 'サイズ', kanji: '', r: 'saizu', zh: '尺寸', emoji: '📏' },
+        { jp: 'コンビニ', kanji: '', r: 'konbini', zh: '便利商店', emoji: '🏪' }
+      ]},
+      { id: 'hotel', name: '住宿', emoji: '🏨', words: [
+        { jp: 'ホテル', kanji: '', r: 'hoteru', zh: '飯店', emoji: '🏨' },
+        { jp: 'チェックイン', kanji: '', r: 'chekkuin', zh: '辦理入住', emoji: '🛎️' },
+        { jp: 'チェックアウト', kanji: '', r: 'chekkuauto', zh: '退房', emoji: '🧳' },
+        { jp: 'へや', kanji: '部屋', r: 'heya', zh: '房間', emoji: '🛏️' },
+        { jp: 'かぎ', kanji: '鍵', r: 'kagi', zh: '鑰匙', emoji: '🔑' },
+        { jp: 'にもつ', kanji: '荷物', r: 'nimotsu', zh: '行李', emoji: '🧳' },
+        { jp: 'あさごはん', kanji: '朝ご飯', r: 'asagohan', zh: '早餐', emoji: '🍳' },
+        { jp: 'おふろ', kanji: 'お風呂', r: 'ofuro', zh: '浴池／泡澡', emoji: '🛁' },
+        { jp: 'タオル', kanji: '', r: 'taoru', zh: '毛巾', emoji: '🧺' },
+        { jp: 'エレベーター', kanji: '', r: 'erebeetaa', zh: '電梯', emoji: '🛗' },
+        { jp: 'ワイファイ', kanji: '', r: 'waifai', zh: 'Wi-Fi 無線網路', emoji: '📶' }
+      ]},
+      { id: 'sight', name: '觀光', emoji: '⛩️', words: [
+        { jp: 'じんじゃ', kanji: '神社', r: 'jinja', zh: '神社', emoji: '⛩️' },
+        { jp: 'おてら', kanji: 'お寺', r: 'otera', zh: '寺廟', emoji: '🛕' },
+        { jp: 'おんせん', kanji: '温泉', r: 'onsen', zh: '溫泉', emoji: '♨️' },
+        { jp: 'しゃしん', kanji: '写真', r: 'shashin', zh: '照片', emoji: '📷' },
+        { jp: 'ちず', kanji: '地図', r: 'chizu', zh: '地圖', emoji: '🗺️' },
+        { jp: 'さくら', kanji: '桜', r: 'sakura', zh: '櫻花', emoji: '🌸' },
+        { jp: 'うみ', kanji: '海', r: 'umi', zh: '海', emoji: '🌊' },
+        { jp: 'やま', kanji: '山', r: 'yama', zh: '山', emoji: '🗻' },
+        { jp: 'まつり', kanji: '祭り', r: 'matsuri', zh: '祭典', emoji: '🏮' },
+        { jp: 'コインロッカー', kanji: '', r: 'koinrokkaa', zh: '投幣置物櫃', emoji: '🔐' }
+      ]},
+      { id: 'emergency', name: '緊急狀況', emoji: '🆘', words: [
+        { jp: 'トイレ', kanji: '', r: 'toire', zh: '廁所', emoji: '🚻' },
+        { jp: 'たすけて', kanji: '助けて', r: 'tasukete', zh: '救命！', emoji: '🆘' },
+        { jp: 'びょういん', kanji: '病院', r: 'byouin', zh: '醫院', emoji: '🏥' },
+        { jp: 'くすり', kanji: '薬', r: 'kusuri', zh: '藥', emoji: '💊' },
+        { jp: 'いたい', kanji: '痛い', r: 'itai', zh: '痛', emoji: '🤕' },
+        { jp: 'けいさつ', kanji: '警察', r: 'keisatsu', zh: '警察', emoji: '👮' },
+        { jp: 'こうばん', kanji: '交番', r: 'kouban', zh: '派出所', emoji: '🚓' },
+        { jp: 'パスポート', kanji: '', r: 'pasupooto', zh: '護照', emoji: '🛂' },
+        { jp: 'さいふ', kanji: '財布', r: 'saifu', zh: '錢包', emoji: '👛' },
+        { jp: 'なくしました', kanji: '無くしました', r: 'nakushimashita', zh: '弄丟了', emoji: '😰' }
+      ]},
+      { id: 'number', name: '數字・時間', emoji: '🔢', words: [
+        { jp: 'いち', kanji: '一', r: 'ichi', zh: '1', emoji: '1️⃣' },
+        { jp: 'に', kanji: '二', r: 'ni', zh: '2', emoji: '2️⃣' },
+        { jp: 'さん', kanji: '三', r: 'san', zh: '3', emoji: '3️⃣' },
+        { jp: 'よん', kanji: '四', r: 'yon', zh: '4', emoji: '4️⃣' },
+        { jp: 'ご', kanji: '五', r: 'go', zh: '5', emoji: '5️⃣' },
+        { jp: 'ろく', kanji: '六', r: 'roku', zh: '6', emoji: '6️⃣' },
+        { jp: 'なな', kanji: '七', r: 'nana', zh: '7', emoji: '7️⃣' },
+        { jp: 'はち', kanji: '八', r: 'hachi', zh: '8', emoji: '8️⃣' },
+        { jp: 'きゅう', kanji: '九', r: 'kyuu', zh: '9', emoji: '9️⃣' },
+        { jp: 'じゅう', kanji: '十', r: 'juu', zh: '10', emoji: '🔟' },
+        { jp: 'ひゃく', kanji: '百', r: 'hyaku', zh: '100', emoji: '💯' },
+        { jp: 'せん', kanji: '千', r: 'sen', zh: '1,000', emoji: '💴' },
+        { jp: 'えん', kanji: '円', r: 'en', zh: '日圓', emoji: '💴' },
+        { jp: 'きょう', kanji: '今日', r: 'kyou', zh: '今天', emoji: '📆' },
+        { jp: 'あした', kanji: '明日', r: 'ashita', zh: '明天', emoji: '🌅' },
+        { jp: 'なんじ', kanji: '何時', r: 'nanji', zh: '幾點', emoji: '🕒' }
+      ]}
     ];
+    VOCAB_CATS.forEach(c => c.words.forEach(w => { w.id = `${c.id}:${w.jp}`; w.cat = c.id; }));
+    const VOCAB_ALL = VOCAB_CATS.flatMap(c => c.words);
 
-    // Built-in Reading & Shadowing Phrases
+    // Built-in Reading & Shadowing Phrases（{は} {へ} {を} 標示助詞，標音分別為 wa / e / o）
     const READING_PHRASES = {
       greeting: [
-        { jp: 'こんにちは', zh: '你好（午安）', note: '最基本的日間問候，注意最後的「は」當助詞時唸 wa！' },
+        { jp: 'こんにち{は}', zh: '你好（午安）', note: '最基本的日間問候，最後的「は」是助詞，唸 wa！' },
+        { jp: 'こんばん{は}', zh: '晚上好', note: '傍晚之後的問候，「は」一樣唸 wa。' },
         { jp: 'ありがとう', zh: '謝謝', note: '對親友說謝謝，更禮貌則加上 ございます。' },
         { jp: 'すみません', zh: '不好意思／請問／對不起', note: '在日本萬用度第一名，問路、點餐、道歉都能用。' },
         { jp: 'おはようございます', zh: '早安（禮貌說法）', note: '早上見面必說，熟悉「ご」的濁音發音。' },
@@ -1251,18 +1480,23 @@
         { jp: 'おつかれさまです', zh: '辛苦了', note: '職場與日常最常聽到的溫馨問候語。' }
       ],
       travel: [
-        { jp: 'えきはどこですか', zh: '請問車站在哪裡？', note: 'えき(車站)＋どこ(哪裡)，自由行問路神句。' },
-        { jp: 'これをください', zh: '請給我這個', note: '指著菜單或商品就能直接點餐結帳！' },
-        { jp: 'おすすめはなんですか', zh: '請問推薦哪一道呢？', note: 'おすすめ(推薦)，去居酒屋或拉麵店必問。' },
+        { jp: 'えき{は}どこですか', zh: '請問車站在哪裡？', note: 'えき(車站)＋どこ(哪裡)，自由行問路神句。' },
+        { jp: 'トイレ{は}どこですか', zh: '請問廁所在哪裡？', note: '把「トイレ」換成任何地點就能問路。' },
+        { jp: 'いくらですか', zh: '請問多少錢？', note: 'いくら(多少錢)＋ですか(嗎)，購物必備。' },
+        { jp: 'これ{を}ください', zh: '請給我這個', note: '指著菜單或商品就能直接點餐結帳！' },
+        { jp: 'ふたりです', zh: '兩位', note: '進餐廳被問「なんめいさまですか（幾位）」時回答。' },
+        { jp: 'よやくしています', zh: '我有預約', note: 'よやく(預約)，到飯店或餐廳報到時使用。' },
+        { jp: 'カードでおねがいします', zh: '我要刷卡', note: 'カード(卡)＋で(用)＋おねがいします(拜託)。' },
+        { jp: 'おすすめ{は}なんですか', zh: '請問推薦哪一道呢？', note: 'おすすめ(推薦)，去居酒屋或拉麵店必問。' },
         { jp: 'おかいけいおねがいします', zh: '麻煩結帳', note: 'おかいけい(結帳)＋おねがいします(拜託您)。' },
-        { jp: 'コーヒーをひとつください', zh: '請給我一杯咖啡', note: '同時練習片假名長音「コーヒー」與助詞「を」。' }
+        { jp: 'コーヒー{を}ひとつください', zh: '請給我一杯咖啡', note: '同時練習片假名長音「コーヒー」與助詞「を」。' }
       ],
       lyrics: [
-        { jp: 'さくら さくら やよいの そらは', zh: '櫻花呀櫻花，三月陽春的天空裡', note: '經典日本民謠《櫻花》，節奏緩慢最適合新手跟讀。' },
-        { jp: 'ありがとうって つたえたくて あなたを みつめる', zh: '好想傳達那句謝謝，靜靜凝視著你', note: '練習促音「って」停頓一拍的柔美節奏感。' },
-        { jp: 'ほしが ながれる よるに きみを おもう', zh: '在流星劃過的夜晚裡思念著你', note: '抒情歌常見句型：ほし(星星)、よる(夜晚)、きみ(你)。' },
-        { jp: 'あしたは きっと はれるから わらって あるこう', zh: '明天一定會放晴的，笑著向前走吧', note: '練習促音「きっと(一定)」與長音「あるこう」。' },
-        { jp: 'かぜに ゆれる はなびら そっと てをのばした', zh: '隨風搖曳的花瓣，我輕輕伸出了手', note: '感受清音、濁音(ぜ/び)與促音(そっと)交錯的韻律。' }
+        { jp: 'さくら さくら やよいの そら{は}', zh: '櫻花呀櫻花，三月陽春的天空裡', note: '經典日本民謠《櫻花》，節奏緩慢最適合新手跟讀。' },
+        { jp: 'ありがとうって つたえたくて あなた{を} みつめる', zh: '好想傳達那句謝謝，靜靜凝視著你', note: '練習促音「って」停頓一拍的柔美節奏感。' },
+        { jp: 'ほしが ながれる よるに きみ{を} おもう', zh: '在流星劃過的夜晚裡思念著你', note: '抒情歌常見句型：ほし(星星)、よる(夜晚)、きみ(你)。' },
+        { jp: 'あした{は} きっと はれるから わらって あるこう', zh: '明天一定會放晴的，笑著向前走吧', note: '練習促音「きっと(一定)」與長音「あるこう」。' },
+        { jp: 'かぜに ゆれる はなびら そっと て{を}のばした', zh: '隨風搖曳的花瓣，我輕輕伸出了手', note: '感受清音、濁音(ぜ/び)與促音(そっと)交錯的韻律。' }
       ]
     };
 
@@ -1276,7 +1510,9 @@
       hanamaru: [], // e.g., ['h_あ', 'k_ア']
       quizStats: { total: 0, correct: 0, bestCombo: 0 },
       mistakes: {}, // e.g., { 'h_ぬ': 2 }
-      karuta: { bestScore: 0, bestCombo: 0, fastestMs: null }
+      srs: {},      // 間隔複習：{ 'h_ぬ': { step: 0, due: 1732000000000 } }
+      karuta: { bestScore: 0, bestCombo: 0, fastestMs: null },
+      vocabKnown: [] // 已記住的旅遊單字 id
     };
 
     function loadStore() {
@@ -1289,8 +1525,14 @@
             hanamaru: Array.isArray(p.hanamaru) ? p.hanamaru : [],
             quizStats: p.quizStats || { total: 0, correct: 0, bestCombo: 0 },
             mistakes: p.mistakes || {},
-            karuta: p.karuta || { bestScore: 0, bestCombo: 0, fastestMs: null }
+            srs: p.srs || {},
+            karuta: p.karuta || { bestScore: 0, bestCombo: 0, fastestMs: null },
+            vocabKnown: Array.isArray(p.vocabKnown) ? p.vocabKnown : []
           };
+          // 舊版錯題沒有複習排程：一律排成今天到期
+          Object.keys(store.mistakes).forEach(k => {
+            if (!store.srs[k]) store.srs[k] = { step: 0, due: Date.now() };
+          });
         }
       } catch (e) {
         console.warn('LocalStorage unavailable:', e);
@@ -1305,10 +1547,42 @@
       }
     }
 
+    /* ===== 間隔複習（簡易 SRS）：答錯排今天，答對依 1→3→7→14 天延後，14 天後再答對即畢業 ===== */
+    const SRS_STEPS_DAYS = [1, 3, 7, 14];
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    function srsOnWrong(key) {
+      store.mistakes[key] = (store.mistakes[key] || 0) + 1;
+      store.srs[key] = { step: 0, due: Date.now() };
+    }
+    function srsOnCorrect(key) {
+      const rec = store.srs[key];
+      if (!rec) return;
+      if (rec.step >= SRS_STEPS_DAYS.length) {
+        delete store.srs[key];
+        delete store.mistakes[key];
+        return;
+      }
+      rec.due = Date.now() + SRS_STEPS_DAYS[rec.step] * DAY_MS;
+      rec.step += 1;
+    }
+    function srsDueKeys() {
+      const end = new Date(); end.setHours(23, 59, 59, 999);
+      return Object.keys(store.mistakes).filter(k => store.mistakes[k] > 0 && (!store.srs[k] || store.srs[k].due <= end.getTime()));
+    }
+    function removeMistake(key) {
+      delete store.mistakes[key];
+      delete store.srs[key];
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
     // Runtime UI State
     let activeTab = 'chart';
     let globalScript = 'hiragana'; // 'hiragana' | 'katakana'
     let chartScript = 'hiragana';  // 'hiragana' | 'katakana' | 'both'
+    let chartSet = 'seion';        // 'seion' | 'dakuon' | 'yoon'
     let seqPlayToken = 0;
 
     // Writing State
@@ -1322,6 +1596,12 @@
     let strokes = [];
     let currentStroke = null;
     let isDrawing = false;
+    let activePointerId = null;
+    let penDetected = false;      // 偵測到觸控筆後忽略手指／手掌
+    let allowFingerWithPen = false;
+    let writeShowNumbers = true;
+    let writeStage = 'trace';     // 'trace' 描紅 → 'recall' 默寫 → 蓋花丸
+    let strokeAnimToken = 0;
 
     // Karuta State
     let karutaScript = 'hiragana'; // 'hiragana' | 'katakana' | 'mixed'
@@ -1358,6 +1638,13 @@
     };
     let readTokens = [];
 
+    // Vocab State
+    let vocabCat = 'all';
+    let vocabMode = 'browse';   // 'browse' | 'cards'
+    let vocabDir = 'jz';        // 'jz' 日→中 | 'zj' 中→日
+    let vocabDeck = [];
+    let vocabIdx = 0;
+
     /*************************************************************************
      * 3. WEB SPEECH API & WEB AUDIO API SOUND EFFECTS
      *************************************************************************/
@@ -1389,7 +1676,7 @@
       }
       try {
         window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
+        const utter = new SpeechSynthesisUtterance(String(text).replace(/[{}]/g, ''));
         utter.lang = 'ja-JP';
         utter.rate = rate;
         if (bestJaVoice) utter.voice = bestJaVoice;
@@ -1505,19 +1792,21 @@
       updateHideRomajiUI();
       renderChart();
       renderWritePanelInfo();
-      renderTravelWords();
+      renderVocab();
       showToast(store.hideRomaji ? '已隱藏羅馬拼音，訓練直覺認字！' : '已恢復顯示羅馬拼音');
     }
 
     function switchTab(tab) {
       activeTab = tab;
       stopSequentialPlay();
+      strokeAnimToken++;
+      window.scrollTo({ top: 0, behavior: 'instant' });
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
       document.getElementById(`tab-${tab}`).classList.remove('hidden');
 
       document.querySelectorAll('.nav-tab').forEach(btn => {
         const isCurrent = btn.dataset.tab === tab;
-        btn.className = `nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[11px] sm:text-sm font-bold transition ${
+        btn.className = `nav-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition ${
           isCurrent
             ? 'bg-indigoJp text-washi shadow-xs'
             : 'text-muted hover:text-indigoJp hover:bg-washiBorder/40'
@@ -1528,6 +1817,10 @@
         requestAnimationFrame(() => {
           resizeWritingCanvas();
           renderWriteUI();
+          // 橫向時畫面較矮：自動捲到畫布，讓整個格子可見
+          if (window.innerWidth > window.innerHeight) {
+            document.getElementById('writeCanvasCard').scrollIntoView({ behavior: 'instant', block: 'start' });
+          }
         });
       } else if (tab === 'read') {
         renderReadSection();
@@ -1535,6 +1828,8 @@
         if (quizSubTab === 'match' && matchState.cards.length === 0) initMatchGame();
       } else if (tab === 'guide') {
         renderDashboard();
+      } else if (tab === 'vocab') {
+        renderVocab();
       }
     }
 
@@ -1551,31 +1846,71 @@
       renderChart();
     }
 
+    function setChartSet(set) {
+      stopSequentialPlay();
+      chartSet = set;
+      renderChartControls();
+      renderChart();
+    }
+
+    const CHART_SET_NOTES = {
+      seion: '清音：最基本的 46 個假名。點擊假名可看字源、口訣與代表單字。',
+      dakuon: '濁音：在清音右上加「゛」，發音時聲帶震動（か→が）。半濁音：は行加「゜」變成 ぱ行（p 音）。注意「ぢ・づ」與「じ・ず」發音相同，日常多用「じ・ず」。',
+      yoon: '拗音：い段假名＋小寫「ゃ・ゅ・ょ」，兩個字合成一拍唸（き＋ゃ → きゃ kya）。小字要寫得比較小、偏右下。'
+    };
+
+    function getChartConfig() {
+      if (chartSet === 'dakuon') return { data: DAKUON_DATA, rows: DAKUON_ROWS, cols: ['あ段', 'い段', 'う段', 'え段', 'お段'], vowels: ['a', 'i', 'u', 'e', 'o'] };
+      if (chartSet === 'yoon') return { data: YOON_DATA, rows: YOON_ROWS, cols: ['ゃ', 'ゅ', 'ょ'], vowels: ['ya', 'yu', 'yo'] };
+      return { data: SEION_DATA, rows: SEION_ROWS, cols: ['あ段', 'い段', 'う段', 'え段', 'お段'], vowels: ['a', 'i', 'u', 'e', 'o'] };
+    }
+
     function renderChartControls() {
       const act = 'bg-indigoJp text-washi shadow-xs';
       const idle = 'text-muted hover:text-indigoJp';
       document.getElementById('btnChartHira').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${chartScript === 'hiragana' ? act : idle}`;
       document.getElementById('btnChartKata').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${chartScript === 'katakana' ? act : idle}`;
       document.getElementById('btnChartBoth').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${chartScript === 'both' ? act : idle}`;
+      document.getElementById('btnSetSeion').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${chartSet === 'seion' ? 'bg-matcha text-white shadow-xs' : idle}`;
+      document.getElementById('btnSetDakuon').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${chartSet === 'dakuon' ? 'bg-matcha text-white shadow-xs' : idle}`;
+      document.getElementById('btnSetYoon').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${chartSet === 'yoon' ? 'bg-matcha text-white shadow-xs' : idle}`;
+      document.getElementById('chartSetNote').textContent = CHART_SET_NOTES[chartSet];
     }
 
     function renderChart() {
+      const cfg = getChartConfig();
+      const nCols = cfg.cols.length;
+      const gridCls = nCols === 5
+        ? 'grid grid-cols-[62px_repeat(5,1fr)] sm:grid-cols-[84px_repeat(5,1fr)] gap-1.5 sm:gap-2.5'
+        : 'grid grid-cols-[62px_repeat(3,1fr)] sm:grid-cols-[84px_repeat(3,1fr)] gap-1.5 sm:gap-2.5';
+
+      // Column headers
+      document.getElementById('chartColHeader').innerHTML = `
+        <div class="${gridCls}">
+          <div class="flex items-center justify-center text-xs font-bold text-muted bg-washi rounded-xl py-2 border border-washiBorder/60">行＼段</div>
+          ${cfg.cols.map((c, i) => `
+            <button onclick="playColumn(${i})" class="py-2 px-1 rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm transition flex flex-col items-center justify-center">
+              <span>${nCols === 5 ? c : '小' + c}</span>
+              <span class="text-xs font-normal opacity-75">${store.hideRomaji ? '' : cfg.vowels[i] + ' '}🔊</span>
+            </button>`).join('')}
+        </div>`;
+
       const container = document.getElementById('kanaMatrixBody');
       let html = '';
 
-      SEION_ROWS.forEach((rowName) => {
-        const rowItems = SEION_DATA.filter(d => d.row === rowName);
-        html += `<div class="grid grid-cols-[62px_repeat(5,1fr)] sm:grid-cols-[84px_repeat(5,1fr)] gap-1.5 sm:gap-2.5 items-stretch">`;
+      cfg.rows.forEach((rowName) => {
+        const rowItems = cfg.data.filter(d => d.row === rowName);
+        html += `<div class="${gridCls} items-stretch">`;
 
         // Row Header Button
         html += `
           <button onclick="playRow('${rowName}')" class="rounded-xl bg-washi hover:bg-indigoJp hover:text-white border border-washiBorder text-indigoJp font-bold text-xs sm:text-sm px-1 py-2 flex flex-col items-center justify-center transition">
             <span>${rowName.replace('(撥音)', '')}</span>
-            <span class="text-[10px] font-normal opacity-75">🔊</span>
+            <span class="text-xs font-normal opacity-75">🔊</span>
           </button>
         `;
 
-        for (let c = 0; c < 5; c++) {
+        for (let c = 0; c < nCols; c++) {
           const item = rowItems.find(x => x.col === c);
           if (!item) {
             html += `<div class="rounded-xl bg-washi/40 border border-dashed border-washiBorder/50"></div>`;
@@ -1600,11 +1935,11 @@
             }
 
             const romajiHtml = store.hideRomaji
-              ? `<div class="text-[11px] text-muted/40 mt-1 select-none">••</div>`
+              ? `<div class="text-xs text-muted/40 mt-1 select-none">••</div>`
               : `<div class="text-xs sm:text-sm font-medium text-muted mt-1">${item.r}</div>`;
 
             const hanaBadge = showHana
-              ? `<span class="absolute top-1 left-1 text-[11px] leading-none" title="已獲得花丸">💮</span>`
+              ? `<span class="absolute top-1 left-1 text-xs leading-none" title="已獲得花丸">💮</span>`
               : '';
             const mistakeDot = hasMistake
               ? `<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-vermilion" title="錯題本待加強"></span>`
@@ -1629,10 +1964,20 @@
 
     function onKanaCellClick(hChar) {
       stopSequentialPlay();
-      const item = SEION_DATA.find(d => d.h === hChar);
+      const item = findKana(hChar);
       if (!item) return;
       speakJapanese(item.h, 0.95);
-      openKanaModal(item);
+      if (item.kind === 'seion') {
+        openKanaModal(item);
+      } else {
+        const cell = document.getElementById(`cell-${item.h}`);
+        if (cell) {
+          cell.classList.remove('kana-speaking');
+          void cell.offsetWidth;
+          cell.classList.add('kana-speaking');
+        }
+        showToast(`${item.h}／${item.k}　${store.hideRomaji ? '' : item.r}`);
+      }
     }
 
     function clearChartHighlights() {
@@ -1650,14 +1995,14 @@
     }
 
     function playRow(rowName) {
-      const items = SEION_DATA.filter(d => d.row === rowName);
+      const items = getChartConfig().data.filter(d => d.row === rowName);
       playSequence(items, `正在連播：${rowName}`);
     }
 
     function playColumn(colIdx) {
-      const items = SEION_DATA.filter(d => d.col === colIdx && d.row !== 'ん(撥音)');
-      const colNames = ['あ段', 'い段', 'う段', 'え段', 'お段'];
-      playSequence(items, `正在連播：${colNames[colIdx]}`);
+      const cfg = getChartConfig();
+      const items = cfg.data.filter(d => d.col === colIdx && d.row !== 'ん(撥音)');
+      playSequence(items, `正在連播：${cfg.cols[colIdx]}`);
     }
 
     function playSequence(items, toastMsg) {
@@ -1714,6 +2059,7 @@
         writeCharH = item.h;
         if (chartScript === 'katakana') writeScript = 'katakana';
         else if (chartScript === 'hiragana') writeScript = 'hiragana';
+        resetWriteStage();
         clearWritingCanvas();
         switchTab('write');
       };
@@ -1726,10 +2072,12 @@
     }
 
     /*************************************************************************
-     * 6. TAB 2: HANDWRITING CANVAS (4 Rooms + Easy Order + Hanamaru Stamp)
+     * 6. TAB 2: HANDWRITING CANVAS (筆順描紅 + 防手掌誤觸 + 描紅→默寫→花丸)
      *************************************************************************/
     const canvas = document.getElementById('writingCanvas');
     const ctx = canvas.getContext('2d');
+    let canvasCssW = 0;
+    let canvasCssH = 0;
 
     function getWriteOrderList() {
       if (writeOrderMode === 'easy') {
@@ -1738,36 +2086,62 @@
       return SEION_DATA;
     }
 
+    function currentWriteItem() {
+      return SEION_DATA.find(s => s.h === writeCharH) || SEION_DATA[0];
+    }
+    function currentWriteChar() {
+      const item = currentWriteItem();
+      return writeScript === 'hiragana' ? item.h : item.k;
+    }
+
     function initCanvasEvents() {
-      // Unified Pointer Events (supports stylus, finger touch, and mouse on Android Chrome)
       canvas.addEventListener('pointerdown', (e) => {
+        // 防手掌誤觸：偵測過觸控筆後，忽略手指／手掌（可在下方切換允許手指）
+        if (e.pointerType === 'pen' && !penDetected) {
+          penDetected = true;
+          updatePenStatus();
+        }
+        if (penDetected && e.pointerType === 'touch' && !allowFingerWithPen) return;
+        // 同一時間只接受一個指標，避免第二隻手指畫出亂線
+        if (activePointerId !== null && activePointerId !== e.pointerId) return;
+
         e.preventDefault();
         hideHanamaruOverlay();
         try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+        activePointerId = e.pointerId;
         isDrawing = true;
-        const pt = getNormalizedPoint(e.clientX, e.clientY);
-        currentStroke = { color: brushColor, sizeRatio: brushSizeRatio, points: [pt] };
+        currentStroke = {
+          color: brushColor,
+          sizeRatio: brushSizeRatio,
+          isPen: e.pointerType === 'pen',
+          points: [getNormalizedPoint(e)]
+        };
         strokes.push(currentStroke);
-        redrawCanvas();
+        drawStroke(currentStroke, 0);
       });
 
       canvas.addEventListener('pointermove', (e) => {
-        if (!isDrawing || !currentStroke) return;
+        if (!isDrawing || !currentStroke || e.pointerId !== activePointerId) return;
         e.preventDefault();
-        const pt = getNormalizedPoint(e.clientX, e.clientY);
-        currentStroke.points.push(pt);
-        redrawCanvas();
+        // 取得瀏覽器合併掉的中間取樣點，快速書寫時線條更平滑
+        const events = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [];
+        const list = events.length ? events : [e];
+        const startIdx = currentStroke.points.length;
+        list.forEach(ev => currentStroke.points.push(getNormalizedPoint(ev)));
+        drawStroke(currentStroke, startIdx);
       });
 
-      const endDraw = () => {
-        if (!isDrawing) return;
+      const endDraw = (e) => {
+        if (e.pointerId !== activePointerId) return;
         isDrawing = false;
         currentStroke = null;
+        activePointerId = null;
       };
       canvas.addEventListener('pointerup', endDraw);
       canvas.addEventListener('pointercancel', endDraw);
+      canvas.addEventListener('lostpointercapture', endDraw);
 
-      // Extra touchmove prevention for older Android WebViews
+      // 舊版 Android WebView 額外防止捲動
       canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
       canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
 
@@ -1776,11 +2150,32 @@
       });
     }
 
-    function getNormalizedPoint(clientX, clientY) {
+    function updatePenStatus() {
+      const txt = document.getElementById('penStatusText');
+      const btn = document.getElementById('fingerToggleBtn');
+      if (!penDetected) return;
+      btn.classList.remove('hidden');
+      if (allowFingerWithPen) {
+        txt.textContent = '✋ 已允許手指書寫（手掌碰到畫面也可能畫出線條）';
+        btn.textContent = '只用觸控筆';
+      } else {
+        txt.textContent = '🖊️ 已偵測到觸控筆：手指與手掌觸碰會被忽略，可安心把手靠在螢幕上寫。';
+        btn.textContent = '允許手指書寫';
+      }
+    }
+
+    function toggleFingerDrawing() {
+      allowFingerWithPen = !allowFingerWithPen;
+      updatePenStatus();
+    }
+
+    function getNormalizedPoint(e) {
       const rect = canvas.getBoundingClientRect();
+      const pressure = e.pointerType === 'pen' ? (e.pressure || 0.5) : 0.5;
       return {
-        x: Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)),
-        y: Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
+        x: Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)),
+        y: Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height)),
+        p: pressure
       };
     }
 
@@ -1794,38 +2189,62 @@
       canvas.width = Math.floor(size * dpr);
       canvas.height = Math.floor(size * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      const wm = document.getElementById('tracingWatermark');
-      wm.style.fontSize = `${Math.floor(size * 0.68)}px`;
+      canvasCssW = size;
+      canvasCssH = size;
       redrawCanvas();
     }
 
-    function redrawCanvas() {
-      const rect = canvas.getBoundingClientRect();
-      const w = rect.width;
-      const h = rect.height;
-      ctx.clearRect(0, 0, w, h);
+    // 觸控筆依壓力改變粗細；手指／滑鼠維持固定粗細
+    function widthFactor(stroke, p) {
+      return stroke.isPen ? 0.55 + 0.9 * Math.max(0, Math.min(1, p)) : 1;
+    }
 
-      strokes.forEach(s => {
-        if (!s.points.length) return;
+    // 以中點二次曲線連接取樣點，從 startIdx 開始增量繪製
+    function drawStroke(s, startIdx) {
+      const pts = s.points;
+      if (!pts.length || !canvasCssW) return;
+      const w = canvasCssW;
+      const h = canvasCssH;
+      const base = Math.max(2, s.sizeRatio * w);
+      ctx.strokeStyle = s.color;
+      ctx.fillStyle = s.color;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      if (startIdx === 0) {
+        const p0 = pts[0];
         ctx.beginPath();
-        ctx.strokeStyle = s.color;
-        ctx.fillStyle = s.color;
-        ctx.lineWidth = Math.max(2, s.sizeRatio * w);
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        ctx.arc(p0.x * w, p0.y * h, (base * widthFactor(s, p0.p)) / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+      for (let i = Math.max(1, startIdx); i < pts.length; i++) {
+        const p0 = pts[i - 1];
+        const p1 = pts[i];
+        const from = i >= 2 ? mid(pts[i - 2], p0) : p0;
+        const to = mid(p0, p1);
+        ctx.beginPath();
+        ctx.moveTo(from.x * w, from.y * h);
+        ctx.quadraticCurveTo(p0.x * w, p0.y * h, to.x * w, to.y * h);
+        ctx.lineWidth = base * widthFactor(s, (p0.p + p1.p) / 2);
+        ctx.stroke();
+      }
+      if (pts.length >= 2) {
+        const a = pts[pts.length - 2];
+        const b = pts[pts.length - 1];
+        const m = mid(a, b);
+        ctx.beginPath();
+        ctx.moveTo(m.x * w, m.y * h);
+        ctx.lineTo(b.x * w, b.y * h);
+        ctx.lineWidth = base * widthFactor(s, b.p);
+        ctx.stroke();
+      }
+    }
 
-        if (s.points.length === 1) {
-          ctx.arc(s.points[0].x * w, s.points[0].y * h, ctx.lineWidth / 2, 0, Math.PI * 2);
-          ctx.fill();
-        } else {
-          ctx.moveTo(s.points[0].x * w, s.points[0].y * h);
-          for (let i = 1; i < s.points.length; i++) {
-            ctx.lineTo(s.points[i].x * w, s.points[i].y * h);
-          }
-          ctx.stroke();
-        }
-      });
+    function redrawCanvas() {
+      if (!canvasCssW) return;
+      ctx.clearRect(0, 0, canvasCssW, canvasCssH);
+      strokes.forEach(s => drawStroke(s, 0));
     }
 
     function clearWritingCanvas() {
@@ -1845,23 +2264,162 @@
       el.classList.remove('animate-hanamaru');
     }
 
-    function stampHanamaru() {
-      const item = SEION_DATA.find(s => s.h === writeCharH) || SEION_DATA[0];
-      const key = writeScript === 'hiragana' ? `h_${item.h}` : `k_${item.k}`;
+    /* ----- 筆順描紅 SVG ----- */
+    function renderStrokeGuide() {
+      const ch = currentWriteChar();
+      const paths = KANA_STROKES[ch] || [];
+      const guide = document.getElementById('guideStrokes');
+      const nums = document.getElementById('guideNumbers');
+      strokeAnimToken++;
+      document.getElementById('animStrokes').innerHTML = '';
 
+      guide.innerHTML = paths.map(d => `<path class="guide-stroke" d="${d}" />`).join('');
+      nums.innerHTML = paths.map((d, i) => {
+        const m = d.match(/^M\s*([-\d.]+)[,\s]+([-\d.]+)/);
+        if (!m) return '';
+        const x = parseFloat(m[1]);
+        const y = parseFloat(m[2]);
+        return `<g><circle class="num-dot" cx="${x}" cy="${y}" r="3.8" /><text class="num-text" x="${x}" y="${y + 0.2}">${i + 1}</text></g>`;
+      }).join('');
+
+      guide.style.display = writeShowGuide ? '' : 'none';
+      nums.style.display = writeShowGuide && writeShowNumbers ? '' : 'none';
+    }
+
+    function playStrokeAnimation() {
+      const ch = currentWriteChar();
+      const paths = KANA_STROKES[ch] || [];
+      if (!paths.length) return;
+      const myToken = ++strokeAnimToken;
+      const layer = document.getElementById('animStrokes');
+      layer.innerHTML = '';
+      hideHanamaruOverlay();
+      speakJapanese(currentWriteItem().h, 0.9);
+
+      let i = 0;
+      const next = () => {
+        if (myToken !== strokeAnimToken) return;
+        if (i >= paths.length) {
+          setTimeout(() => { if (myToken === strokeAnimToken) layer.innerHTML = ''; }, 1400);
+          return;
+        }
+        const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        el.setAttribute('d', paths[i]);
+        el.setAttribute('class', 'anim-stroke');
+        layer.appendChild(el);
+        const len = el.getTotalLength();
+        const dur = Math.max(450, Math.min(1300, len * 11));
+        el.style.strokeDasharray = `${len}`;
+        el.style.strokeDashoffset = `${len}`;
+        el.getBoundingClientRect();
+        el.style.transition = `stroke-dashoffset ${dur}ms ease-in-out`;
+        el.style.strokeDashoffset = '0';
+        i++;
+        setTimeout(next, dur + 260);
+      };
+      next();
+    }
+
+    function toggleStrokeNumbers() {
+      writeShowNumbers = !writeShowNumbers;
+      renderGuideButtons();
+      renderStrokeGuide();
+    }
+
+    function toggleTracingGuide() {
+      writeShowGuide = !writeShowGuide;
+      if (writeStage !== 'done') writeStage = writeShowGuide ? 'trace' : 'recall';
+      renderGuideButtons();
+      renderStrokeGuide();
+      renderWriteStage();
+    }
+
+    function renderGuideButtons() {
+      const on = 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-indigoJp text-white border-indigoJp';
+      const off = 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-washi text-muted border-washiBorder';
+      const g = document.getElementById('toggleGuideBtn');
+      g.textContent = writeShowGuide ? '描紅字帖：顯示' : '描紅字帖：隱藏';
+      g.className = writeShowGuide ? on : off;
+      const n = document.getElementById('toggleNumsBtn');
+      n.textContent = writeShowNumbers ? '筆順編號：顯示' : '筆順編號：隱藏';
+      n.className = writeShowNumbers ? on : off;
+    }
+
+    function resetWriteStage() {
+      writeStage = 'trace';
+      writeShowGuide = true;
+      renderGuideButtons();
+    }
+
+    function renderWriteStage() {
+      const bar = document.getElementById('writeStageBar');
+      const label = document.getElementById('stampBtnLabel');
+      const n = (KANA_STROKES[currentWriteChar()] || []).length;
+      if (writeStage === 'trace') {
+        bar.textContent = `步驟 1／2：照著淡色描紅寫（共 ${n} 畫，紅點是每一筆的起點）`;
+        label.textContent = '✓ 描寫完成，下一步默寫';
+      } else if (writeStage === 'recall') {
+        bar.textContent = `步驟 2／2：不看描紅，自己默寫一次（${n} 畫）`;
+        label.textContent = '💮 默寫完成・蓋花丸';
+      } else {
+        bar.textContent = '💮 完成！可以換下一個字，或按下方按鈕再練一次。';
+        label.textContent = '↻ 再練一次';
+      }
+    }
+
+    function stampHanamaru() {
+      const item = currentWriteItem();
+      const ch = currentWriteChar();
+
+      if (writeStage === 'done') {
+        resetWriteStage();
+        clearWritingCanvas();
+        renderStrokeGuide();
+        renderWriteStage();
+        return;
+      }
+
+      const expected = (KANA_STROKES[ch] || []).length;
+      if (strokes.length === 0) {
+        showToast('先在格子裡寫字喔！');
+        return;
+      }
+      if (expected && strokes.length !== expected) {
+        playChime('wrong');
+        showToast(`「${ch}」是 ${expected} 畫，你寫了 ${strokes.length} 畫。看看筆順動畫再試一次！`);
+        return;
+      }
+
+      if (writeStage === 'trace') {
+        writeStage = 'recall';
+        writeShowGuide = false;
+        clearWritingCanvas();
+        renderGuideButtons();
+        renderStrokeGuide();
+        renderWriteStage();
+        playChime('karutaHit');
+        showToast('描得很好！現在不看描紅，自己默寫一次。');
+        return;
+      }
+
+      // recall → 蓋花丸
+      const key = writeScript === 'hiragana' ? `h_${item.h}` : `k_${item.k}`;
       if (!store.hanamaru.includes(key)) {
         store.hanamaru.push(key);
         saveStore();
       }
+      writeStage = 'done';
+      writeShowGuide = true;
+      renderGuideButtons();
+      renderStrokeGuide();
 
-      // Show animated Hanamaru SVG stamp + play chime + speak kana
       const overlay = document.getElementById('hanamaruOverlay');
       overlay.classList.remove('hidden', 'animate-hanamaru');
-      void overlay.offsetWidth; // trigger reflow for replay
+      void overlay.offsetWidth;
       overlay.classList.add('animate-hanamaru');
 
       playChime('hanamaru');
-      showToast(`💮 太棒了！獲得「${writeScript === 'hiragana' ? item.h : item.k}」花丸印章！`);
+      showToast(`💮 太棒了！獲得「${ch}」花丸印章！`);
       renderWriteUI();
       renderChart();
     }
@@ -1870,6 +2428,7 @@
       writeScript = script;
       globalScript = script;
       renderGlobalScriptUI();
+      resetWriteStage();
       clearWritingCanvas();
       renderWriteUI();
       speakCurrentWriteChar();
@@ -1920,51 +2479,33 @@
       brushSizeRatio = ratio;
       document.querySelectorAll('.bsize-btn').forEach(b => {
         const active = parseFloat(b.dataset.bsize) === ratio;
-        b.className = `bsize-btn px-2.5 py-1 rounded-lg text-xs font-bold border ${
+        b.className = `bsize-btn px-3.5 py-1 rounded-lg text-sm font-bold border ${
           active ? 'border-indigoJp bg-indigoJp text-white' : 'border-washiBorder bg-washi text-muted'
         }`;
       });
-    }
-
-    function toggleTracingGuide() {
-      writeShowGuide = !writeShowGuide;
-      const wm = document.getElementById('tracingWatermark');
-      const btn = document.getElementById('toggleGuideBtn');
-      wm.classList.toggle('opacity-0', !writeShowGuide);
-      if (writeShowGuide) {
-        btn.textContent = '描紅字帖：顯示';
-        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-indigoJp text-white border-indigoJp';
-      } else {
-        btn.textContent = '描紅字帖：隱藏';
-        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-washi text-muted border-washiBorder';
-      }
     }
 
     function stepWriteChar(delta) {
       const list = getWriteOrderList();
       const idx = list.findIndex(d => d.h === writeCharH);
       const nextIdx = (idx + delta + list.length) % list.length;
-      writeCharH = list[nextIdx].h;
-      clearWritingCanvas();
-      renderWriteUI();
-      speakCurrentWriteChar();
+      selectWriteCharByH(list[nextIdx].h);
     }
 
     function selectWriteCharByH(hChar) {
       writeCharH = hChar;
+      resetWriteStage();
       clearWritingCanvas();
       renderWriteUI();
       speakCurrentWriteChar();
     }
 
     function speakCurrentWriteChar() {
-      const item = SEION_DATA.find(s => s.h === writeCharH) || SEION_DATA[0];
-      speakJapanese(item.h, 0.9);
+      speakJapanese(currentWriteItem().h, 0.9);
     }
 
     function speakCurrentWriteWord() {
-      const item = SEION_DATA.find(s => s.h === writeCharH) || SEION_DATA[0];
-      speakJapanese(item.w, 0.9);
+      speakJapanese(currentWriteItem().w, 0.9);
     }
 
     function renderWriteUI() {
@@ -2010,9 +2551,9 @@
           <button onclick="selectWriteCharByH('${d.h}')" class="relative shrink-0 min-w-[52px] px-3 py-1.5 rounded-xl border text-center transition ${
             isAct ? 'bg-indigoJp text-white border-indigoJp shadow-xs' : 'bg-washi text-indigoJp border-washiBorder hover:border-indigoJp'
           }">
-            ${hasHana ? '<span class="absolute top-0.5 right-0.5 text-[10px] leading-none">💮</span>' : ''}
+            ${hasHana ? '<span class="absolute top-0.5 right-0.5 text-xs leading-none">💮</span>' : ''}
             <div class="font-serifJp font-bold text-lg leading-none">${ch}</div>
-            <div class="text-[10px] mt-0.5 opacity-80">${store.hideRomaji ? '•' : d.r}</div>
+            <div class="text-xs mt-0.5 opacity-80">${store.hideRomaji ? '•' : d.r}</div>
           </button>
         `;
       }).join('');
@@ -2027,8 +2568,8 @@
       const key = writeScript === 'hiragana' ? `h_${item.h}` : `k_${item.k}`;
       const hasHana = store.hanamaru.includes(key);
 
-      document.getElementById('tracingWatermark').textContent = ch;
       document.getElementById('writeDisplayChar').textContent = ch;
+      document.getElementById('writeStrokeCount').textContent = `${(KANA_STROKES[ch] || []).length} 畫`;
       document.getElementById('writeDisplayRomaji').textContent = store.hideRomaji ? '（隱藏）' : item.r;
       document.getElementById('writeDisplayPair').textContent = `對應：${pairCh}`;
       document.getElementById('writeKidsEmoji').textContent = item.emoji;
@@ -2037,16 +2578,21 @@
       document.getElementById('writeOriginHira').textContent = `${item.h} ← ${item.oh}`;
       document.getElementById('writeOriginKata').textContent = `${item.k} ← ${item.ok}`;
       document.getElementById('writeMnemonicText').textContent = item.tip;
-      document.getElementById('writeRoomHintText').textContent = item.roomHint;
+      document.getElementById('writeRoomHintText').textContent = writeScript === 'hiragana'
+        ? item.roomHint
+        : '此提示以平假名為準；片假名請看格子裡的筆順編號，或按「▶ 筆順動畫」。';
 
       const badge = document.getElementById('writeHanamaruBadge');
       if (hasHana) {
         badge.textContent = '💮 已獲得花丸印章！';
         badge.className = 'text-xs font-bold mt-1 text-vermilion';
       } else {
-        badge.textContent = '描寫完成後點擊「蓋花丸」紀錄進度';
+        badge.textContent = '描紅＋默寫都完成後即可蓋花丸';
         badge.className = 'text-xs font-medium mt-1 text-muted';
       }
+
+      renderStrokeGuide();
+      renderWriteStage();
     }
 
     /*************************************************************************
@@ -2119,7 +2665,16 @@
 
       karutaGame.locked = false;
       const target = karutaGame.targets[karutaGame.round];
-      const distractors = shuffleArr(SEION_DATA.filter(s => s.h !== target.h)).slice(0, 8);
+      // 優先放入易混淆字（シ／ツ、ぬ／め…），再補隨機字
+      const useKata = karutaScript === 'katakana';
+      const mateChars = CONFUSING_GROUPS
+        .filter(g => g.chars.some(c => c.ch === target.h || c.ch === target.k))
+        .flatMap(g => g.chars.map(c => c.ch));
+      const extraMates = useKata ? (KATA_LOOKALIKE[target.k] || []) : (HIRA_LOOKALIKE[target.h] || []);
+      const mates = SEION_DATA.filter(s => s.h !== target.h &&
+        (mateChars.includes(s.h) || mateChars.includes(s.k) || extraMates.includes(s.h) || extraMates.includes(s.k)));
+      const others = shuffleArr(SEION_DATA.filter(s => s.h !== target.h && !mates.includes(s) && soundOf(s) !== soundOf(target)));
+      const distractors = [...shuffleArr(mates).slice(0, 3), ...others].slice(0, 8);
       const boardItems = shuffleArr([target, ...distractors]).map((it, idx) => {
         const sc = karutaScript === 'mixed'
           ? (Math.random() < 0.5 ? 'hiragana' : 'katakana')
@@ -2214,7 +2769,7 @@
         document.getElementById('karutaComboDisp').textContent = 0;
         const targetCard = karutaGame.cards.find(c => c.isTarget);
         const mKey = `${targetCard.script === 'hiragana' ? 'h' : 'k'}_${targetCard.char}`;
-        store.mistakes[mKey] = (store.mistakes[mKey] || 0) + 1;
+        srsOnWrong(mKey);
         saveStore();
 
         playChime('wrong');
@@ -2283,17 +2838,23 @@
       document.getElementById('quizScriptGroup').classList.toggle('hidden', quizMode === 'scriptSwap' || hideRows);
 
       const rowGrid = document.getElementById('quizRowGrid');
-      rowGrid.innerHTML = SEION_ROWS.map(r => {
-        const checked = quizSelectedRows.has(r);
-        return `
-          <button onclick="toggleQuizRow('${r}')" class="px-3 py-2 rounded-xl border text-xs font-bold flex items-center justify-between transition ${
-            checked ? 'bg-indigoJp text-white border-indigoJp' : 'bg-washi text-indigoJp border-washiBorder hover:border-indigoJp'
-          }">
-            <span>${r.replace('(撥音)', '')}</span>
-            <span>${checked ? '✓' : '+'}</span>
-          </button>
-        `;
-      }).join('');
+      rowGrid.innerHTML = ROW_GROUPS.map(g => `
+        <div class="space-y-1.5">
+          <div class="text-xs font-bold text-muted">${g.name}</div>
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            ${g.rows.map(r => {
+              const checked = quizSelectedRows.has(r);
+              return `
+                <button onclick="toggleQuizRow('${r}')" class="px-3 py-2 rounded-xl border text-sm font-bold flex items-center justify-between transition ${
+                  checked ? 'bg-indigoJp text-white border-indigoJp' : 'bg-washi text-indigoJp border-washiBorder hover:border-indigoJp'
+                }">
+                  <span>${r.replace('(撥音)', '')}</span>
+                  <span>${checked ? '✓' : '+'}</span>
+                </button>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
     }
 
     function setQuizMode(m) { quizMode = m; renderQuizSetupUI(); }
@@ -2306,7 +2867,9 @@
     }
     function presetQuizRows(type) {
       if (type === 'start') quizSelectedRows = new Set(['あ行', 'か行']);
-      else if (type === 'all') quizSelectedRows = new Set(SEION_ROWS);
+      else if (type === 'seion') quizSelectedRows = new Set(SEION_ROWS);
+      else if (type === 'dakuon') quizSelectedRows = new Set(DAKUON_ROWS);
+      else if (type === 'yoon') quizSelectedRows = new Set(YOON_ROWS);
       else quizSelectedRows = new Set();
       renderQuizSetupUI();
     }
@@ -2328,20 +2891,23 @@
       if (quizMode === 'confusing') {
         CONFUSING_GROUPS.forEach(g => {
           g.chars.forEach(c => {
-            const base = SEION_DATA.find(s => s.h === c.ch || s.k === c.ch);
+            const base = findKana(c.ch);
             if (base) pool.push({ item: base, script: c.script, groupChars: g.chars.map(x => x.ch) });
           });
         });
       } else if (quizMode === 'weak') {
-        const keys = Object.keys(store.mistakes).filter(k => store.mistakes[k] > 0);
-        if (keys.length === 0) {
+        const allKeys = Object.keys(store.mistakes).filter(k => store.mistakes[k] > 0);
+        if (allKeys.length === 0) {
           alertEl.textContent = '目前錯題本是空的！先做幾次一般測驗或歌牌吧。';
           alertEl.classList.remove('hidden');
           return;
         }
+        // 先複習今天到期的字；都複習完了就練全部錯題
+        const due = srsDueKeys();
+        const keys = due.length ? due : allKeys;
         keys.forEach(k => {
           const [sc, ch] = k.split('_');
-          const base = SEION_DATA.find(s => s.h === ch || s.k === ch);
+          const base = findKana(ch);
           if (base) pool.push({ item: base, script: sc === 'h' ? 'hiragana' : 'katakana' });
         });
       } else {
@@ -2350,7 +2916,7 @@
           alertEl.classList.remove('hidden');
           return;
         }
-        const filtered = SEION_DATA.filter(d => quizSelectedRows.has(d.row));
+        const filtered = ALL_KANA.filter(d => quizSelectedRows.has(d.row));
         filtered.forEach(item => {
           if (quizScript === 'mixed' || quizMode === 'scriptSwap') {
             pool.push({ item, script: 'hiragana' });
@@ -2397,7 +2963,9 @@
         const mates = SEION_DATA.filter(s => s.h !== item.h && (groupChars.includes(s.h) || groupChars.includes(s.k)));
         distractors = shuffleArr(mates);
       }
-      const fallback = shuffleArr(SEION_DATA.filter(s => s.r !== item.r && !distractors.includes(s)));
+      // 干擾選項：同類別（清音／濁音／拗音）且「發音不同」，避免 お／を、じ／ぢ 同時出現造成無解
+      const sameKind = ALL_KANA.filter(s => s.kind === item.kind);
+      const fallback = shuffleArr(sameKind.filter(s => s.r !== item.r && soundOf(s) !== soundOf(item) && !distractors.includes(s)));
       const picks = [...distractors, ...fallback].slice(0, 3);
 
       let options = [];
@@ -2446,7 +3014,7 @@
         stage.innerHTML = `
           <button onclick="speakJapanese('${q.item.h}', 0.9)" class="w-24 h-24 rounded-full bg-indigoJp hover:bg-indigoSoft text-white flex flex-col items-center justify-center shadow-md transition active:scale-95">
             <span class="text-3xl">🔊</span>
-            <span class="text-[11px] font-bold mt-1">再聽一次</span>
+            <span class="text-xs font-bold mt-1">再聽一次</span>
           </button>
         `;
         speakJapanese(q.item.h, 0.9);
@@ -2484,13 +3052,10 @@
         quizSession.maxCombo = Math.max(quizSession.maxCombo, quizSession.combo);
         store.quizStats.correct += 1;
         store.quizStats.bestCombo = Math.max(store.quizStats.bestCombo, quizSession.combo);
-        if (store.mistakes[mKey] && store.mistakes[mKey] > 0) {
-          store.mistakes[mKey] -= 1;
-          if (store.mistakes[mKey] <= 0) delete store.mistakes[mKey];
-        }
+        srsOnCorrect(mKey);
       } else {
         quizSession.combo = 0;
-        store.mistakes[mKey] = (store.mistakes[mKey] || 0) + 1;
+        srsOnWrong(mKey);
         quizSession.missed.push({ char: q.charText, item: q.item });
       }
       saveStore();
@@ -2512,10 +3077,12 @@
       fb.classList.remove('hidden');
       if (chosen.isCorrect) {
         fb.className = 'rounded-xl p-4 text-left text-sm bg-matcha/10 border border-matcha/30 text-ink';
-        fb.innerHTML = `<div class="font-bold text-matcha">✓ 答對了！${q.item.h} / ${q.item.k}（${q.item.r}）</div><p class="text-xs text-muted mt-1">${q.item.emoji} 代表單字：${q.item.w}（${q.item.wZh}）</p>`;
+        fb.innerHTML = `<div class="font-bold text-matcha">✓ 答對了！${q.item.h} / ${q.item.k}（${q.item.r}）</div>${q.item.w ? `<p class="text-xs text-muted mt-1">${q.item.emoji} 代表單字：${q.item.w}（${q.item.wZh}）</p>` : ''}`;
       } else {
         fb.className = 'rounded-xl p-4 text-left text-sm bg-vermilion/10 border border-vermilion/30 text-ink space-y-1';
-        fb.innerHTML = `<div class="font-bold text-vermilion">✕ 正確答案：${q.item.h} / ${q.item.k}（${q.item.r}）</div><p class="text-xs leading-relaxed"><strong>口訣：</strong>${q.item.tip}</p>`;
+        const hint = q.item.tip
+          || (q.item.kind === 'yoon' ? 'い段假名＋小寫ゃゅょ，合成一拍唸。' : '濁音加「゛」聲帶震動；半濁音加「゜」唸 p 音。');
+        fb.innerHTML = `<div class="font-bold text-vermilion">✕ 正確答案：${q.item.h} / ${q.item.k}（${q.item.r}）</div><p class="text-xs leading-relaxed"><strong>${q.item.tip ? '口訣' : '提示'}：</strong>${hint}</p>`;
       }
       document.getElementById('quizNextBtnWrap').classList.remove('hidden');
     }
@@ -2598,8 +3165,13 @@
       document.getElementById('matchWinBox').classList.add('hidden');
       updateMatchStats();
       renderMatchBoard();
+    }
 
+    // 第一次翻牌才開始計時；切到其他分頁時暫停
+    function ensureMatchTimer() {
+      if (matchState.timerId) return;
       matchState.timerId = setInterval(() => {
+        if (activeTab !== 'quiz' || quizSubTab !== 'match' || document.hidden) return;
         matchState.seconds++;
         updateMatchStats();
       }, 1000);
@@ -2634,6 +3206,7 @@
       const card = matchState.cards[id];
       if (!card || card.matched || matchState.flipped.includes(id)) return;
 
+      ensureMatchTimer();
       document.getElementById(`mcard-${id}`).classList.add('flipped');
       matchState.flipped.push(id);
 
@@ -2666,6 +3239,7 @@
 
             if (matchState.matchedCount === 8) {
               clearInterval(matchState.timerId);
+              matchState.timerId = null;
               playChime('hanamaru');
               document.getElementById('matchWinSummary').textContent = `共翻牌 ${matchState.flips} 次，耗時 ${document.getElementById('matchTimeStat').textContent}！`;
               document.getElementById('matchWinBox').classList.remove('hidden');
@@ -2721,12 +3295,29 @@
       'ァ':'a','ィ':'i','ゥ':'u','ェ':'e','ォ':'o','ャ':'ya','ュ':'yu','ョ':'yo'
     };
 
-    function tokenizeJapaneseForShadowing(text) {
+    // 助詞讀音：は→wa、へ→e、を→o
+    const PARTICLE_ROMAJI = { 'は': 'wa', 'へ': 'e', 'を': 'o' };
+    const BREAK_CHARS = ' 　、。，,.!?！？\n';
+
+    function tokenizeJapaneseForShadowing(text, autoParticles = false) {
       const tokens = [];
       let i = 0;
       while (i < text.length) {
         const two = text.slice(i, i + 2);
         const one = text[i];
+        // {は} 為內建句子標示的助詞
+        if (one === '{' && text[i + 2] === '}' && PARTICLE_ROMAJI[text[i + 1]]) {
+          tokens.push({ text: text[i + 1], romaji: PARTICLE_ROMAJI[text[i + 1]], clickable: true, marked: false, particle: true });
+          i += 3;
+          continue;
+        }
+        // 自訂句子：「を」一律唸 o；詞尾的「は／へ」（後面接空白或標點）視為助詞
+        if (autoParticles && (one === 'を' ||
+            ((one === 'は' || one === 'へ') && i > 0 && KANA_ROMAJI_MAP[text[i - 1]] && (i + 1 >= text.length || BREAK_CHARS.includes(text[i + 1]))))) {
+          tokens.push({ text: one, romaji: PARTICLE_ROMAJI[one], clickable: true, marked: false, particle: true });
+          i += 1;
+          continue;
+        }
         if (KANA_ROMAJI_MAP[two]) {
           tokens.push({ text: two, romaji: KANA_ROMAJI_MAP[two], clickable: true, marked: false });
           i += 2;
@@ -2801,7 +3392,7 @@
       document.getElementById('readPhraseZh').textContent = phrase.zh;
       document.getElementById('readPhraseNote').textContent = phrase.note;
 
-      readTokens = tokenizeJapaneseForShadowing(phrase.jp);
+      readTokens = tokenizeJapaneseForShadowing(phrase.jp, readCategory === 'custom');
       renderReadTiles();
     }
 
@@ -2818,17 +3409,17 @@
         if (!tk.clickable) {
           if (tk.text === '\n') return `<div class="w-full h-1"></div>`;
           if (tk.text === ' ' || tk.text === '　') return `<span class="inline-block w-4 sm:w-5"></span>`;
-          return `<span class="text-2xl sm:text-3xl font-serifJp text-muted px-0.5 pb-1">${tk.text}</span>`;
+          return `<span class="text-2xl sm:text-3xl font-serifJp text-muted px-0.5 pb-1">${escapeHtml(tk.text)}</span>`;
         }
         if (tk.marked) markedCount++;
         return `
           <button onclick="toggleReadTileMark(${idx})" class="flex flex-col items-center justify-end px-1.5 sm:px-2 py-1.5 rounded-xl border transition active:scale-95 ${
             tk.marked ? 'bg-[#FDF2EE] border-vermilion/45 shadow-2xs' : 'bg-white border-washiBorder/80 hover:border-indigoJp'
           }">
-            <span class="h-4 text-[11px] sm:text-xs font-bold tracking-wide transition ${
+            <span class="h-4 text-xs sm:text-xs font-bold tracking-wide transition ${
               tk.marked ? 'text-vermilion opacity-100' : 'text-transparent select-none'
             }">${tk.romaji}</span>
-            <span class="text-2xl sm:text-3xl font-serifJp font-bold text-indigoJp mt-0.5">${tk.text}</span>
+            <span class="text-2xl sm:text-3xl font-serifJp font-bold ${tk.particle ? 'text-matcha' : 'text-indigoJp'} mt-0.5">${tk.text}</span>
           </button>
         `;
       }).join('');
@@ -2846,7 +3437,8 @@
       tk.marked = !tk.marked;
       renderReadTiles();
       if (tk.marked && tk.text !== 'っ' && tk.text !== 'ッ' && tk.text !== 'ー') {
-        speakJapanese(tk.text, 0.9);
+        const particleSay = { 'wa': 'わ', 'e': 'え', 'o': 'お' };
+        speakJapanese(tk.particle ? particleSay[tk.romaji] : tk.text, 0.9);
       }
     }
 
@@ -2903,6 +3495,10 @@
         .sort((a, b) => b[1] - a[1]);
 
       document.getElementById('dashWeakQuizBtn').disabled = entries.length === 0;
+      const dueCount = srsDueKeys().length;
+      document.getElementById('dashDueText').textContent = entries.length === 0
+        ? ''
+        : dueCount > 0 ? `📅 今日待複習：${dueCount} 字` : '✅ 今天的複習都完成了！（仍可練習全部錯題）';
 
       const listEl = document.getElementById('dashMistakeList');
       if (entries.length === 0) {
@@ -2910,8 +3506,12 @@
       } else {
         listEl.innerHTML = entries.map(([key, cnt]) => {
           const [sc, ch] = key.split('_');
-          const item = SEION_DATA.find(s => s.h === ch || s.k === ch);
+          const item = findKana(ch);
           const romaji = item ? item.r : '';
+          const rec = store.srs[key];
+          const dueText = rec && rec.due > Date.now()
+            ? `下次複習：${new Date(rec.due).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })}`
+            : '今天複習';
           const tag = sc === 'h' ? '平假名' : '片假名';
           return `
             <div class="flex items-center justify-between p-3 rounded-xl bg-washi border border-washiBorder gap-2">
@@ -2919,7 +3519,7 @@
                 <span class="text-2xl font-serifJp font-bold ${sc === 'h' ? 'text-indigoJp' : 'text-vermilion'}">${ch}</span>
                 <div>
                   <div class="text-xs font-bold text-ink">${tag}・${store.hideRomaji ? '••' : romaji}</div>
-                  <div class="text-[11px] text-vermilion font-medium">累計答錯 ${cnt} 次</div>
+                  <div class="text-xs text-vermilion font-medium">累計答錯 ${cnt} 次・${dueText}</div>
                 </div>
               </div>
               <div class="flex items-center gap-1.5">
@@ -2933,7 +3533,7 @@
     }
 
     function clearSingleMistake(key) {
-      delete store.mistakes[key];
+      removeMistake(key);
       saveStore();
       renderDashboard();
       renderChart();
@@ -2956,7 +3556,7 @@
             <div class="flex items-center gap-1.5">
               ${g.chars.map(c => `
                 <button onclick="speakJapanese('${c.ch}', 0.85)" class="px-2.5 py-1 rounded-lg bg-white border border-washiBorder hover:border-vermilion font-serifJp font-bold text-base text-indigoJp shadow-2xs active:scale-95 transition">
-                  ${c.ch} <span class="text-[10px] font-sans text-muted">${c.r}</span> 🔊
+                  ${c.ch} <span class="text-xs font-sans text-muted">${c.r}</span> 🔊
                 </button>
               `).join('')}
             </div>
@@ -2966,36 +3566,179 @@
       `).join('');
     }
 
-    function renderTravelWords() {
-      document.getElementById('travelWordsGrid').innerHTML = TRAVEL_WORDS.map(w => `
-        <button onclick="speakJapanese('${w.jp}', 0.9)" class="text-left p-3 rounded-xl bg-washi hover:bg-white border border-washiBorder hover:border-indigoJp transition shadow-2xs active:scale-95 space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-xl leading-none">${w.emoji}</span>
-            <span class="text-xs text-muted">🔊</span>
-          </div>
-          <div class="font-serifJp font-bold text-base text-indigoJp leading-tight">${w.jp}</div>
-          <div class="text-[11px] text-muted">${store.hideRomaji ? w.zh : `${w.zh} (${w.r})`}</div>
-        </button>
-      `).join('');
-    }
-
     function openResetModal() { document.getElementById('resetConfirmModal').classList.remove('hidden'); }
     function closeResetModal() { document.getElementById('resetConfirmModal').classList.add('hidden'); }
     function confirmResetProgress() {
       store.hanamaru = [];
       store.quizStats = { total: 0, correct: 0, bestCombo: 0 };
       store.mistakes = {};
+      store.srs = {};
+      store.vocabKnown = [];
       store.karuta = { bestScore: 0, bestCombo: 0, fastestMs: null };
       saveStore();
       closeResetModal();
       renderDashboard();
       renderChart();
       renderWriteUI();
+      renderVocab();
       showToast('已清除本機所有學習進度');
     }
 
     /*************************************************************************
-     * 11. INITIALIZATION
+     * 11. TAB 6: 旅遊單字（瀏覽 + 字卡練習）
+     *************************************************************************/
+    function vocabInCat() {
+      return vocabCat === 'all' ? VOCAB_ALL : (VOCAB_CATS.find(c => c.id === vocabCat) || VOCAB_CATS[0]).words;
+    }
+
+    function setVocabCat(cat) {
+      vocabCat = cat;
+      if (vocabMode === 'cards') buildVocabDeck();
+      renderVocab();
+    }
+
+    function setVocabMode(mode) {
+      vocabMode = mode;
+      if (mode === 'cards') buildVocabDeck();
+      renderVocab();
+    }
+
+    function setVocabDir(dir) {
+      vocabDir = dir;
+      renderVocab();
+    }
+
+    function toggleVocabKnown(id, ev) {
+      if (ev) ev.stopPropagation();
+      const i = store.vocabKnown.indexOf(id);
+      if (i >= 0) store.vocabKnown.splice(i, 1);
+      else store.vocabKnown.push(id);
+      saveStore();
+      renderVocab();
+    }
+
+    function speakVocab(id) {
+      const w = VOCAB_ALL.find(x => x.id === id);
+      if (w) speakJapanese(w.jp, 0.85);
+    }
+
+    // 字卡：還沒記住的排前面，各自洗牌
+    function buildVocabDeck() {
+      const words = vocabInCat();
+      const unknown = shuffleArr(words.filter(w => !store.vocabKnown.includes(w.id)));
+      const known = shuffleArr(words.filter(w => store.vocabKnown.includes(w.id)));
+      vocabDeck = [...unknown, ...known];
+      vocabIdx = 0;
+    }
+
+    function renderVocab() {
+      const knownCount = VOCAB_ALL.filter(w => store.vocabKnown.includes(w.id)).length;
+      document.getElementById('vocabProgress').textContent = `已記住 ${knownCount} / ${VOCAB_ALL.length}`;
+
+      const act = 'bg-indigoJp text-washi shadow-xs';
+      const idle = 'text-muted hover:text-indigoJp';
+      document.getElementById('vmode-browse').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${vocabMode === 'browse' ? act : idle}`;
+      document.getElementById('vmode-cards').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${vocabMode === 'cards' ? act : idle}`;
+
+      const cats = [{ id: 'all', name: '全部', emoji: '🌏', words: VOCAB_ALL }, ...VOCAB_CATS];
+      document.getElementById('vocabCatBar').innerHTML = cats.map(c => {
+        const k = c.words.filter(w => store.vocabKnown.includes(w.id)).length;
+        return `<button onclick="setVocabCat('${c.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold border transition ${
+          vocabCat === c.id ? 'bg-matcha text-white border-matcha' : 'bg-washi text-indigoJp border-washiBorder hover:border-matcha'
+        }">${c.emoji} ${c.name} <span class="opacity-75 font-normal">${k}/${c.words.length}</span></button>`;
+      }).join('');
+
+      const browse = document.getElementById('vocabBrowse');
+      const cards = document.getElementById('vocabCards');
+      browse.classList.toggle('hidden', vocabMode !== 'browse');
+      cards.classList.toggle('hidden', vocabMode !== 'cards');
+
+      if (vocabMode === 'browse') {
+        browse.innerHTML = vocabInCat().map(w => {
+          const known = store.vocabKnown.includes(w.id);
+          return `
+            <div role="button" tabindex="0" onclick="speakVocab('${w.id}')"
+              class="relative text-left p-3.5 rounded-2xl border transition active:scale-[0.98] cursor-pointer select-none ${
+                known ? 'bg-matcha/5 border-matcha/40' : 'bg-white border-washiBorder hover:border-indigoJp'
+              }">
+              <div class="flex items-start justify-between gap-2">
+                <span class="text-2xl leading-none">${w.emoji}</span>
+                <button onclick="toggleVocabKnown('${w.id}', event)" class="-mt-1 -mr-1 w-11 h-11 rounded-xl flex items-center justify-center text-xl ${known ? 'text-matcha' : 'text-muted/50'}" title="${known ? '取消已記住' : '標記為已記住'}" aria-label="已記住">${known ? '★' : '☆'}</button>
+              </div>
+              <div class="font-serifJp font-bold text-xl sm:text-2xl text-indigoJp leading-tight mt-1">${w.jp}</div>
+              <div class="text-xs text-muted mt-0.5 min-h-[1rem]">${w.kanji ? w.kanji + '　' : ''}${store.hideRomaji ? '' : w.r}</div>
+              <div class="text-sm font-bold text-ink mt-1.5">${w.zh} <span class="text-xs text-muted font-normal">🔊</span></div>
+            </div>`;
+        }).join('');
+        return;
+      }
+
+      // ===== Flashcard Mode =====
+      document.getElementById('vdir-jz').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${vocabDir === 'jz' ? act : idle}`;
+      document.getElementById('vdir-zj').className = `px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition ${vocabDir === 'zj' ? act : idle}`;
+      if (!vocabDeck.length) buildVocabDeck();
+      const front = document.getElementById('vocabCardFront');
+      const back = document.getElementById('vocabCardBack');
+      const counter = document.getElementById('vocabCardCounter');
+
+      if (vocabIdx >= vocabDeck.length) {
+        counter.textContent = '';
+        front.innerHTML = `<div class="text-4xl">🎉</div><div class="text-lg font-bold text-matcha">這一組練完了！</div>
+          <button onclick="buildVocabDeck(); renderVocab();" class="mt-2 px-6 py-3 rounded-xl bg-indigoJp text-white font-bold text-sm">再練一輪</button>`;
+        back.classList.add('hidden');
+        document.getElementById('vocabRevealWrap').classList.add('hidden');
+        document.getElementById('vocabJudgeWrap').classList.add('hidden');
+        return;
+      }
+
+      const w = vocabDeck[vocabIdx];
+      counter.textContent = `${vocabIdx + 1} / ${vocabDeck.length}${store.vocabKnown.includes(w.id) ? '（已記住，複習中）' : ''}`;
+      const jpBlock = `<div class="font-serifJp font-bold text-5xl sm:text-6xl text-indigoJp leading-tight">${w.jp}</div>`;
+      const zhBlock = `<div class="text-3xl sm:text-4xl font-bold text-ink">${w.emoji} ${w.zh}</div>`;
+      const detail = `<div class="text-sm text-muted">${w.kanji ? '漢字：' + w.kanji + '　' : ''}${store.hideRomaji ? '' : '拼音：' + w.r}</div>`;
+
+      if (vocabDir === 'jz') {
+        front.innerHTML = jpBlock + `<div class="text-xs text-muted">這是什麼意思？</div>`;
+        back.innerHTML = zhBlock + detail;
+      } else {
+        front.innerHTML = zhBlock + `<div class="text-xs text-muted">日文怎麼說？先在心裡唸一次</div>`;
+        back.innerHTML = jpBlock + detail;
+      }
+      back.classList.add('hidden');
+      document.getElementById('vocabRevealWrap').classList.remove('hidden');
+      document.getElementById('vocabJudgeWrap').classList.add('hidden');
+      if (vocabDir === 'jz') speakJapanese(w.jp, 0.85);
+    }
+
+    function speakVocabCard() {
+      const w = vocabDeck[vocabIdx];
+      if (w) speakJapanese(w.jp, 0.85);
+    }
+
+    function revealVocabCard() {
+      document.getElementById('vocabCardBack').classList.remove('hidden');
+      document.getElementById('vocabRevealWrap').classList.add('hidden');
+      document.getElementById('vocabJudgeWrap').classList.remove('hidden');
+      if (vocabDir === 'zj') speakVocabCard();
+    }
+
+    function judgeVocabCard(remembered) {
+      const w = vocabDeck[vocabIdx];
+      if (!w) return;
+      const i = store.vocabKnown.indexOf(w.id);
+      if (remembered && i < 0) store.vocabKnown.push(w.id);
+      if (!remembered) {
+        if (i >= 0) store.vocabKnown.splice(i, 1);
+        vocabDeck.push(w); // 不熟的字放到最後再出一次
+      }
+      saveStore();
+      if (remembered) playChime('karutaHit');
+      vocabIdx++;
+      renderVocab();
+    }
+
+    /*************************************************************************
+     * 12. INITIALIZATION
      *************************************************************************/
     window.addEventListener('DOMContentLoaded', () => {
       loadStore();
@@ -3010,9 +3753,17 @@
       renderQuizSetupUI();
       switchQuizSubTab('karuta');
       renderConfusingShowdown();
-      renderTravelWords();
+      renderVocab();
+      setBrushSize(0.028);
       switchTab('chart');
     });
+
+    // 離線使用：註冊 Service Worker（僅在 http/https 下）
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW 註冊失敗：', err));
+      });
+    }
   </script>
 </body>
 </html>

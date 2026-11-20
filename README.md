@@ -1,37 +1,55 @@
 # 和風五十音
 
-日文平假名・片假名互動自學工具。單一 `index.html`，不需安裝、不需後端，用瀏覽器開啟即可使用，也適合在平板上手寫練習。
+日文平假名・片假名互動自學工具，針對平板觸控與觸控筆設計（以小米 Pad 8 Pro 為主要測試尺寸）。可加到主畫面，離線也能使用。
 
 線上版：https://juonal.github.io/wafu-gojuon/
 
 ## 功能
 
-- **五十音圖表**：點「行」或「段」標題可連續朗讀；點任一假名可看漢字字源（女手／男手）、記憶口訣與日本小一「一字一詞」代表單字。支援平假名、片假名、平片對照。
-- **手寫描字**：支援觸控、手寫筆與滑鼠。提供「四個房間」、傳統米字格與無格線三種格線，可顯示描紅字帖，完成後蓋「花丸」。書寫順序可選由簡入繁或五十音順序。
-- **測驗與歌牌**：
-  - 日式歌牌（かるた）聽音搶答
-  - 分組互動測驗（聽音選字、看字選音、平片互換、易混淆特訓、錯題本特訓）
+- **五十音圖表**：清音、濁音・半濁音、拗音三張表。點「行」或「段」標題可連續朗讀；點清音可看漢字字源（女手／男手）、記憶口訣與代表單字。
+- **手寫描字**
+  - 筆順描紅與每筆起點編號，可播放筆順動畫
+  - 兩個步驟：先照描紅寫，再不看描紅默寫，筆畫數正確才蓋「花丸」
+  - 偵測到觸控筆後自動忽略手指與手掌誤觸；支援筆壓粗細
+  - 「四個房間」、米字格、無格線三種格線
+- **測驗與歌牌**
+  - 日式歌牌（かるた）聽音搶答，干擾牌會放入形近字
+  - 分組測驗：清音、濁音、拗音都可選；含易混淆特訓與錯題複習
   - 4×4 翻牌配對
-- **短句跟讀**：內建打招呼、旅遊會話與歌詞短句，預設隱藏羅馬拼音，點不熟的假名才標音。可貼上自訂日文，並以 0.6x／0.8x／1.0x 語速朗讀。
-- **進度與攻略**：花丸統計、測驗正確率、歌牌紀錄、錯題本，以及長音、促音、拗音示範、易混淆字對照表和 12 個旅遊實用單字。
+- **短句跟讀**：打招呼、旅遊會話、歌詞短句；助詞「は／へ／を」正確標成 wa／e／o。可貼上自訂日文。
+- **旅遊單字**：基本用語、交通、餐廳、購物、住宿、觀光、緊急狀況、數字・時間，共 98 個初學者單字。可瀏覽、朗讀、標記「已記住」，也有字卡練習（日→中、中→日）。
+- **進度與攻略**：花丸統計、測驗正確率、歌牌紀錄；錯題依 1、3、7、14 天間隔安排複習。
 
 ## 使用說明
 
-直接開啟 `index.html`，或部署到 GitHub Pages。
+- 在平板的 Chrome 開啟網址，選單中選「加到主畫面」或「安裝應用程式」，之後就能像 App 一樣全螢幕使用，離線也能開。
+- 日語朗讀使用瀏覽器內建語音。若沒有聲音，請到 Android「設定 → 文字轉語音輸出」確認已安裝 Google 語音服務的日文語音。
+- 學習進度只存在本機瀏覽器（localStorage），不會上傳或跨裝置同步。清除瀏覽器資料會一併清除進度。
 
-日語朗讀使用瀏覽器內建的 Web Speech API，需要裝置有日文語音。Android Chrome 與 iOS Safari 通常內建，部分桌面 Linux 可能需要另外安裝。
+## 修改與部署
 
-學習進度只存在使用者自己瀏覽器的 localStorage，不會上傳，也不會跨裝置同步。清除瀏覽器資料會一併清除進度。
+網站本身是靜態檔案，直接放在 GitHub Pages 即可：
 
-## 技術
+| 檔案 | 用途 |
+| --- | --- |
+| `index.html` | 主程式（HTML、CSS、JavaScript、假名與單字資料） |
+| `tailwind.css` | 預先編譯好的 Tailwind CSS |
+| `src/input.css` | Tailwind 設定（顏色、字型） |
+| `sw.js`、`manifest.webmanifest`、`icons/` | 離線使用與加到主畫面 |
 
-- 純 HTML / CSS / JavaScript，單一檔案
-- [Tailwind CSS](https://tailwindcss.com/)（CDN）
-- [Google Fonts](https://fonts.google.com/)：Noto Sans JP、Noto Serif JP、Noto Sans TC
-- Web Speech API（朗讀）、Web Audio API（提示音）、Canvas（手寫）
+如果修改了 `index.html` 裡的 Tailwind class，需要重新產生 `tailwind.css`：
 
-載入字型與 Tailwind 需要網路連線。
+```bash
+npm install --no-save @tailwindcss/cli@4 tailwindcss@4
+npx @tailwindcss/cli -i src/input.css -o tailwind.css --minify
+```
 
-## 授權
+更新網站內容後，請把 `sw.js` 裡的 `CACHE_VERSION` 改成新值（例如 `v2`），已安裝的使用者下次開啟時才會拿到新版。
 
-尚未指定授權條款。如需開放他人使用或修改，建議加入 LICENSE 檔案（例如 MIT）。
+## 使用的資源與授權
+
+- 筆順資料：[KanjiVG](https://kanjivg.tagaini.net/) © Ulrich Apel，採 [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) 授權。內嵌於 `index.html` 的 `KANA_STROKES`，該部分資料沿用相同授權。
+- 字型：[Klee One](https://fonts.google.com/specimen/Klee+One)（教科書體風格）、Noto Sans JP／TC、Noto Serif JP，皆為 SIL Open Font License。
+- [Tailwind CSS](https://tailwindcss.com/)（MIT）
+
+本專案其餘程式碼尚未指定授權條款。
